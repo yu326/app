@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--管理工具</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/parts/multiTab.js"></script>
+<script type="text/javascript" src="js/parts/doubleRichbox.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+	function _showerror(msg){
+		$("#sperrormsg").text(msg);;
+		$("#sperrormsg").show();
+	}
+	function _hideerror(msg){
+		$("#sperrormsg").hide();
+		$("#sperrormsg").text("");;
+	}
+
+	function _beforesend(){
+		$("#btnclearcache,#btnupdatecache").attr("disabled","disabled");
+		$("#imgloading").show();
+	}
+
+	function _aftersend(){
+		$("#btnclearcache,#btnupdatecache").removeAttr("disabled");
+		$("#imgloading").hide();
+	}
+	//--------时间控件,时间格式化---add by wangchen-------------->
+		$("#s-starttime").unbind("click");
+		$("#s-starttime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+		});
+		$("#s-endtime").unbind("click");
+		$("#s-endtime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+		});
+		$("#s-step").bind("change", function(){
+			$("#s-starttime").val("");
+			$("#s-endtime").val("");
+			var stepval = $(this).val();
+			if(stepval == "1d"){
+				$("#s-starttime").unbind("click");
+				$("#s-starttime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd 00:00:00'});
+				});
+				$("#s-endtime").unbind("click");
+				$("#s-endtime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd 00:00:00'});
+				});
+			}
+			else{
+				$("#s-starttime").unbind("click");
+				$("#s-starttime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+				});
+				$("#s-endtime").unbind("click");
+				$("#s-endtime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+				});
+			}
+		});
+	//--------时间控件,时间格式化---add by wangchen-------------->	
+
+
+
+	$(function(){
+		changeTabTitle();
+		//控件初始化
+		planArray.length=0;
+		$("#dictionaryPlanText2").text("默认方案");
+		var plan1=[];
+		planArray.push(plan1);
+		var s1=JSON.stringify(planArray);
+		
+		$("#dictionaryPlan2").val(s1);
+		checkSession();
+		$("#divtest").dialog({
+			autoOpen: false,
+		    modal:true,
+		    height:600,
+		    width:800,
+		    buttons:{
+		    "关闭":function(){$(this).dialog("close");}
+		    }
+		});
+		$("#btntestnlp").bind("click", function(){
+			$("#txttestcontent").val("");
+			$("#divtestresult").text("");
+			$("#content_type_0").attr("checked", true);
+			$("#btntestcontent").removeAttr("disabled");
+			$("#testimgloading").hide();
+			$("#divtest").dialog("open");
+		});
+		$("#btntestcontent").bind("click",function(){
+			var content = $("#txttestcontent").val();
+			if(content == undefined || commonFun.trim(content) == ""){
+				alert("请输入内容");
+			}
+			else{
+				$("#btntestcontent").attr("disabled","disabled");
+				$("#testimgloading").show();
+				var content_type = $("input[name=content_type]:checked").val();
+				$.ajax({url:config.phpPath+'solrmamager.php',data:{opt:"testnlp",content:content, content_type:content_type,dictionary_plan:$("#dictionaryPlan2").val()}, type:"post",
+					success:function(d){
+						$("#btntestcontent").removeAttr("disabled");
+						$("#testimgloading").hide();
+						if(d.result){
+							/*var obj = d.msg;
+							var htm = "关键词：";
+							for(var i=0; i< obj.text.length; i++){
+								htm += obj.text[i].text; 
+							}
+							htm += "<br/>";
+							htm += "组合关键词：";
+							for(var i=0; i< obj.combinWord.length; i++){
+								var substr = "#"+obj.combinWord[i].join("#")+"#";
+								htm += substr+", ";
+							}
+							htm += "<br/>";
+							*/
+							$("#divtestresult").text(JSON.stringify(d.msg,null,"\t"));
+						}
+						else{
+							$("#divtestresult").text(d.msg);
+						}
+					},
+					error:function(){
+						$("#btntestcontent").removeAttr("disabled");
+						$("#testimgloading").hide();
+						$("#divtestresult").text("请求异常");
+					},
+					dataType:"json"
+				});
+			}
+		});
+		_aftersend();
+		$("#btnclearcache,#btnupdatecache").bind("click",function(){
+			_hideerror();
+			var opt = $(this).attr("optvalue");
+			_beforesend();
+			$.ajax({url:config.phpPath+'solrmamager.php',data:{opt:opt,dictionary_plan:$("#dictionaryPlan2").val()}, type:"post", success:function(r){
+	            if(r.result){
+	            	alert("操作成功");
+	            }
+	            else{
+		            if(r.error != undefined){
+		            	_showerror(r.error);
+		            }
+		            else{
+		            	_showerror("未知错误");
+		            }
+	            }
+	            _aftersend();
+	        },dataType:"json", error:function(){
+	        	 _showerror("请求发生异常");
+	        	 _aftersend();
+	        }});
+		});
+		$("#divtest1").dialog({
+			autoOpen: false,
+		    modal:true,
+		    height:600,
+		    width:800,
+		    buttons:{
+		    "关闭":function(){$(this).dialog("close");}
+		    }
+		});
+		 //开始时间
+                        $("#s10-4-1").show();
+                        //结束时间
+                        $("#s10-4-2").show();
+		$("#btnquerykey").bind("click", function(){
+			$("#txttestcontent1").val("");
+			$("#txttestcontent2").val("");
+			$("#divtestresult").text("");
+			$("#btntestcontent").removeAttr("disabled");
+			$("#s-starttime").val("");
+			$("#s-endtime").val("")
+			$("#divtest1").dialog("open");
+		});
+		        $("#s-caltotal").bind("click", function(){
+					var keyword = $("#txttestcontent1").val()
+					if(keyword ==""){
+						alert("关键词不能为空");
+						return false;
+					}
+					var sstarttime = $("#s-starttime").val();
+					var sendtime = $("#s-endtime").val();
+					$("#testimgloading1").show();
+
+					if(sstarttime != "" && sendtime != ""){
+							if(sendtime < sstarttime){
+								alert('结束时间应晚于或等于起始时间!');
+								return false;
+							}
+					}
+
+                var data = {
+					type:"gettotalcount",
+                    keywords:$("#txttestcontent1").val(),
+                    starttime:$("#s-starttime").val(),
+                    sendtime:$("#s-endtime").val(),
+                    request_type:'1'
+				};
+				var totalnum = "";
+				$.ajax({
+						type:"POST",
+						url:config.modelUrl + "taskmanager.php",
+						data:data,
+						dataType: "json",
+						complete:function(){
+							 $("#testwait").remove();
+						},
+						success:function(data){
+							$("#testimgloading1").hide();
+							for(var i=0;i<data.length;i++){
+								totalnum += data[i]+"\r\n";
+							}
+							$("#txttestcontent2").val(totalnum);
+						},
+						error:function(a,b,c){
+							alert(b);
+							$("#testimgloading1").hide();
+						}
+					});
+            });
+
+	 });    
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">管理工具</span>
+<p />
+<input type="button" value="清空缓存" title="将清空所有字段的缓存，页面查询统计时会重建相关字段缓存（影响查询速度）" id="btnclearcache" style="cursor:pointer" optvalue="clearcache" />&nbsp;&nbsp;
+<input type="button" value="重建缓存" title="将清空所有字段缓存，并立即重建" id="btnupdatecache" style="cursor:pointer" optvalue="updatecache" />&nbsp;&nbsp;
+<input type="button" value="NLP测试"  id="btntestnlp" style="cursor:pointer" optvalue="testnlp" />&nbsp;&nbsp;
+<input type="button" value="关键词查询"  id="btnquerykey" style="cursor:pointer" optvalue="querykey" />
+<img src="images/loading.gif" id="imgloading" style="display:none" border="0" /><span id="sperrormsg" style="color:red;display:none"></span>
+<br/>
+</div>
+</div>
+<div id="divtest">
+<div>测试内容：<br/><textarea id="txttestcontent" rows=5 style="width:650px;"></textarea>&nbsp;
+	<br/>
+	<br/>
+	<!--  添加分词方案 -->
+	<table  style="width:100%" >
+	<tr >
+		<td class="tdleft">分词方案：</td>
+		<td>
+		<input type="button" value="设置" onclick="popPlan2('newTask');" id="s-dictionaryPlan2" /></td>
+		
+		<input type="hidden" name="dictionaryPlan" id="dictionaryPlan2" value="" />
+		</td>
+		<td class="tdtip">系统对每个方案的分词结果去重后保存,未配置则用默认词典。</td>
+	</tr>
+	<tr >
+		<td class="tdleft">已添加：</td>
+		<td>
+		<span class="selwordsbox" id="dictionaryPlanText2">默认方案</span></td>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	</table>
+	<br/>
+	<input type="radio" name="content_type" value="0" id="content_type_0" checked="checked" /><label for="content_type_0">原创</label>
+	<input type="radio" name="content_type" value="1" id="content_type_1" /><label for="content_type_1">转发</label>
+	<input type="radio" name="content_type" value="2" id="content_type_2" /><label for="content_type_2">评论</label>
+<input type="button" id="btntestcontent" value="测试" />&nbsp;
+<img src="images/loading.gif" id="testimgloading" style="float:right;display:none" border="0" />
+</div>
+<textarea id="divtestresult" style="width:99%;height:70%"></textarea>
+<!-- div id="divtestresult" style="border:1px solid gray;min-height:400px"></div> -->
+</div>
+<!--#include file="multiTab.shtml"-->
+<!--#include file="foot.shtml"-->
+<div id="divtest1" style="position:relative;">
+	<img src="images/wait.gif" id="testimgloading1" style="margin:200px 350px;display:none;position:absolute;" border="0" />
+	<div style="float:left;">关键词：<br/><textarea id="txttestcontent1" rows=5 style="width:150px;height:450px;"></textarea>&nbsp;
+	</div>
+	<div style="float:left;">相关微博总条数：<br/><textarea id="txttestcontent2" rows=5 style="width:150px;height:450px;"></textarea>&nbsp;
+	</div>
+	<div style="float:right;margin-top:20px;margin-right:40px;">
+    <table  style="width:100%;" >
+	<tr id="s10-4-1">
+		<td class="tdleft">开始时间：</td>
+		<td>
+			<input id="s-starttime" name="starttime" class="Wdate" type="text" readonly="readonly" style="width:150px;" onclick="WdatePicker({dateFmt:'%y-%M-%d',dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>		
+		</td>
+		<td class="tdtip">查询微博的起始时间</td>
+	</tr>
+	<tr id="s10-4-2">
+		<td class="tdleft">结束时间：</td>
+		<td>
+			<input id="s-endtime" name="endtime" class="Wdate" type="text" readonly="readonly" style="width:150px;" onclick="WdatePicker({dateFmt:'%y-%M-%d',dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>		
+		</td>
+		<td class="tdtip">查询微博的结束时间</td>
+	</tr>
+		<tr >
+			<td class="tdleft">计算总条数：</td>
+			<td>
+			<input type="button" value="查询" id="s-caltotal"  name="caltotal"/></td>
+			</td>
+			<td class="tdtip"></td>
+		</tr>
+	</table>
+	</div>
+
+</div>
+</div>
+</body>
+</html>

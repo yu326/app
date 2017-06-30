@@ -1,0 +1,50 @@
+.product{
+width:304px; height:150px; background-image:url(../images/pbg.gif); margin-top:15px; margin-right:17px; float:left; margin-bottom:10px
+}
+.product1{
+width:304px; height:150px; background-image:url(../images/pbg.gif); margin-top:15px; margin-right:0px; float:left; margin-bottom:10px
+}
+.product h1 img{margin-left:12px; }
+.product h1{margin:0px}
+.product ul {
+margin-left:0px; margin-top:5px; padding:0 13px; text-indent:24px; color:#fff; line-height:21px; *+margin-top:0; *+line-height:20px
+}
+.product1 h1 img{margin-left:12px; }
+.product1 h1{margin:0px}
+.product1 ul {
+margin-left:0px; margin-top:5px; padding:0 13px; text-indent:24px; color:#fff; line-height:21px; *+margin-top:0; *+line-height:20px
+}
+
+.market{
+width:304px; height:140px; margin-top:0px; margin-right:17px; float:left; *+margin-right:8px
+}
+.market1{
+width:304px; height:140px; margin-top:0px; margin-right:0px; float:left
+}
+.market h1 img{margin-left:12px; }
+.market h1{margin:0px}
+.market ul {
+margin-left:0px; margin-top:0px; padding:0 ; text-indent:24px; color:#646464; line-height:21px; *+margin-top:0; *+line-height:20px
+}
+.market1 h1 img{margin-left:12px; }
+.market1 h1{margin:0px}
+.market1 ul {
+margin-left:0px; margin-top:0px; padding:0 ; text-indent:24px; color:#646464; line-height:21px; *+margin-top:0; *+line-height:20px
+}
+.other{
+width:1005px; height:90px; background-color:#f7f7f7; margin:0px; padding-top:10px
+}
+.other .xc{
+height:70px; margin:0px 15px; line-height:34px; vertical-align:middle; float:left; margin-right:100px
+}
+.other .xc1{
+height:70px; margin:0px 13px; line-height:34px; vertical-align:middle; float:left; margin-left:120px; *+margin-left:150px
+}
+.other .xc1 ul{margin:0px}
+.other .xc1 ul li{
+line-height:20px; list-style-image:url(../images/dot.gif); background-position:left; background-repeat:no-repeat; margin:0px
+}
+.other p{
+margin:0px; padding:0
+}
+.other img{line-height:34px; vertical-align:middle; margin-right:5px; margin-left:5px}

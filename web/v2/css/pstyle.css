@@ -1,0 +1,269 @@
+body {
+	font-size: 12px;
+	color: #222222;
+	text-align:left;
+	background-color: #FFFFFF;
+	margin: 0;
+}
+#mybody{
+margin:auto; width:1005px; 
+}
+.style2 {
+	color: #FF6600;
+	font-weight: bold;
+}
+a {
+	font-size: 12px;
+	color: #37547d;
+}
+a:link {
+	text-decoration: none;
+}
+a:visited {
+	text-decoration: none;
+	color: #476DA0;
+}
+a:hover {
+	text-decoration: none;
+	color: #04a9e1;
+}
+a:active {
+	text-decoration: none;
+	color: #49CCED;
+}
+ input{
+border:1px solid #dadada; background-color:#FFFFFF; height:20px
+}
+.buttono{
+ height:31px; width:75px;  border:0;  background-image:url(../images/submit.gif);  margin-right:20px; font-weight:bold; cursor:pointer; color:#ffffff; 
+}
+.buttono:hover{
+ height:31px; width:75px; border:0; background-image:url(../images/submit1.gif);  margin-right:20px; font-weight:bold; cursor:pointer; color:#ffffff; 
+}
+#top{
+width:975px; height:85px; background-image:url(../images/ptop.jpg); margin:0px; padding-right:30px
+}
+#content{
+width:960px; background-image:url(../images/bg.gif); 
+ padding:0 24px; background-position:top; background-repeat:no-repeat; overflow:hidden; *+width:960px; *+padding-left:30px;  margin:0px
+}
+.smenu{
+float:right; width:110px; height:22px; margin-top:15px; margin-right:20px; *+margin-right:15px; 
+}
+.clear{
+float:none; 
+}
+.style1 {color: #21447A}
+.styelt{
+color:#04a9e1; font-weight:bold; font-size:12px
+}
+.menu{
+width:750px;  margin-top:6px; float:right; height:30px; font-size:12px; font-weight:bold; margin-left:250px; color:#000
+}
+.menu ul{margin:0}
+.menu ul li{
+float:left;  list-style:none; width:70px; height:40px; line-height:40px; vertical-align:middle; text-align:center;font-size:12px;
+}
+.menu ul li:hover{
+background-image:url(../images/ptopbg.gif); color:#fff
+}
+.menu a{font-size:12px; color:#22457b}
+.menu a:hover{color:#fff}
+.menu .dq{background-image:url(../images/ptopbg.gif); color:#fff}
+.dh{
+*+width:950px;height:40px; text-align:left; padding-left:10px; font-weight:bold; line-height:40px; *+padding-top:4px; *+height:35px; vertical-align:middle; background-color:#E8E8E8;*+margin-left:-5px;
+}
+.dh img{line-height:40px; vertical-align:text-bottom;}
+
+/*bert old style*/
+#left{
+width:145px; color:#03abdc; float:left; background-image:url(../images/pmenubg.jpg); background-repeat:repeat-y; padding-bottom:30px; color:#000
+}
+
+#left .f{
+line-height:30px; list-style:none; padding-left:10px ; 
+}
+#left img {
+float:right;padding-top:7px; margin-right:20px;*+margin-top:-30px;
+}
+.f ul{margin:0px; padding:0px; padding-bottom:5px;}
+.f ul li{
+padding-left:10px; color:#22457b; background-image:none; list-style:none
+}
+.f li:hover{color:#31b8e6; background-color:#FFFFFF}
+
+.f span:hover{color:#31b8e6; background-color:#FFFFFF;} /* bert add */
+.f a{font-size:14px;} /*bert add */
+.f li a{font-size:12px;} /*bert add */
+/*bert old style end*/
+#right{
+width:790px; float:left;  margin:0 0 10px 10px; *+width:770px;min-height: 460px;
+}
+.search{
+padding:5px;
+}
+.title{width:790px; background-color:#f5f5f5; height:30px; line-height:30px; vertical-align:middle; *+width:775px }
+.title img{line-height:30px; vertical-align:middle; margin:0px 5px }
+
+.fontt{font-size:12px; font-weight:bold; color:#22457b}
+.fontb{font-size:14px; font-weight:bold; color:#000}
+.fontr{font-size:14px; font-weight:bold; color:#fd0505}
+
+.table {float:left; width:380px; margin:5px 15px 0 0; margin-bottom:10px; *+width:360px  }
+.table .tabletitle{font-size:14px; font-weight:bold; height:35px; overflow:hidden; line-height:35px; vertical-align:middle; *+padding-top:5px; *+width:350px  }
+.table .img1{float:right; *+margin-top:-33px; cursor:pointer;  }
+.table .ctable{
+border:1px solid #a0a0a0; padding:10px; *+padding:5px
+}
+.prod{width:462px; float:left; margin:5px; height:300px;  border:1px solid #dfdfdf; *+width:450px }
+
+.foot{
+width:1005px; height:70px; background-color:#dcdcdc; margin:0px; text-align:center; color:#000
+}
+/*add by bert*/
+.ctable{
+	height:215px;
+}
+.ctable div{
+	height:100%;
+	width:100%;
+}
+.ctable div img{
+	position:relative;
+	left:40%;
+	top:35%;
+}
+/*表格*/
+.list{
+width:100%; border-left:1px solid #bcbcbc; border-top:1px solid #bcbcbc; text-align:center; *+width:100%; margin-bottom:5px
+}
+.list td {border-right:1px solid #bcbcbc; border-bottom:1px solid #bcbcbc; height:30px }
+.list tr:hover{background-color:#eef2f9}
+.list img{line-height:30px; vertical-align:middle}
+.list th{height:30px; background-image:url(../images/table.gif); background-repeat:repeat-x; color:#000; border-right:1px solid #bcbcbc; border-bottom:1px solid #bcbcbc}
+.list .tdl{padding-left:5px; text-align:left}
+/*add by bert user card from 垂直产品*/
+.prod{width:462px; float:left; margin:5px; height:300px;  border:1px solid #dfdfdf; *+width:450px }  /*2012-03-19 */
+.mp{width:97%; padding:10px;   margin-top:8px; border:1px solid #b2d5f9; line-height:25px; overflow:hidden; background-color:#F0F5FD; margin-bottom:5px}
+.mpleft{width:40%; float:left; height:50px}
+.mpleft p{margin:0px; padding:0px}
+.mpleft img{line-height:25px; vertical-align:middle}
+.mpleft .img1{float:left; margin-right:10px}
+
+.at:link {
+	text-decoration: none;
+	color:#2D7DC6
+}
+.at:visited {
+	text-decoration: none;
+	color: #476DA0;
+}
+.at:hover {
+	text-decoration: underline;
+	color: #04a9e1;
+}
+.at:active {
+	text-decoration: none;
+	color: #49CCED;
+}
+.jj{width:50%; float:left; height:50px;   margin-left:10px;  border-left:1px solid #ccc; padding:0px 10px}
+.foot{
+width:1005px; height:70px; background-color:#dcdcdc; margin:0px; text-align:center; color:#000
+}
+/*12:59 2012-03-04 bert radio去掉边框*/
+.outborder{ 
+	background: transparent; 
+	border: 0; 
+	height:15px;
+	vertical-align: middle;
+}
+.pages{
+	margin-top:2px;
+}
+.pages a{
+	padding:2px;
+	border:1px solid #cccccc;
+	cursor:pointer;
+	margin:1px;
+}
+
+/*短文本框*/
+.shortinput{
+	width:75px;
+}
+/*替换 fontt*/
+.rightalign{
+    color: #22457B;
+    float: left;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: middle;
+    width: 70px;
+}
+/*tag页样式*/
+.tag{
+ border-top:1px solid #b6d7f9;  border-left:1px solid #b6d7f9;  width:auto; float:left; 
+}
+.tag ul{margin:0px; padding:0px;;}
+
+.tag ul li{
+	float:left;
+	list-style:none;
+	background-image:url(../images/tagbg.gif);
+	background-repeat:repeat-x ;
+	background-position:top ;
+	background-color:#FFFFFF;
+	border-right:1px solid #b6d7f9;
+	height:150px;
+	width:183px;
+	_width:183px;
+	_height:170px;
+	z-index:10;
+	border-bottom:1px solid #fff;
+
+}
+.tag ul li:hover{
+	background-image:url(../images/tagbg_1.gif);
+	background-repeat:repeat-x ;
+	background-position:top ;
+	border-bottom:1px solid #fff;
+	background-color:#FFFFFF;
+	border-right:1px solid #b6d7f9;
+	cursor:pointer;
+	z-index:10;
+	position:relative;
+}
+.defaultli{
+	background-image:url(../images/tagbg_1.gif);
+	background-repeat:repeat-x ;
+	background-position:top ;
+	border-bottom:1px solid #fff;
+	background-color:#FFFFFF;
+	border-right:1px solid #b6d7f9;
+	cursor:pointer;
+	z-index:10;
+	position:relative;
+}
+.tag li .tagtitle{
+	height:20px;  padding-left:8px; color:#044589; padding-top:8px; font-weight:bold; 
+}
+.tag li .drag{
+	padding:5px 5px 10px 5px; color:#353535; 
+}
+.tag li .drag .conleft{ float:left; white-space:nowrap; width:100%;}
+.tag li .drag img{margin-right:5px; }
+.tag li .drag p{
+	line-height:25px; margin:0px 5px; padding:0px ; _padding:3px 0px
+}
+.tag li .drag .img1{float:left; margin:10px}
+.tag  .arrow {
+	width:20px;  padding:7px;  _padding:3px; 
+}
+.tagcontent{
+	width:99%; border:1px solid #b6d7f9;  float:left; padding:5px; margin-top:-1px; z-index:1; position:relative
+}
+.fontc{color:#646464; font-size:18px; font-weight:bold; font-family:Arial, Helvetica, sans-serif}
+
+
+

@@ -1,0 +1,834 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>系统管理--查看</title>
+    <link rel="stylesheet" href="css/jquery_datatables.css" type="text/css"/>
+    <link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+          type="text/css"/>
+    <link rel="stylesheet" href="css/pstyle.css" type="text/css"/>
+    <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="js/base_common.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/base_commonFun.js"></script>
+    <script type="text/javascript" src="js/parts/commonFun.js"></script>
+    <script type="text/javascript" src="js/task.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/check.js"></script>
+
+
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+    <div id="content"><!--#include file="3a_left.shtml"-->
+        <div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">查看</span>
+            <img src="images/loading.gif" id="imgloading" style="display:none" border="0"/><span id="sperrormsg"
+                                                                                                 style="color:red;display:none"></span>
+
+            <p/>
+            <table id="mytbl" name="queryinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 35px"><span>编辑</span></th>
+                    <th scope="col" style="width: 35px">ID</th>
+                    <th scope="col" style="width: 50px">状态</th>
+                    <th scope="col" style="width: 60px">开始时间</th>
+                    <th scope="col" style="width: 60px">结束时间</th>
+                    <th scope="col" style="width: 40px">耗时</th>
+                    <th scope="col" style="width: 55px">缓存个数</th>
+                    <th scope="col" style="width: 65px">封装器名称</th>
+                    <th scope="col" style="width: 65px">数据库名称</th>
+                    <th scope="col" style="width: 40px">表名称</th>
+                    <th scope="col" style="width: 65px">成功数据量</th>
+                    <th scope="col" style="width: 65px">提交数据量</th>
+                    <th scope="col" style="width: 65px">失败数据量</th>
+                    <th scope="col" style="width: 35px"><a href="">详情</a></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot id="userinfo1">
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="divtest" style="display: none;">
+    <table width="98%" border="0" cellspacing="0" cellpadding="0" class="list" id="cachetable" name="cachetable">
+        <thead>
+        <tr>
+            <th width="10%">编辑</th>
+            <th width="10%">id</th>
+            <th width="15%">提交总数</th>
+            <th width="15%">提交成功</th>
+            <th width="15%">提交失败</th>
+            <th width="10%">数据量</th>
+            <th width="15%">错误信息</th>
+            <th width="10%">详情</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot id="userinfo">
+
+        </tfoot>
+    </table>
+</div>
+<div id="divtest_1" style="display:none;">
+    <table width="98%" border="0" cellspacing="0" cellpadding="0" class="list" id="cachetable_1" name="cachetable">
+        <thead>
+        <tr>
+            <th width="10%">编辑</th>
+            <th width="10%">ID</th>
+            <th width="80%">Docsev</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot id="userinfo_1">
+        </tfoot>
+    </table>
+</div>
+</body>
+
+<script type="text/javascript">
+    $.ajaxSetup ({
+        cache: false //close AJAX cache
+    });
+    var wrapperId = -1;
+    var innerCacheId = -1;
+
+
+    $("#cachesubmit").bind("click", function () {
+        var searchnameUrl = config.modelUrl + "cachemanager.php?type=commit";
+        var content = $('#mytbl').val();
+
+        $.ajax({
+            type: "get",
+            url: searchnameUrl,
+            data: content,
+            success: function () {
+            }
+        })
+    })
+
+    function divtest() {
+        var dialogParent = $("#divtest").parent();
+        var dialogOwn = $("#divtest").clone();
+        dialogOwn.hide();
+        var $dialog = $("#divtest").dialog({
+            autoOpen: false,
+            modal: true,
+            height: 600,
+            width: 800,
+            buttons: {
+                "关闭": function () {
+                    $(this).dialog("close");
+                    $(this).dialog("destroy");
+                }
+                // close: function () { $(this).dialog("destroy"); }
+
+            },
+            close: function () {
+                dialogOwn.appendTo(dialogParent);
+                $(this).dialog("destroy").remove();
+            },
+
+        });
+    }
+
+    function divtest_1() {
+        var dialogParent = $("#divtest_1").parent();
+        var dialogOwn = $("#divtest_1").clone();
+        dialogOwn.hide();
+        var $dialog = $("#divtest_1").dialog({
+            autoOpen: false,
+            modal: true,
+            height: 600,
+            width: 800,
+            buttons: {
+                "关闭": function () {
+                    $(this).dialog("close");
+                    $(this).dialog("destroy");
+                }
+                // close: function () { $(this).dialog("destroy"); }
+
+            },
+            close: function () {
+                dialogOwn.appendTo(dialogParent);
+                $(this).dialog("destroy").remove();
+            },
+
+        });
+    }
+
+firstDatatable();
+//创建表格
+    var tbl;
+    var tbl_1;
+    var tbl_2;
+
+
+    //第一页表格数据
+function firstDatatable(){
+    $("#mytbl").dataTable({
+        "sAjaxSource": config.phpPath + "cachemanager.php?type=getAllCacheWrapper",
+       // "sAjaxSource":"css/cachedata.txt" ,
+        "bdestroy": true,
+        "destroy": true,
+        "bStateSave": false,        
+        "bLengthChange": false,
+        "bSort": false,
+        "iDisplayLength": 10,
+        "bRetrieve": true,
+        "aoColumns": [
+            //          {"fnRender":function(o){
+            // if (o.aData.wp_status != 0){
+            //                    return "<span id='"+o.aData.id+"' >"+deletebtn+"</span>";
+            //                }
+            //                else{
+            //                    return "";
+            //                }
+            //            }},
+            {
+                "fnRender": function (o) {
+                    return "<input type='checkbox' name='checklist1' id='checkbox1' value='" + o.aData.id + "'></input>";
+                }
+            },
+            {"mDataProp": "id"},
+            // { "mDataProp": "wp_status" },
+            {
+                "fnRender": function (o) {
+                switch(o.aData.wp_status){
+                        case 0:
+                        return "初始化";
+                        break;
+                        case 1:
+                        return "正在使用";
+                        break;
+                        case 2:
+                        return "使用完成";
+                        break;
+                        case 3:
+                        return "正在入库";
+                        break;
+                        case 4:
+                        return "入库完成";
+                        break;
+                        case 5:
+                        return "入库异常";
+                        break;
+                        case 6:
+                        return "";
+                        break;
+                        case 7:
+                        return "等待销毁";
+                        break;
+                }
+            }},
+            {"mDataProp": "mg_st"},
+            {"mDataProp": "mg_et"},
+            {"mDataProp": "mg_spt"},
+            {"mDataProp": "cache_num"},
+            {"mDataProp": "wp_name"},
+            {"mDataProp": "db_name"},
+            {"mDataProp": "dt_name"},
+            {"fnRender":function(o){
+                                if(o.aData.fc_fsm !=null){
+                                    return o.aData.fc_fsm;
+                            }else{
+                                return "暂无数据";
+                            }}
+                        },
+            {"fnRender":function(o){
+                                if(o.aData.fc_fsm !=null){
+                                    return o.aData.fc_fcm;
+                            }else{
+                                return "暂无数据";
+                            }}},
+            {"fnRender":function(o){
+                                if(o.aData.fc_fsm !=null){
+                                    return o.aData.fc_ffm;
+                            }else{
+                                return "暂无数据";
+                            }}},
+
+            {
+                "fnRender": function (o) {
+
+                    return "<a href='javascript:;' style='cursor:pointer;' onclick='fetcheInnerCacheById(" + o.aData.id + ")'>详情</a>";
+                }
+            }
+
+
+        ]
+    });
+}    
+    
+
+    var url;
+    var url1;
+
+    //点击后第二页详情数据
+    function fetcheInnerCacheById(id) {
+        divtest(); 
+        wrapperId = id;
+        url = config.phpPath + "cachemanager.php?type=getAllInnerCacheInfos&id=" + wrapperId + "&iDisplayStart=0&iDisplayLength=10";  
+        // url="css/cachedata.txt" ;     
+        $("#divtest").dialog("open");
+        $('#divtest').dialog('open').dialog('refresh', url);
+        // $('#divtest').dialog('open').dialog('refresh', url)
+        // var dataTable=$("#cachetable").dataTable();
+        // table.ajax.reload();
+
+        
+        
+       cachetable(url);
+
+    }
+    function cachetable(a) {
+
+        $("#cachetable").dataTable({
+            "bdestroy": true,
+            "destroy": true,
+            "sAjaxSource": a,
+            "bLengthChange": false,
+            "bSort": false,
+            "iDisplayLength": 10,
+            "aoColumns": [
+                {
+                    "fnRender": function (o) {
+                        return "<input type='checkbox' name='checklist' id='checkbox' value='" + o.aData.id + "'></input>";
+                    }
+                },
+                {"mDataProp": "id"},
+                {"mDataProp": "fc_fcm"},
+                {"mDataProp": "fc_fsm"},
+                {"mDataProp": "fc_ffm"},
+                {
+                    "fnRender": function (o) {
+                            if(o.aData.dt_cnt>200){                                                              
+                            setTimeout(function(){submitnant(o.aData.id)},7200000);
+                           
+                       };
+                        return o.aData.dt_cnt;
+                    }
+                },
+                {"fnRender":function(o){
+                                if(o.aData.excp_info !=null){
+                                    return o.aData.excp_info;
+                            }else{
+                            	return "暂无数据";
+                            }}},
+                {
+                    "fnRender": function (o) {
+                        //alert(o.aData.taskparams);
+                        return "<a href='javascript:;' style='cursor:pointer' onclick='fetcheInnerCacheById_1(" + o.aData.id + ',' + o.aData.dt_cnt + ")'>详情</a>";
+                    }
+                }]
+
+        })
+    }
+    // function destroy(){
+    // 	$("#divtest").dialog("destroy");
+    // }
+
+
+    //点击后第三页详情数据
+
+    function fetcheInnerCacheById_1(id, dt) {
+        divtest_1();
+        url1=config.phpPath + "cachemanager.php?type=getDatasFromInnerCache&wrapperId=" + wrapperId + "&cacheId=" + id + "&dataCount=" + dt + "&iDisplayStart=0&iDisplayLength=10";
+        $("#divtest_1").dialog("open");
+        $('#divtest_1').dialog('open').dialog('refresh', url1)
+        innerCacheId = id;
+        $("#cachetable_1").dataTable({
+            // "sAjaxSource":"css/cachedata.txt" ,
+            "sAjaxSource": config.phpPath + "cachemanager.php?type=getDatasFromInnerCache&wrapperId=" + wrapperId + "&cacheId=" + id + "&dataCount=" + dt + "&iDisplayStart=0&iDisplayLength=10",
+            "bLengthChange": false,
+            "bSort": false,
+            "iDisplayLength": 10,
+            "bdestroy": true,
+            "destroy": true,
+            "aoColumns": [
+                {
+                    "fnRender": function (o) {
+                        return "<input type='checkbox' name='checklist_1' id='checkbox_1' value='" + o.aData.id + "'></input>";
+                    }
+                },
+                {"mDataProp": "id"},
+                {"mDataProp": "docStr"}]
+        })
+    }
+
+
+
+
+//刷新dialog 
+
+    function reFresh(){
+        firstDatatable()
+    }
+    function reFresh1(){
+    	
+   
+    }
+    function reFresh_1(){
+    	$('#divtest_1').dialog('open').dialog('refresh', url1)
+    }
+
+
+
+    //第一页编辑   删除、提交
+    var str = $("<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll1' id='selectAll1' onclick='selectall1()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll1' id='unselectAll1' onclick='unselectall1()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall1' id='delall1' onclick='delselect1()' value='删除'>&nbsp;&nbsp;<input type='button' name='submit1' id='submit1' onclick='submit1()' value='提交'>&nbsp;&nbsp;<input type='button' name='submit1_b' id='submit1_b' onclick='submit1_b()' value='从备份文件提交'></td></tr>");
+        $("#userinfo1").append(str);
+    function selectall1() {
+        $('input[name="checklist1"]').each(function () {
+            $(this).attr("checked", "true");
+        });
+    }
+    function unselectall1() {
+        $('input[name="checklist1"]').each(function () {
+            $(this).attr("checked", !this.checked);
+        });
+    }
+
+    //删除
+    function delselect1() {
+        var innerCacheId = '';
+        var arrChk = $("input[name='checklist1']:checked");
+        $(arrChk).each(function () {
+            if (innerCacheId == '') {
+                innerCacheId = this.value + ",";
+            }
+            else {
+                innerCacheId += this.value + ",";
+            }
+        });
+        if (innerCacheId == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            innerCacheId = innerCacheId.substring(0, innerCacheId.length - 1);
+            if (confirm("您确认要删除选中数据么，删除后相关角色和用户信息将无法恢复!")) {
+                var a = [];
+                innerCacheId = innerCacheId.split(",");
+                for (i = 0; i < innerCacheId.length; i++) {
+                    var tmp = parseInt(innerCacheId[i]);
+                    a.push(tmp);
+                }
+                console.log(a);
+                deletetenant1(a);
+            }
+        }
+        $("#mytabl").dataTable().fnDraw(false);
+    }
+
+    function deletetenant1(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=delWrapperData&wrapperId=" +  "[" + tid + "]";
+        ajaxRequest(searchnameUrl, delcomplete1, "json");
+    }
+
+    function delcomplete1(data) {
+        if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh();
+            }
+            else {
+                alert(data[0].dataerror.error)
+                // reFresh();
+
+            }
+        }
+    }
+
+
+    
+
+    //提交
+    function submit1() {
+        var innerCacheId = '';
+        var arrChk = $("input[name='checklist1']:checked");
+        $(arrChk).each(function () {
+            if (innerCacheId == '') {
+                innerCacheId = this.value + ",";
+            }
+            else {
+                innerCacheId += this.value + ",";
+            }
+        });
+        if (innerCacheId == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            innerCacheId = innerCacheId.substring(0, innerCacheId.length - 1);
+            if (confirm("您确认要提交选中数据吗？")) {
+                var a = [];
+                innerCacheId = innerCacheId.split(",");
+                for (i = 0; i < innerCacheId.length; i++) {
+                    var tmp = parseInt(innerCacheId[i]);
+                    a.push(tmp);
+                }
+                submitnant1(a);
+            }
+        }
+        $("#mytabl").dataTable().fnDraw(false);
+    }
+
+    function submitnant1(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=flushAndCommitData&wrapperId=" +  "[" + tid + "]";
+        ajaxRequest(searchnameUrl, subcomplete1, "json")
+    }
+    function subcomplete1(data) {
+    	if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh();
+            }
+            else {
+                console.log(data)
+                alert(data[0].dataerror.error)
+                
+            }
+        }
+    }
+
+    function submit1_b() {
+
+        var innerCacheId = '';
+        var arrChk = $("input[name='checklist1']:checked");
+        $(arrChk).each(function () {
+            if (innerCacheId == '') {
+                innerCacheId = this.value + ",";
+            }
+            else {
+                innerCacheId += this.value + ",";
+            }
+        });
+        if (innerCacheId == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            innerCacheId = innerCacheId.substring(0, innerCacheId.length - 1);
+            if (confirm("您确认要提交选中数据吗？")) {
+                var a = [];
+                innerCacheId = innerCacheId.split(",");
+                for (i = 0; i < innerCacheId.length; i++) {
+                    var tmp = parseInt(innerCacheId[i]);
+                    a.push(tmp);
+                }
+                submitnant1_b(a);
+            }
+        }
+        $("#mytabl").dataTable().fnDraw(false);
+    }
+
+    function submitnant1_b(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=flushAndCommitData&wrapperId=" +  "[" + tid + "]"+"&commitDataSourceType=backFile";
+        ajaxRequest(searchnameUrl, subcomplete1_b, "json")
+    }
+    function subcomplete1_b(data) {
+        if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh();
+            }
+            else {
+                alert(data[0].dataerror.error)
+                
+            }
+        }
+    }
+
+
+    //第二页编辑   删除、提交
+    var str = $("<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'>&nbsp;&nbsp;<input type='button' name='submit' id='submit' onclick='submit()' value='提交'></td></tr>");
+
+    $("#userinfo").append(str);
+    function selectall() {
+        $('input[name="checklist"]').each(function () {
+            $(this).attr("checked", "true");
+        });
+    }
+    function unselectall() {
+        $('input[name="checklist"]').each(function () {
+            $(this).attr("checked", !this.checked);
+        });
+    }
+    //删除
+    function delselect() {
+        var innerCacheId = '';
+        var arrChk = $("input[name='checklist']:checked");
+        $(arrChk).each(function () {
+            if (innerCacheId == '') {
+                innerCacheId = this.value + ",";
+            }
+            else {
+                innerCacheId += this.value + ",";
+            }
+        });
+        if (innerCacheId == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            console.log(innerCacheId);
+            innerCacheId = innerCacheId.substring(0, innerCacheId.length - 1);
+            if (confirm("您确认要删除选中数据么，删除后相关角色和用户信息将无法恢复!")) {
+                var a = [];
+                innerCacheId = innerCacheId.split(",");
+                for (i = 0; i < innerCacheId.length; i++) {
+                    var tmp = parseInt(innerCacheId[i]);
+                    a.push(tmp);
+                }
+                deletetenant(a);
+            }
+        }
+        $("#cachetable").dataTable().fnDraw(false);
+        $("#mytabl").dataTable().fnDraw(false);
+    }
+    
+
+
+    function deletetenant(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=delWrapperData&wrapperId=" + wrapperId + "&innerCacheId=" + "[" + tid + "]";
+        ajaxRequest(searchnameUrl, delcomplete, "json");
+    }
+
+    function delcomplete(data) {
+        if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh1();
+            }
+            else {
+                alert(data[0].dataerror.error)
+
+            }
+        }
+    }
+
+    //提交
+    function submit() {
+
+        var innerCacheId = '';
+        var arrChk = $("input[name='checklist']:checked");
+        $(arrChk).each(function () {
+            if (innerCacheId == '') {
+                innerCacheId = this.value + ",";
+            }
+            else {
+                innerCacheId += this.value + ",";
+            }
+        });
+        if (innerCacheId == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            console.log(innerCacheId);
+            innerCacheId = innerCacheId.substring(0, innerCacheId.length - 1);
+            if (confirm("您确认要提交选中数据吗？")) {
+                var a = [];
+                innerCacheId = innerCacheId.split(",");
+                for (i = 0; i < innerCacheId.length; i++) {
+                    var tmp = parseInt(innerCacheId[i]);
+                    a.push(tmp);
+                }
+                submitnant(a);
+            }
+        }
+        $("#cachetable").dataTable().fnDraw(false);
+        $("#mytabl").dataTable().fnDraw(false);
+    }
+
+    function submitnant(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=flushAndCommitData&wrapperId=" + wrapperId + "&innerCacheId=" + "[" + tid + "]";
+        ajaxRequest(searchnameUrl, subcomplete, "json")
+    }
+    function subcomplete(data) {
+    	if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh1();
+            }
+            else {
+                alert(data[0].dataerror.error)
+            }
+        }
+    }
+
+
+    //第三页编辑  删除、提交
+    var str_1 = $("<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll_1' id='selectAll_1' onclick='selectall_1()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll_1' id='unselectAll_1' onclick='unselectall_1()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall_1' id='delall_1' onclick='delselect_1()' value='删除'>&nbsp;&nbsp;<input type='button' name='submit_1' id='submit_1' onclick='submit_1()' value='提交'></td></tr>");
+    $("#userinfo_1").append(str_1);
+    function selectall_1() {
+        $('input[name="checklist_1"]').each(function () {
+            $(this).attr("checked", "true");
+        });
+    }
+    function unselectall_1() {
+        $('input[name="checklist_1"]').each(function () {
+            $(this).attr("checked", !this.checked);
+        });
+    }
+
+
+    //删除数据
+    function delselect_1() {
+        var dataIds = '';
+        var arrChk = $("input[name='checklist_1']:checked");
+        $(arrChk).each(function () {
+            if (dataIds == '') {
+                dataIds = this.value + ",";
+            }
+            else {
+                dataIds += this.value + ",";
+            }
+        });
+        if (dataIds == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            dataIds = dataIds.substring(0, dataIds.length - 1);
+            if (confirm("您确认要删除选中数据么,删除后相关角色和用户信息将无法恢复!")) {
+                var a = [];
+                dataIds = dataIds.split(",");
+                for (i = 0; i < dataIds.length; i++) {
+                    var tmp = parseInt(dataIds[i]);
+                    a.push(tmp);
+                }
+                deletetenant_1(a);
+            }
+        }
+        $("#cachetable_1").dataTable().fnDraw(false);
+        $("#cachetable").dataTable().fnDraw(false);
+    }
+
+    function deletetenant_1(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=delWrapperData&wrapperId=" + wrapperId + "&innerCacheId=" + innerCacheId + "&dataIds=" + "[" + tid + "]";
+        ajaxRequest(searchnameUrl, delcomplete_1, "json");
+    }
+
+    function delcomplete_1(data) {
+        if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh_1();
+            }
+            else {
+                alert(data[0].dataerror.error)
+            }
+        }
+    }
+
+    //提交
+    function submit_1() {
+
+        var dataIds = '';
+        var arrChk = $("input[name='checklist_1']:checked");
+        $(arrChk).each(function () {
+            if (dataIds == '') {
+                dataIds = this.value + ",";
+            }
+            else {
+                dataIds += this.value + ",";
+            }
+        });
+        if (dataIds == '') {
+            alert("请选择要数据的记录!");
+        }
+        else {
+            dataIds = dataIds.substring(0, dataIds.length - 1);
+            if (confirm("您确认要提交选中数据吗？")) {
+                var a = [];
+                dataIds = dataIds.split(",");
+                for (i = 0; i < dataIds.length; i++) {
+                    var tmp = parseInt(dataIds[i]);
+                    a.push(tmp);
+                }
+                submitnant_1(a);
+            }
+
+        }
+        $("#cachetable_1").dataTable().fnDraw(false);
+        $("#cachetable").dataTable().fnDraw(false);
+	 }
+
+    function submitnant_1(tid) {
+        var searchnameUrl = config.phpPath + "cachemanager.php?type=flushAndCommitData&wrapperId=" + wrapperId + "&innerCacheId=" + innerCacheId + "&dataIds=" + "[" + tid + "]";
+        ajaxRequest(searchnameUrl, subcomplete_1, "json")
+    }
+
+    function subcomplete_1(data) {
+    		if (data != null) {
+            if (data.result) {
+               alert(data[0].dataerror.msg);
+               reFresh_1();
+            }
+            else {
+                alert(data[0].dataerror.error)
+            }
+        }
+    }
+function ajaxRequest(url, successCallBack, dataType, errorCallBack, beforeSendCallBack, completeCallBack, methodType, sendData) {
+    if (methodType == undefined || methodType == "" || methodType == null) {
+        methodType = "GET";
+    }
+    if (sendData == undefined || sendData == "" || sendData == null) {
+        sendData = {
+            sid : Math.random()
+        };
+    }
+    if (dataType == undefined || dataType == "" || dataType == null) {
+        dataType = "json";
+    }
+    if (beforeSendCallBack == undefined || beforeSendCallBack == ""
+            || beforeSendCallBack == null) {
+        beforeSendCallBack = new Function();
+    }
+    if (completeCallBack == undefined || completeCallBack == ""
+            || completeCallBack == null) {
+        completeCallBack = new Function();
+    }
+    if (errorCallBack == undefined || errorCallBack == ""
+            || errorCallBack == null) {
+        errorCallBack = new Function();
+    }
+    $.ajax( {
+        type : methodType,
+        url : url,
+        async : true, // (默认: true) 默认设置下，所有请求均为异步请求。如果需要发送同步请求，请将此选项设置为 false
+        data : sendData,
+        cache : true, // 默认为true， false时不会从浏览器缓存中加载请求信息
+        dataType : dataType,// text返回纯文本字符串
+        contentType: "application/json",
+        beforeSend : function() {
+            beforeSendCallBack();
+        },
+        success : function(returnData, textStatus) {
+            if (returnData != null) {
+                if (returnData.errorcode == undefined
+                        && returnData.error == undefined) {
+                    successCallBack(returnData);
+                } else {
+                    var rd = [ {
+                        totalcount : 0,
+                        datalist : [],
+                        dataerror:returnData
+                    } ];
+                    successCallBack(rd);
+                }
+            } else {
+                errorOutPut('2001', '数据为空');
+            }
+        },
+        complete : function(XMLHttpRequest, textStatus) {
+            completeCallBack();
+        },
+        error : function(XMLHttpRequest, textStatus, errorThrown) {
+            errorCallBack(XMLHttpRequest.responseText, errorThrown);
+        }
+    }); // ajax end
+}    
+</script>
+</html>

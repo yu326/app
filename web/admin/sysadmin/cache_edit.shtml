@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--参数修改</title>
+<link rel="stylesheet" href="css/jquery_datatables.css" type="text/css"/>
+    <link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+          type="text/css"/>
+    <link rel="stylesheet" href="css/pstyle.css" type="text/css"/>
+    <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="js/base_common.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/base_commonFun.js"></script>
+    <script type="text/javascript" src="js/parts/commonFun.js"></script>
+    <script type="text/javascript" src="js/task.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="js/check.js"></script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">参数修改</span>
+	<h3>提交主机配置</h3>
+	<table id="mytbl" name="queryinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 35px">缓存实例名</th>
+                    <th scope="col" style="width: 35px">数据提交URL</th>
+                </tr>
+                </thead>
+            </table>
+     <hr style="margin-top:55px;border-top:2px solid blue;"/>      
+    <h3>缓存实例配置</h3>
+	<table id="mytbl1" name="queryinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 35px">缓存实例名</th>
+                    <th scope="col" style="width: 35px">缓存个数</th>
+                    <th scope="col" style="width: 45px">最大提交线程</th>
+                    <th scope="col" style="width: 35px">数据目录</th>
+                    <th scope="col" style="width: 60px">强制提交最小间隔</th>
+                    <th scope="col" style="width: 60px">提交器名称</th>
+                    <th scope="col" style="width: 70px">最大文档数缓存(缓存)</th>
+                    <th scope="col" style="width: 60px">查看提交器配置</th>
+                </tr>
+                </thead>
+            </table>
+            <div id="divtest" style="display: none;">
+			    <h3>提交器配置</h3>
+			    <table width="98%" border="0" cellspacing="0" cellpadding="0" class="list" id="cachetable" name="cachetable">
+			        <thead>
+			        <tr>
+			            <th width="70px">参数名</th>
+			            <th width="70px">值</th>
+			            <th width="70px">编辑</th>    
+			        </tr>
+			        </thead>
+			        <tbody></tbody>
+			        <tfoot id="userinfo">
+
+			        </tfoot>
+			    </table>
+			</div>
+    <hr style="margin-top:55px;border-top:2px solid blue;"/>              
+    <h3>全局参数配置</h3>
+	<table id="mytbl2" name="queryinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <thead>
+                <tr>
+                	<th scope="col" style="width: 35px">参数名</th>
+                    <th scope="col" style="width: 35px">参数值</th>                    
+                </tr>
+                </thead>
+            </table>
+</div>
+</div>
+</div>
+
+</body>
+<script type="text/javascript">
+//第一张表
+	$("#mytbl").dataTable({
+        "sAjaxSource": config.phpPath + "cachemanager.php?type=getCacheInsServeMapping",
+       // "sAjaxSource":"css/cachedata.txt" ,
+        "bdestroy": true,
+        "destroy": true,
+        "bStateSave": false,        
+        "bLengthChange": false,
+        "bSort": false,
+        "iDisplayLength": 10,
+        "bRetrieve": true,
+        "aoColumns": [
+            {"fnRender":function(o){
+                                if(o.aData.cacheInsName !=null){
+                                    return o.aData.cacheInsName;
+                            }else{
+                                return "暂无数据";
+                            }}},
+            {"fnRender":function(o){
+                                if(o.aData.url !=null){
+                                    return o.aData.url;
+                            }else{
+                                return "暂无数据";
+                            }}}               
+        ]
+    });
+
+
+//第二张表
+    $("#mytbl1").dataTable({
+        "sAjaxSource": config.phpPath + "cachemanager.php?type=getAllCacheInsCfg",
+       // "sAjaxSource":"css/cachedata.txt" ,
+        "bdestroy": true,
+        "destroy": true,
+        "bStateSave": false,        
+        "bLengthChange": false,
+        "bSort": false,
+        "iDisplayLength": 10,
+        "bRetrieve": true,
+        "aoColumns": [
+            {"fnRender":function(o){
+                                if(o.aData.cacheInsName !=null){
+                                    return o.aData.cacheInsName;
+                            }else{
+                                return "暂无数据";
+                            }}}, 
+            {"fnRender":function(o){
+                                if(o.aData.inner_cache_mum !=null){
+                                    return o.aData.inner_cache_mum;
+                            }else{
+                                return "暂无数据";
+                            }}},                              
+            {"fnRender":function(o){
+                                if(o.aData.max_flush_thread !=null){
+                                    return o.aData.max_flush_thread;
+                            }else{
+                                return "暂无数据";
+                            }}}, 
+            {"fnRender":function(o){
+                                if(o.aData.data_dir !=null){
+                                    return o.aData.data_dir;
+                            }else{
+                                return "暂无数据";
+                            }}}, 
+            {"fnRender":function(o){
+                                if(o.aData.force_Commit_Interval !=null){
+                                    return o.aData.force_Commit_Interval;
+                            }else{
+                                return "暂无数据";
+                            }}}, 
+            {"fnRender":function(o){
+                                if(o.aData.commiter_name !=null){
+                                    return o.aData.commiter_name;
+                            }else{
+                                return "暂无数据";
+                            }}}, 
+            {"fnRender":function(o){
+                                if(o.aData.max_doc_innercache !=null){
+                                    return o.aData.max_doc_innercache;
+                            }else{
+                                return "暂无数据";
+                            }}},                                               
+            {
+                "fnRender": function (o) {
+
+                    return "<a href='javascript:;' style='cursor:pointer;' onclick='clickCommiter_name(" + o.aData.cacheInsName + ")'>查看</a>";
+                }
+            }
+
+
+        ]
+    });
+
+//查看窗口 
+var url;
+ function clickCommiter_name(name) {
+        divtest(); 
+        url = config.phpPath + "cachemanager.php?type=getCmtCfg&cacheInsName="+name;  
+        // url="css/cachedata.txt" ;     
+        $("#divtest").dialog("open");
+        $('#divtest').dialog('open').dialog('refresh', url);
+       cachetable(url);
+
+    }
+function cachetable(a) {
+        $("#cachetable").dataTable({
+            "bdestroy": true,
+            "destroy": true,
+            "sAjaxSource": a,
+            "bLengthChange": false,
+            "bSort": false,
+            "iDisplayLength": 10,
+            "aoColumns": [
+                {"fnRender":function(o){
+                                if(o.aData.paramName !=null){
+                                    return o.aData.paramName;
+                            }else{
+                            	return "暂无数据";
+                            }}},
+                {"fnRender":function(o){
+                                if(o.aData.value !=null){
+                                    return o.aData.value;
+                            }else{
+                            	return "暂无数据";
+                            }}},            
+                {
+                    "fnRender": function (o) {
+                        //alert(o.aData.taskparams);
+                        return "<a href='javascript:;' style='cursor:pointer' onclick='fetcheInnerCacheById_1(" + o.aData.id + ',' + o.aData.dt_cnt + ")'>编辑</a>";
+                    }
+                }]
+
+        })
+    }
+
+//第三张表
+    $("#mytbl2").dataTable({
+        "sAjaxSource": config.phpPath + "cachemanager.php?type=getAllGlbParams",
+       // "sAjaxSource":"css/cachedata.txt" ,
+        "bdestroy": true,
+        "destroy": true,
+        "bStateSave": false,        
+        "bLengthChange": false,
+        "bSort": false,
+        "iDisplayLength": 10,
+        "bRetrieve": true,
+        "aoColumns": [
+            
+            {"fnRender":function(o){
+                                if(o.aData.paramName !=null){
+                                    return o.aData.paramName;
+                            }else{
+                                return "暂无数据";
+                            }}
+                        },
+            {"fnRender":function(o){
+                                if(o.aData.value !=null){
+                                    return o.aData.value;
+                            }else{
+                                return "暂无数据";
+                            }}}
+        ]
+    });
+    function divtest() {
+        var dialogParent = $("#divtest").parent();
+        var dialogOwn = $("#divtest").clone();
+        dialogOwn.hide();
+        var $dialog = $("#divtest").dialog({
+            autoOpen: false,
+            modal: true,
+            height: 600,
+            width: 800,
+            buttons: {
+                "关闭": function () {
+                    $(this).dialog("close");
+                    $(this).dialog("destroy");
+                }
+                // close: function () { $(this).dialog("destroy"); }
+
+            },
+            close: function () {
+                dialogOwn.appendTo(dialogParent);
+                $(this).dialog("destroy").remove();
+            },
+
+        });
+    }
+
+
+</script>
+</html>

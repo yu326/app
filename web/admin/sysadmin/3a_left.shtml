@@ -1,0 +1,58 @@
+<div id="left">
+    <div class="f"><span style="width:100%; float:right;"><a name="level1" href="index.shtml">首页</a></span></div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+    <div class="f"><span style="width:100%; float:right;"><a name="level1">系统管理</a><img src="images/arrowd.gif" width="15" height="15" /></span>
+        <ul>
+            <li ><a name="level2" href="sysadmin_index.shtml">管理工具</a></li>
+            <li ><a name="level2" href="sysadmin_dictionary.shtml">系统词典</a></li>
+        </ul>
+    </div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+    <div class="f"><span style="width:100%; float:right;"><a name="level1" >缓存管理</a><img src="images/arrowd.gif" width="15" height="15" /></span>
+        <ul>
+            <li  style="margin-left:8px;"><a name="level2" href="cache_query.shtml">查看</a></li>
+            <li  style="margin-left:8px;"><a name="level2" href="cache_submit.shtml">提交</a></li>
+            <li  style="margin-left:8px;"><a name="level2" href="cache_edit.shtml">参数修改</a></li>
+        </ul>
+    </div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+    <div class="f"><span style="width:100%; float:right;"><a name="level1" >任务管理</a><img src="images/arrowd.gif" width="15" height="15" /></span>
+        <ul>
+            <li ><a name="level2" href="task_index.shtml">当前任务</a></li>
+            <li ><a name="level2" href="task_history.shtml">历史任务</a></li>
+            <li ><a name="level2" href="taskschedule.shtml">定时任务</a></li>
+            <li ><a name="level2" href="taskschedule_history.shtml">过期定时任务</a></li>
+
+			<!--
+            <li ><a href="task_account.shtml">帐号管理</a></li>
+			-->
+            <li ><a name="level2" href="task_ip.shtml">IP管理</a></li>
+            <li ><a name="level2" href="embedUser.shtml">植入用户</a></li>
+            <li ><a name="level2" href="embedWeibo.shtml">植入微博</a></li>
+            <li ><a name="level2" href="spiderconfig.shtml">爬虫配置管理</a></li>
+            <li ><a name="level2" href="spideraccount.shtml">爬虫帐号管理</a></li>
+            <li ><a name="level2" href="datahost.shtml">数据主机管理</a></li>
+        </ul>
+    </div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+    <div class="f"><span style="width:100%; float:right;"><a name="level1">授权认证管理</a><img src="images/arrowd.gif" width="15" height="15" /></span>
+        <ul>
+            <li ><a name="level2" href='tenantlist.shtml'>租户管理</a></li>
+            <li ><a name="level2" href='childtenantlist.shtml'>给租户分配资源</a></li>
+            <li ><a name="level2" href='setuptenantrolelist.shtml'>给租户分配角色</a></li>
+			<li ><a name="level2" href='setuptenantlist.shtml'>设置角色权限</a></li>
+            <li ><a name="level2" href='userlist.shtml'>用户管理</a></li>
+            <li ><a name="level2" href='rolelist.shtml'>角色管理</a></li>
+            <li ><a name="level2" href='products.shtml'>产品管理</a></li>
+            <li ><a name="level2" href='resourcelist.shtml'>资源管理</a></li>
+            <li ><a name="level2" href='grouplist.shtml'>资源组管理</a></li>
+        </ul>
+    </div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+    <div class="f"><span style="width:100%; float:right;"><a name="level1">系统使用统计</a><img src="images/arrowd.gif" width="15" height="15" /></span>
+        <ul>
+            <li ><a name="level2" href='login_history.shtml'>登录行为</a></li>
+        </ul>
+    </div>
+    <img src="images/pmenuline.gif" style="margin-top:-10px;"  />
+</div>

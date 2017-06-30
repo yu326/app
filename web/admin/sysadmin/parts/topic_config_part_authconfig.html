@@ -1,0 +1,1066 @@
+<!--原文内容-->
+<!--摘要内容-->
+<!--来源-->
+<div class="search" style="display:block;"><span class="rightalign">来源限制：</span>
+	&nbsp;&nbsp;<input id="setsource_host" name="source_host" value="设置限制"  type="button">
+	&nbsp;&nbsp;<label for="allowcontrol_source_host">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="source_host" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">来源限制：</span><span id="selectedsource_host" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_source_hostcode">
+</div>
+<!--微博ID-->
+<!--微博URL-->
+<!--
+<div class="search"><span class="rightalign"> 微博URL：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtweibourl" name="weibourl" />
+    <input type="button" id="btnaddweibourl" name="btnaddlimit" target="weibourl" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_weibourl">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="weibourl" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">微博URL限制：</span><span id="endweibourl"></span></div>
+-->
+<!--页面URL-->
+<div class="search"><span class="rightalign"> 页面URL：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtoriginal_url" name="original_url" />
+    <input type="button" id="btnaddoriginal_url" name="btnaddlimit" target="original_url" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_original_url">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="original_url" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">页面URL限制：</span><span id="endoriginal_url"></span></div>
+<!--原创ID-->
+<!--原创URL-->
+<div class="search"><span class="rightalign"> 原创URL：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtoristatusurl" name="oristatusurl" />
+    <input type="button" id="btnaddoristatusurl" name="btnaddlimit" target="oristatusurl" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_oristatusurl">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="oristatusurl" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">原创URL限制：</span><span id="endoristatusurl"></span>
+</div>
+<!--昵称查转发-->
+<div class="search"><span class="rightalign"> 昵称查转发：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtoristatus_username" name="oristatus_username" />
+	<input name="commendName" target="oristatus_username" type="button" value="推荐"/> 
+    <input type="button" id="btnaddoristatus_username" name="btnaddlimit" target="oristatus_username" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_oristatus_username">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="oristatus_username" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">昵称查转发限制：</span><span id="endoristatus_username"></span>
+</div>
+<!--用户名查转发-->
+<div class="search"><span class="rightalign">用户名查转发：</span>
+    &nbsp;&nbsp;<input id="setoristatus_userid" name="oristatus_userid" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_oristatus_userid">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="oristatus_userid" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">用户名查转发：</span>
+	<span id="selectedoristatus_userid" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_oristatus_useridcode">
+</div>
+<!--转发URL-->
+<div class="search"><span class="rightalign"> 转发URL：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtrepost_url" name="repost_url" />
+    <input type="button" id="btnaddrepost_url" name="btnaddlimit" target="repost_url" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_repost_url">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="repost_url" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">转发URL限制：</span><span id="endrepost_url"></span>
+</div>
+<!--昵称查原创-->
+<div class="search"><span class="rightalign"> 昵称查原创：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtrepost_username" name="repost_username" />
+	<input name="commendName" target="repost_username" type="button" value="推荐"/> 
+    <input type="button" id="btnaddrepost_username" name="btnaddlimit" target="repost_username" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_repost_username">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="repost_username" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">昵称查原创限制：</span><span id="endrepost_username"></span>
+</div>
+<!--用户名查原创-->
+<div class="search"><span class="rightalign">用户名查原创：</span>
+    &nbsp;&nbsp;<input id="setrepost_userid" name="repost_userid" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_repost_userid">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="repost_userid" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">用户名查原创：</span>
+	<span id="selectedrepost_userid" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_repost_useridcode">
+</div>
+<!--作者昵称限制-->
+<div class="search"><span class="rightalign"> 作者昵称：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtusername" name="username" />
+	<input name="commendName" target="username" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusername" name="btnaddlimit" target="username" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_username">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="username" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">作者限制：</span><span id="endusername"></span>
+</div>
+<!--用户名-->
+<div class="search"><span class="rightalign">用户名：</span>
+    &nbsp;&nbsp;<input id="setuserid" name="userid" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_userid">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="userid" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">用户名限制：</span>
+	<span id="selecteduserid" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_useridcode">
+</div>
+<!--性别-->
+<div class="search" id="islimit_sex"> <span class="rightalign">性别限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_sex" id="islimit_sexm" value="m" /> 男
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_sex" id="islimit_sexf" value="f" /> 女
+	&nbsp;&nbsp;<label for="allowcontrol_sex">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="sex" value="恢复默认" />
+</div>
+<!--用户地区-->
+<div class="search"><span class="rightalign">用户地区：</span>
+	 &nbsp;&nbsp;<input id="setareauser" name="areauser" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_areauser">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="areauser" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">用户地区限制：</span><span id="selectedareauser" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_areausercode">
+</div>
+<!--用户级别-->
+<div class="search"> <span class="rightalign">用户级别限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="level_minvalue" id="level_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="level_maxvalue" id="level_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_level">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="level" value="恢复默认" />
+</div>
+<!--认证 认证类型-->
+<div class="search" style="display:block;"><span class="rightalign">认证限制：</span>
+	&nbsp;&nbsp;<input id="setverified" name="verified" value="设置限制"  type="button">
+	&nbsp;&nbsp;<label for="allowcontrol_verified">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="verified" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">认证限制：</span><span id="selectedverified" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_verifiedcode">
+</div>
+<!--认证原因-->
+<div class="search"><span class="rightalign"> 认证原因：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtverifiedreason" name="verifiedreason" />
+	<input name="commendverifiedreason" target="verifiedreason" type="button" value="推荐"/> 
+    <input type="button" id="btnaddverifiedreason" name="btnaddlimit" target="verifiedreason" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_verifiedreason">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="verifiedreason" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">认证原因限制：</span><span id="endverifiedreason"></span>
+</div>
+<!--简介-->
+<div class="search"><span class="rightalign"> 简介：</span> 
+    &nbsp;&nbsp;<input type="text" id="txtdescription" name="description" />
+	<input name="commenddescription" target="description" type="button" value="推荐"/> 
+    <input type="button" id="btnadddescription" name="btnaddlimit" target="description" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_description">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="description" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">简介限制：</span><span id="enddescription"></span>
+</div>
+<!--博龄-->
+<div class="search" id="islimit_registertime"> <span class="rightalign">博龄：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="registertime_minvalue" id="registertime_minvalue" value="" />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="registertime_maxvalue" id="registertime_maxvalue" value="" />
+	<select id="registertime_gap"> 
+		<option value="year">年</option>  
+		<option value="month">月</option> 
+		<option value="day" selected="selected">天</option> 
+	</select>
+	&nbsp;&nbsp;<label for="allowcontrol_registertime">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="registertime" value="恢复默认" />
+</div>
+<!--产品型号-->
+<div class="search"><span class="rightalign">产品型号：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtproductType" name="productType" />
+    <input name="commendproductType" target="productType" type="button" value="推荐"/> 
+    <input type="button" id="btnaddproductType" name="addproductType" target="productType" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_productType">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="productType" value="恢复默认" />
+</div>
+<!--买家印象-->
+<div class="search"><span class="rightalign">买家印象：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtimpress" name="impress" />
+    <input name="commendimpress" target="impress" type="button" value="推荐"/> 
+    <input type="button" id="btnaddimpress" name="addimpress" target="impress" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_impress">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="impress" value="恢复默认" />
+</div>
+<!--单评论的标签-->
+<div class="search" id="commentTags_div"><span class="rightalign">单评论的标签：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtcommentTags" name="commentTags" />
+    <input name="commendcommentTags" target="commentTags" type="button" value="推荐"/> 
+    <input type="button" id="btnaddcommentTags" name="addcommentTags" target="commentTags" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_commentTags">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="commentTags" value="恢复默认" />
+</div>
+
+<!--关键词-->
+<div class="search"><span class="rightalign">关键词：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtsearchword" name="searchword" />
+    <input name="commendsearchword" target="searchword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddsearchword" name="addsearchword" target="searchword" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_searchword">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="searchword" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">关键词限制：</span><span id="endsearchword"></span></div>
+<!--段关键词-->
+<div class="search"><span class="rightalign">段关键词：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtpg_text" name="pg_text" />
+    <input name="commendpg_text" target="pg_text" type="button" value="推荐"/> 
+    <input type="button" id="btnaddpg_text" name="addpg_text" target="pg_text" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_pg_text">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="pg_text" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">段关键词限制：</span><span id="endpg_text"></span></div>
+<!--短语-->
+<div class="search"><span class="rightalign">短语：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txttopic" name="topic" />
+    <input name="commendtopic" target="topic" type="button" value="推荐"/> 
+    <input type="button" id="btnaddtopic" name="addtopic" target="topic" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_topic">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="topic" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">短语限制：</span><span id="endtopic"></span></div>
+<!--人名-->
+<div class="search"><span class="rightalign">人名：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtNRN" name="NRN" />
+    <input name="commendNRN" target="NRN" type="button" value="推荐"/> 
+    <input type="button" id="btnaddNRN" name="addNRN" target="NRN" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_NRN">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="NRN" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">人名限制：</span><span id="endNRN"></span></div>
+<!--机构-->
+<div class="search"><span class="rightalign">机构：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtorganization" name="organization" />
+    <input name="commendorganization" target="organization" type="button" value="推荐"/> 
+    <input type="button" id="btnaddorganization" name="addorganization" target="organization" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_organization">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="organization" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">机构限制：</span><span id="endorganization"></span></div>
+<!--应用来源-->
+<div class="search"><span class="rightalign">应用来源：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtsource" name="source" />
+    <input name="commendsource" target="source" type="button" value="推荐"/> 
+    <input type="button" id="btnaddsource" name="addsource" target="source" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_source">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="source" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">应用来源限制：</span><span id="endsource"></span></div>
+<!--主机域名-->
+<div class="search"><span class="rightalign">主机域名：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txthostdomain" name="hostdomain" />
+    <input name="commendhostdomain" target="hostdomain" type="button" value="推荐"/> 
+    <input type="button" id="btnaddhostdomain" name="addhostdomain" target="hostdomain" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_hostdomain">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="hostdomain" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">主机域名限制：</span><span id="endhostdomain"></span></div>
+<!--行业-->
+<div class="search"><span class="rightalign">行业：</span>
+    &nbsp;&nbsp;<input id="setbusiness" name="business" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_business">值限制：</label>        
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="business" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">行业限制：</span><span id="selectedbusiness" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="islimit_businesscode">
+</div>
+<!--提及地区-->
+<div class="search"><span class="rightalign">提及地区：</span>
+    &nbsp;&nbsp;<input id="setareamentioned" name="areamentioned" value="设置限制"  type="button">
+     &nbsp;&nbsp;<label for="allowcontrol_areamentioned">值限制：</label>    
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="areamentioned" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">提及地区限制：</span><span id="selectedareamentioned" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="islimit_areamentionedcode">
+</div>
+<!--含有图片-->
+<div class="search" id="islimit_haspicture"> <span class="rightalign">含有图片限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_haspicture" id="islimit_haspicture1" value="1" /> 是
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_haspicture" id="islimit_haspicture0" value="0" /> 否
+	&nbsp;&nbsp;<label for="allowcontrol_haspicture">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="haspicture" value="恢复默认" />
+</div>
+<!--精华帖-->
+<div class="search" id="islimit_recommended"> <span class="rightalign">精华帖限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_recommended" id="islimit_recommended1" value="1" /> 是
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_recommended" id="islimit_recommended0" value="0" /> 否
+	&nbsp;&nbsp;<label for="allowcontrol_recommended">值限制：</label>
+	&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="recommended" value="恢复默认" />
+</div>
+<!--@用户-->
+<div class="search"><span class="rightalign">@用户：</span>
+    &nbsp;&nbsp;<input id="setaccount" name="account" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_account">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="account" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">@用户限制：</span>
+	<span id="selectedaccount" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_accountcode">
+</div>
+<!--上层转发关键词-->
+<div class="search"><span class="rightalign">上层转发关键词：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_text" name="ancestor_text" />
+    <input name="commendancestor_text" target="ancestor_text" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_text" name="addancestor_text" target="ancestor_text" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_text">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_text" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">关键词限制：</span><span id="endancestor_text"></span></div>
+<!--上层转发短语-->
+<div class="search"><span class="rightalign">上层转发短语：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_combinWord" name="ancestor_combinWord" />
+    <input name="commendancestor_combinWord" target="ancestor_combinWord" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_combinWord" name="addancestor_combinWord" target="ancestor_combinWord" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_combinWord">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_combinWord" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发短语限制：</span><span id="endancestor_combinWord"></span></div>
+<!--上层转发人名-->
+<div class="search"><span class="rightalign">上层转发人名：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_NRN" name="ancestor_NRN" />
+    <input name="commendancestor_NRN" target="ancestor_NRN" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_NRN" name="addancestor_NRN" target="ancestor_NRN" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_NRN">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_NRN" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发人名限制：</span><span id="endancestor_NRN"></span></div>
+<!--上层转发机构-->
+<div class="search"><span class="rightalign">上层转发机构：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_organization" name="ancestor_organization" />
+    <input name="commendancestor_organization" target="ancestor_organization" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_organization" name="addancestor_organization" target="ancestor_organization" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_organization">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_organization" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发机构限制：</span><span id="endancestor_organization"></span></div>
+<!--上层转发主机域名-->
+<div class="search"><span class="rightalign">上层转发主机域名：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_host_domain" name="ancestor_host_domain" />
+    <input name="commendancestor_host_domain" target="ancestor_host_domain" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_host_domain" name="addancestor_host_domain" target="ancestor_host_domain" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_host_domain">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_host_domain" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发主机域名限制：</span><span id="endancestor_host_domain"></span></div>
+<!--上层转发行业-->
+<div class="search"><span class="rightalign">上层转发行业：</span>
+    &nbsp;&nbsp;<input id="setancestor_business" name="ancestor_business" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_business">值限制：</label>        
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_business" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发行业限制：</span><span id="selectedancestor_business" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="islimit_ancestor_businesscode">
+</div>
+<!--上层转发提及地区-->
+<div class="search"><span class="rightalign">上层转发提及地区：</span>
+    &nbsp;&nbsp;<input id="setancestor_areamentioned" name="ancestor_areamentioned" value="设置限制"  type="button">
+     &nbsp;&nbsp;<label for="allowcontrol_ancestor_areamentioned">值限制：</label>    
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_areamentioned" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发提及地区限制：</span><span id="selectedancestor_areamentioned" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="islimit_ancestor_areamentionedcode">
+</div>
+<!--上层转发@用户-->
+<div class="search"><span class="rightalign">上层转发@用户：</span>
+    &nbsp;&nbsp;<input id="setancestor_account" name="ancestor_account" value="设置限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_account">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_account" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发@用户限制：</span>
+	<span id="selectedancestor_account" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_ancestor_accountcode">
+</div>
+<!--帖子标题-->
+<div class="search"><span class="rightalign">帖子标题：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtpost_title" name="post_title" />
+    <input name="commendpost_title" target="post_title" type="button" value="推荐"/> 
+    <input type="button" id="btnaddpost_title" name="addpost_title" target="post_title" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_post_title">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="post_title" value="恢复默认" />
+</div>
+<!--栏目标题-->
+<div class="search"><span class="rightalign">栏目标题：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtcolumn" name="column" />
+    <input name="commendcolumn" target="column" type="button" value="推荐"/> 
+    <input type="button" id="btnaddcolumn" name="addcolumn" target="column" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_column">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="column" value="恢复默认" />
+</div>
+<!--父级栏目标题-->
+<div class="search"><span class="rightalign">父级栏目标题：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtcolumn1" name="column1" />
+    <input name="commendcolumn1" target="column1" type="button" value="推荐"/> 
+    <input type="button" id="btnaddcolumn1" name="addcolumn1" target="column1" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_column1">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="column1" value="恢复默认" />
+</div>
+
+<!--微博话题-->
+<div class="search"><span class="rightalign">微博话题：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtweibotopic" name="weibotopic" />
+    <input name="commendweibotopic" target="weibotopic" type="button" value="推荐"/> 
+    <input type="button" id="btnaddweibotopic" name="addweibotopic" target="weibotopic" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_weibotopic">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="weibotopic" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">微博话题限制：</span><span id="endweibotopic"></span></div>
+<!--微博话题关键词-->
+<div class="search"><span class="rightalign">微博话题关键词：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtweibotopickeyword" name="weibotopickeyword" />
+    <input name="commendweibotopickeyword" target="weibotopickeyword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddweibotopickeyword" name="addweibotopickeyword" target="weibotopickeyword" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_weibotopickeyword">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="weibotopickeyword" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">微博话题关键词限制：</span><span id="endweibotopickeyword"></span></div>
+<!--微博话题短语-->
+<div class="search"><span class="rightalign">微博话题短语：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtweibotopiccombinword" name="weibotopiccombinword" />
+    <input name="commendweibotopiccombinword" target="weibotopiccombinword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddweibotopiccombinword" name="addweibotopiccombinword" target="weibotopiccombinword" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_weibotopiccombinword">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="weibotopiccombinword" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">微博话题短语限制：</span><span id="endweibotopiccombinword"></span></div>
+<!--上层转发微博话题-->
+<div class="search"><span class="rightalign">上层转发微博话题：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_wb_topic" name="ancestor_wb_topic" />
+    <input name="commendancestor_wb_topic" target="ancestor_wb_topic" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_wb_topic" name="addancestor_wb_topic" target="ancestor_wb_topic" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_wb_topic">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_wb_topic" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发微博话题限制：</span><span id="endancestor_wb_topic"></span></div>
+<!--上层转发微博话题关键词-->
+<div class="search"><span class="rightalign">上层转发微博话题关键词：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_wb_topic_keyword" name="ancestor_wb_topic_keyword" />
+    <input name="commendancestor_wb_topic_keyword" target="ancestor_wb_topic_keyword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_wb_topic_keyword" name="addancestor_wb_topic_keyword" target="ancestor_wb_topic_keyword" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_wb_topic_keyword">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_wb_topic_keyword" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发微博话题关键词限制：</span><span id="endancestor_wb_topic_keyword"></span></div>
+<!--上层转发微博话题短语-->
+<div class="search"><span class="rightalign">上层转发微博话题短语：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_wb_topic_combinWord" name="ancestor_wb_topic_combinWord" />
+    <input name="commendancestor_wb_topic_combinWord" target="ancestor_wb_topic_combinWord" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_wb_topic_combinWord" name="addancestor_wb_topic_combinWord" target="ancestor_wb_topic_combinWord" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_ancestor_wb_topic_combinWord">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_wb_topic_combinWord" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发微博话题短语限制：</span><span id="endancestor_wb_topic_combinWord"></span></div>
+<!--赞-->
+<div class="search"> <span class="rightalign">赞限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="praises_count_minvalue" id="praises_count_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="praises_count_maxvalue" id="praises_count_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_praises_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="praises_count" value="恢复默认" />
+</div>
+<!--踩-->
+<div class="search"> <span class="rightalign">踩限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="trample_count_minvalue" id="trample_count_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="trample_count_maxvalue" id="trample_count_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_trample_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="trample_count" value="恢复默认" />
+</div>
+<!--满意度-->
+<div class="search"> <span class="rightalign">满意度限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="satisfaction_minvalue" id="satisfaction_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="satisfaction_maxvalue" id="satisfaction_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_satisfaction">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="satisfaction" value="恢复默认" />
+</div>
+<!--好评百分比-->
+<div class="search"> <span class="rightalign">好评百分比限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="godRepPer_minvalue" id="godRepPer_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="godRepPer_maxvalue" id="godRepPer_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_godRepPer">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="godRepPer" value="恢复默认" />
+</div>
+<!--中评百分比-->
+<div class="search"> <span class="rightalign">中评百分比限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="midRepPer_minvalue" id="midRepPer_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="midRepPer_maxvalue" id="midRepPer_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_midRepPer">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="midRepPer" value="恢复默认" />
+</div>
+<!--差评百分比-->
+<div class="search"> <span class="rightalign">差评百分比限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="wosRepPer_minvalue" id="wosRepPer_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="wosRepPer_maxvalue" id="wosRepPer_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_wosRepPer">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="wosRepPer" value="恢复默认" />
+</div>
+<!--好评数-->
+<div class="search"> <span class="rightalign">好评数：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="godRepNum_minvalue" id="godRepNum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="godRepNum_maxvalue" id="godRepNum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_godRepNum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="godRepNum" value="恢复默认" />
+</div>
+<!--中评数-->
+<div class="search"> <span class="rightalign">中评数：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="midRepNum_minvalue" id="midRepNum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="midRepNum_maxvalue" id="midRepNum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_midRepNum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="midRepNum" value="恢复默认" />
+</div>
+<!--差评数-->
+<div class="search"> <span class="rightalign">差评数：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="wosRepNum_minvalue" id="wosRepNum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="wosRepNum_maxvalue" id="wosRepNum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_wosRepNum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="wosRepNum" value="恢复默认" />
+</div>
+<!--追评数-->
+<div class="search"> <span class="rightalign">追评数：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="apdRepNum_minvalue" id="apdRepNum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="apdRepNum_maxvalue" id="apdRepNum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_apdRepNum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="apdRepNum" value="恢复默认" />
+</div>
+<!--有晒单的评价-->
+<div class="search"> <span class="rightalign">有晒单的评价：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="showPicNum_minvalue" id="showPicNum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="showPicNum_maxvalue" id="showPicNum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_showPicNum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="showPicNum" value="恢复默认" />
+</div>
+<!--评价所属星级-->
+<div class="search" id="cmtStarLevel_div"> <span class="rightalign">评价所属星级：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="cmtStarLevel_minvalue" id="cmtStarLevel_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="cmtStarLevel_maxvalue" id="cmtStarLevel_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_cmtStarLevel">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="cmtStarLevel" value="恢复默认" />
+</div>
+
+<!--阅读数-->
+<div class="search"> <span class="rightalign">阅读数限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="read_count_minvalue" id="read_count_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="read_count_maxvalue" id="read_count_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_read_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="read_count" value="恢复默认" />
+</div>
+<!--段落号-->
+<div class="search"> <span class="rightalign">段落号限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="paragraphid_minvalue" id="paragraphid_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="paragraphid_maxvalue" id="paragraphid_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_paragraphid">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="paragraphid" value="恢复默认" />
+</div>
+<!--提问ID-->
+<div class="search"> <span class="rightalign">提问ID限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="question_id_minvalue" id="question_id_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="question_id_maxvalue" id="question_id_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_question_id">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="question_id" value="恢复默认" />
+</div>
+<!--回答ID-->
+<div class="search"> <span class="rightalign">回答ID限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="answer_id_minvalue" id="answer_id_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="answer_id_maxvalue" id="answer_id_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_answer_id">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="answer_id" value="恢复默认" />
+</div>
+<!--子帖ID-->
+<div class="search"> <span class="rightalign">子帖ID限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="child_post_id_minvalue" id="child_post_id_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="child_post_id_maxvalue" id="child_post_id_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_child_post_id">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="child_post_id" value="恢复默认" />
+</div>
+<!--提问父ID-->
+<div class="search"> <span class="rightalign">提问父ID限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="question_father_id_minvalue" id="question_father_id_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="question_father_id_maxvalue" id="question_father_id_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_question_father_id">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="question_father_id" value="恢复默认" />
+</div>
+<!--回答父ID-->
+<div class="search"> <span class="rightalign">回答父ID限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="answer_father_id_minvalue" id="answer_father_id_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="answer_father_id_maxvalue" id="answer_father_id_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_answer_father_id">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="answer_father_id" value="恢复默认" />
+</div>
+<!--楼-->
+<div class="search"> <span class="rightalign">楼限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="floor_minvalue" id="floor_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="floor_maxvalue" id="floor_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_floor">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="floor" value="恢复默认" />
+</div>
+<!--评论数-->
+<div class="search"> <span class="rightalign">评论数限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="commentsnum_minvalue" id="commentsnum_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="commentsnum_maxvalue" id="commentsnum_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_commentsnum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="commentsnum" value="恢复默认" />
+</div>
+<!--直接评论数-->
+<div class="search"> <span class="rightalign">直接评论数限制：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="direct_comments_count_minvalue" id="direct_comments_count_minvalue" value=""  />
+    &nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="direct_comments_count_maxvalue" id="direct_comments_count_maxvalue" value="" />
+    &nbsp;&nbsp;<label for="allowcontrol_direct_comments_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="direct_comments_count" value="恢复默认" />
+</div>
+<!--转发数-->
+<div class="search"> <span class="rightalign">转发数限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="repostsnum_minvalue" id="repostsnum_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="repostsnum_maxvalue" id="repostsnum_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_repostsnum">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="repostsnum" value="恢复默认" />
+</div>
+<!--直接转发数-->
+<div class="search"> <span class="rightalign">直接转发数限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="direct_reposts_count_minvalue" id="direct_reposts_count_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="direct_reposts_count_maxvalue" id="direct_reposts_count_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_direct_reposts_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="direct_reposts_count" value="恢复默认" />
+</div>
+<!--总转发数-->
+<div class="search"> <span class="rightalign">总转发数限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="total_reposts_count_minvalue" id="total_reposts_count_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="total_reposts_count_maxvalue" id="total_reposts_count_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_total_reposts_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="total_reposts_count" value="恢复默认" />
+</div>
+<!--转发所处层级-->
+<div class="search"> <span class="rightalign">转发所处层级限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="repost_trend_cursor_minvalue" id="repost_trend_cursor_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="repost_trend_cursor_maxvalue" id="repost_trend_cursor_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_repost_trend_cursor">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="repost_trend_cursor" value="恢复默认" />
+</div>
+<!--总到达数-->
+<div class="search"> <span class="rightalign">总转发数限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="total_reach_count_minvalue" id="total_reach_count_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="total_reach_count_maxvalue" id="total_reach_count_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_total_reach_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="total_reach_count" value="恢复默认" />
+</div>
+<!--直接到达数-->
+<div class="search"> <span class="rightalign">直接到达数限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="followers_count_minvalue" id="followers_count_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="followers_count_maxvalue" id="followers_count_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_followers_count">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="followers_count" value="恢复默认" />
+</div>
+<!--购买日期-->
+<div class="search"> <span class="rightalign">购买日期限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="purchDate_minvalue" id="purchDate_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="purchDate_maxvalue" id="purchDate_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_purchDate">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="purchDate" value="恢复默认" />
+</div>
+<!--时间限制-->
+<!--相对今天-->
+<!--时间段-->
+<!--日历时间-->
+<div class="search">
+	<div>
+		<span class="rightalign">时间限制：</span>
+		&nbsp;&nbsp;<label for="allowcontrol_createdtime">值限制：</label>
+		&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="createdtime" value="恢复默认" />
+	</div>
+	<span id="topic_authconfig_facet_range_html" checkedtimetype="createdtime" ></span>
+</div>
+<!--创建时间(年)-->
+<div class="search"> <span class="rightalign">创建时间(年)限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="created_year_minvalue" id="created_year_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="created_year_maxvalue" id="created_year_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_created_year">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="created_year" value="恢复默认" />
+</div>
+<!--创建时间(月)-->
+<div class="search"> <span class="rightalign">创建时间(月)限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="created_month_minvalue" id="created_month_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="created_month_maxvalue" id="created_month_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_created_month">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="created_month" value="恢复默认" />
+</div>
+<!--创建时间(日)-->
+<div class="search"> <span class="rightalign">创建时间(日)限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="created_day_minvalue" id="created_day_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="created_day_maxvalue" id="created_day_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_created_day">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="created_day" value="恢复默认" />
+</div>
+<!--创建时间(时)-->
+<div class="search"> <span class="rightalign">创建时间(时)限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="created_hour_minvalue" id="created_hour_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="created_hour_maxvalue" id="created_hour_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_created_hour">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="created_hour" value="恢复默认" />
+</div>
+<!--创建时间(周)-->
+<div class="search"> <span class="rightalign">创建时间(周)限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="created_weekday_minvalue" id="created_weekday_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="created_weekday_maxvalue" id="created_weekday_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<label for="allowcontrol_created_weekday">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="created_weekday" value="恢复默认" />
+</div>
+<!--情感关键词-->
+<div class="search"><span class="rightalign">情感关键词限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emotion">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emotion" value="恢复默认" />
+<span id="span_limit_emotion">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emotion" id="islimit_emotion1" value="1" class="outborder"/><label for="islimit_emotion1">反对</label>
+    <input type="checkbox" name="islimit_emotion" id="islimit_emotion2" value="2" class="outborder"/><label for="islimit_emotion2">负面</label>
+    <input type="checkbox" name="islimit_emotion" id="islimit_emotion3" value="3" class="outborder"/><label for="islimit_emotion3">中性</label>
+    <input type="checkbox" name="islimit_emotion" id="islimit_emotion4" value="4" class="outborder"/><label for="islimit_emotion4">正面</label>
+    <input type="checkbox" name="islimit_emotion" id="islimit_emotion5" value="5" class="outborder"/><label for="islimit_emotion5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemotion" name="emotion" />
+    <input name="commendemotion" target="emotion" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemotion" name="addemotion" target="emotion" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感关键词限制：</span><span id="endemotion"></span></div>
+<!--情感短语-->
+<div class="search"><span class="rightalign">情感短语限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoCombin">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoCombin" value="恢复默认" />
+<span id="span_limit_emoCombin">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoCombin" id="islimit_emoCombin1" value="1" class="outborder"/><label for="islimit_emoCombin1">反对</label>
+    <input type="checkbox" name="islimit_emoCombin" id="islimit_emoCombin2" value="2" class="outborder"/><label for="islimit_emoCombin2">负面</label>
+    <input type="checkbox" name="islimit_emoCombin" id="islimit_emoCombin3" value="3" class="outborder"/><label for="islimit_emoCombin3">中性</label>
+    <input type="checkbox" name="islimit_emoCombin" id="islimit_emoCombin4" value="4" class="outborder"/><label for="islimit_emoCombin4">正面</label>
+    <input type="checkbox" name="islimit_emoCombin" id="islimit_emoCombin5" value="5" class="outborder"/><label for="islimit_emoCombin5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoCombin" name="emoCombin" />
+    <input name="commendemoCombin" target="emoCombin" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoCombin" name="addemoCombin" target="emoCombin" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感短语限制：</span><span id="endemoCombin"></span></div>
+<!--情感人名-->
+<div class="search"><span class="rightalign">情感人名限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoNRN">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoNRN" value="恢复默认" />
+<span id="span_limit_emoNRN">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoNRN" id="islimit_emoNRN1" value="1" class="outborder"/><label for="islimit_emoNRN1">反对</label>
+    <input type="checkbox" name="islimit_emoNRN" id="islimit_emoNRN2" value="2" class="outborder"/><label for="islimit_emoNRN2">负面</label>
+    <input type="checkbox" name="islimit_emoNRN" id="islimit_emoNRN3" value="3" class="outborder"/><label for="islimit_emoNRN3">中性</label>
+    <input type="checkbox" name="islimit_emoNRN" id="islimit_emoNRN4" value="4" class="outborder"/><label for="islimit_emoNRN4">正面</label>
+    <input type="checkbox" name="islimit_emoNRN" id="islimit_emoNRN5" value="5" class="outborder"/><label for="islimit_emoNRN5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoNRN" name="emoNRN" />
+    <input name="commendemoNRN" target="emoNRN" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoNRN" name="addemoNRN" target="emoNRN" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感人名限制：</span><span id="endemoNRN"></span></div>
+<!--情感机构-->
+<div class="search"><span class="rightalign">情感机构限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoOrganization">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoOrganization" value="恢复默认" />
+<span id="span_limit_emoOrganization">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoOrganization" id="islimit_emoOrganization1" value="1" class="outborder"/><label for="islimit_emoOrganization1">反对</label>
+    <input type="checkbox" name="islimit_emoOrganization" id="islimit_emoOrganization2" value="2" class="outborder"/><label for="islimit_emoOrganization2">负面</label>
+    <input type="checkbox" name="islimit_emoOrganization" id="islimit_emoOrganization3" value="3" class="outborder"/><label for="islimit_emoOrganization3">中性</label>
+    <input type="checkbox" name="islimit_emoOrganization" id="islimit_emoOrganization4" value="4" class="outborder"/><label for="islimit_emoOrganization4">正面</label>
+    <input type="checkbox" name="islimit_emoOrganization" id="islimit_emoOrganization5" value="5" class="outborder"/><label for="islimit_emoOrganization5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoOrganization" name="emoOrganization" />
+    <input name="commendemoOrganization" target="emoOrganization" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoOrganization" name="addemoOrganization" target="emoOrganization" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感机构限制：</span><span id="endemoOrganization"></span></div>
+<!--情感微博话题-->
+<div class="search"><span class="rightalign">情感微博话题限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoTopic">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoTopic" value="恢复默认" />
+<span id="span_limit_emoTopic">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoTopic" id="islimit_emoTopic1" value="1" class="outborder"/><label for="islimit_emoTopic1">反对</label>
+    <input type="checkbox" name="islimit_emoTopic" id="islimit_emoTopic2" value="2" class="outborder"/><label for="islimit_emoTopic2">负面</label>
+    <input type="checkbox" name="islimit_emoTopic" id="islimit_emoTopic3" value="3" class="outborder"/><label for="islimit_emoTopic3">中性</label>
+    <input type="checkbox" name="islimit_emoTopic" id="islimit_emoTopic4" value="4" class="outborder"/><label for="islimit_emoTopic4">正面</label>
+    <input type="checkbox" name="islimit_emoTopic" id="islimit_emoTopic5" value="5" class="outborder"/><label for="islimit_emoTopic5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoTopic" name="emoTopic" />
+    <input name="commendemoTopic" target="emoTopic" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoTopic" name="addemoTopic" target="emoTopic" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感微博话题限制：</span><span id="endemoTopic"></span></div>
+<!--情感微博话题关键词-->
+<div class="search"><span class="rightalign">情感微博话题关键词限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoTopicKeyword">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoTopicKeyword" value="恢复默认" />
+<span id="span_limit_emoTopicKeyword">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoTopicKeyword" id="islimit_emoTopicKeyword1" value="1" class="outborder"/><label for="islimit_emoTopicKeyword1">反对</label>
+    <input type="checkbox" name="islimit_emoTopicKeyword" id="islimit_emoTopicKeyword2" value="2" class="outborder"/><label for="islimit_emoTopicKeyword2">负面</label>
+    <input type="checkbox" name="islimit_emoTopicKeyword" id="islimit_emoTopicKeyword3" value="3" class="outborder"/><label for="islimit_emoTopicKeyword3">中性</label>
+    <input type="checkbox" name="islimit_emoTopicKeyword" id="islimit_emoTopicKeyword4" value="4" class="outborder"/><label for="islimit_emoTopicKeyword4">正面</label>
+    <input type="checkbox" name="islimit_emoTopicKeyword" id="islimit_emoTopicKeyword5" value="5" class="outborder"/><label for="islimit_emoTopicKeyword5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoTopicKeyword" name="emoTopicKeyword" />
+    <input name="commendemoTopicKeyword" target="emoTopicKeyword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoTopicKeyword" name="addemoTopicKeyword" target="emoTopicKeyword" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感微博话题关键词限制：</span><span id="endemoTopicKeyword"></span></div>
+<!--情感微博话题短语-->
+<div class="search"><span class="rightalign">情感微博话题短语限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_emoTopicCombinWord">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoTopicCombinWord" value="恢复默认" />
+<span id="span_limit_emoTopicCombinWord">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_emoTopicCombinWord" id="islimit_emoTopicCombinWord1" value="1" class="outborder"/><label for="islimit_emoTopicCombinWord1">反对</label>
+    <input type="checkbox" name="islimit_emoTopicCombinWord" id="islimit_emoTopicCombinWord2" value="2" class="outborder"/><label for="islimit_emoTopicCombinWord2">负面</label>
+    <input type="checkbox" name="islimit_emoTopicCombinWord" id="islimit_emoTopicCombinWord3" value="3" class="outborder"/><label for="islimit_emoTopicCombinWord3">中性</label>
+    <input type="checkbox" name="islimit_emoTopicCombinWord" id="islimit_emoTopicCombinWord4" value="4" class="outborder"/><label for="islimit_emoTopicCombinWord4">正面</label>
+    <input type="checkbox" name="islimit_emoTopicCombinWord" id="islimit_emoTopicCombinWord5" value="5" class="outborder"/><label for="islimit_emoTopicCombinWord5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtemoTopicCombinWord" name="emoTopicCombinWord" />
+    <input name="commendemoTopicCombinWord" target="emoTopicCombinWord" type="button" value="推荐"/> 
+    <input type="button" id="btnaddemoTopicCombinWord" name="addemoTopicCombinWord" target="emoTopicCombinWord" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">情感微博话题短语限制：</span><span id="endemoTopicCombinWord"></span></div>
+<!--@用户情感-->
+<div class="search"><span class="rightalign">@用户情感：</span>
+	 &nbsp;&nbsp;<input id="setemoAccount" name="emoAccount" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_emoAccount">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoAccount" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">@用户情感限制：</span><span id="selectedemoAccount" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_emoAccountcode">
+</div>
+<!--行业情感-->
+<div class="search"><span class="rightalign">行业情感：</span>
+	 &nbsp;&nbsp;<input id="setemoBusiness" name="emoBusiness" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_emoBusiness">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoBusiness" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">行业情感限制：</span><span id="selectedemoBusiness" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_emoBusinesscode">
+</div>
+<!--地区情感-->
+<div class="search"><span class="rightalign">地区情感：</span>
+	 &nbsp;&nbsp;<input id="setemoAreamentioned" name="emoAreamentioned" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_emoAreamentioned">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="emoAreamentioned" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">地区情感限制：</span><span id="selectedemoAreamentioned" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_emoAreamentionedcode">
+</div>
+<!--上层转发情感关键词-->
+<div class="search"><span class="rightalign">上层转发情感关键词限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emotion">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emotion" value="恢复默认" />
+<span id="span_limit_ancestor_emotion">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emotion" id="islimit_ancestor_emotion1" value="1" class="outborder"/><label for="islimit_ancestor_emotion1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emotion" id="islimit_ancestor_emotion2" value="2" class="outborder"/><label for="islimit_ancestor_emotion2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emotion" id="islimit_ancestor_emotion3" value="3" class="outborder"/><label for="islimit_ancestor_emotion3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emotion" id="islimit_ancestor_emotion4" value="4" class="outborder"/><label for="islimit_ancestor_emotion4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emotion" id="islimit_ancestor_emotion5" value="5" class="outborder"/><label for="islimit_ancestor_emotion5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emotion" name="ancestor_emotion" />
+    <input name="commendancestor_emotion" target="ancestor_emotion" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emotion" name="addancestor_emotion" target="ancestor_emotion" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感关键词限制：</span><span id="endancestor_emotion"></span></div>
+<!--上层转发情感短语-->
+<div class="search"><span class="rightalign">上层转发情感短语限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoCombin">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoCombin" value="恢复默认" />
+<span id="span_limit_ancestor_emoCombin">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoCombin" id="islimit_ancestor_emoCombin1" value="1" class="outborder"/><label for="islimit_ancestor_emoCombin1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoCombin" id="islimit_ancestor_emoCombin2" value="2" class="outborder"/><label for="islimit_ancestor_emoCombin2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoCombin" id="islimit_ancestor_emoCombin3" value="3" class="outborder"/><label for="islimit_ancestor_emoCombin3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoCombin" id="islimit_ancestor_emoCombin4" value="4" class="outborder"/><label for="islimit_ancestor_emoCombin4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoCombin" id="islimit_ancestor_emoCombin5" value="5" class="outborder"/><label for="islimit_ancestor_emoCombin5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoCombin" name="ancestor_emoCombin" />
+    <input name="commendancestor_emoCombin" target="ancestor_emoCombin" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoCombin" name="addancestor_emoCombin" target="ancestor_emoCombin" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感短语限制：</span><span id="endancestor_emoCombin"></span></div>
+<!--上层转发情感人名-->
+<div class="search"><span class="rightalign">上层转发情感人名限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoNRN">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoNRN" value="恢复默认" />
+<span id="span_limit_ancestor_emoNRN">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoNRN" id="islimit_ancestor_emoNRN1" value="1" class="outborder"/><label for="islimit_ancestor_emoNRN1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoNRN" id="islimit_ancestor_emoNRN2" value="2" class="outborder"/><label for="islimit_ancestor_emoNRN2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoNRN" id="islimit_ancestor_emoNRN3" value="3" class="outborder"/><label for="islimit_ancestor_emoNRN3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoNRN" id="islimit_ancestor_emoNRN4" value="4" class="outborder"/><label for="islimit_ancestor_emoNRN4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoNRN" id="islimit_ancestor_emoNRN5" value="5" class="outborder"/><label for="islimit_ancestor_emoNRN5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoNRN" name="ancestor_emoNRN" />
+    <input name="commendancestor_emoNRN" target="ancestor_emoNRN" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoNRN" name="addancestor_emoNRN" target="ancestor_emoNRN" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感人名限制：</span><span id="endancestor_emoNRN"></span></div>
+<!--上层转发情感机构-->
+<div class="search"><span class="rightalign">上层转发情感机构限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoOrganization">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoOrganization" value="恢复默认" />
+<span id="span_limit_ancestor_emoOrganization">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoOrganization" id="islimit_ancestor_emoOrganization1" value="1" class="outborder"/><label for="islimit_ancestor_emoOrganization1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoOrganization" id="islimit_ancestor_emoOrganization2" value="2" class="outborder"/><label for="islimit_ancestor_emoOrganization2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoOrganization" id="islimit_ancestor_emoOrganization3" value="3" class="outborder"/><label for="islimit_ancestor_emoOrganization3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoOrganization" id="islimit_ancestor_emoOrganization4" value="4" class="outborder"/><label for="islimit_ancestor_emoOrganization4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoOrganization" id="islimit_ancestor_emoOrganization5" value="5" class="outborder"/><label for="islimit_ancestor_emoOrganization5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoOrganization" name="ancestor_emoOrganization" />
+    <input name="commendancestor_emoOrganization" target="ancestor_emoOrganization" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoOrganization" name="addancestor_emoOrganization" target="ancestor_emoOrganization" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感机构限制：</span><span id="endancestor_emoOrganization"></span></div>
+<!--上层转发情感微博话题-->
+<div class="search"><span class="rightalign">上层转发情感微博话题限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoTopic">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoTopic" value="恢复默认" />
+<span id="span_limit_ancestor_emoTopic">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoTopic" id="islimit_ancestor_emoTopic1" value="1" class="outborder"/><label for="islimit_ancestor_emoTopic1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopic" id="islimit_ancestor_emoTopic2" value="2" class="outborder"/><label for="islimit_ancestor_emoTopic2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopic" id="islimit_ancestor_emoTopic3" value="3" class="outborder"/><label for="islimit_ancestor_emoTopic3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopic" id="islimit_ancestor_emoTopic4" value="4" class="outborder"/><label for="islimit_ancestor_emoTopic4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopic" id="islimit_ancestor_emoTopic5" value="5" class="outborder"/><label for="islimit_ancestor_emoTopic5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoTopic" name="ancestor_emoTopic" />
+    <input name="commendancestor_emoTopic" target="ancestor_emoTopic" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoTopic" name="addancestor_emoTopic" target="ancestor_emoTopic" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感微博话题限制：</span><span id="endancestor_emoTopic"></span></div>
+<!--上层转发情感微博话题关键词-->
+<div class="search"><span class="rightalign">上层转发情感微博话题关键词限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoTopicKeyword">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoTopicKeyword" value="恢复默认" />
+<span id="span_limit_ancestor_emoTopicKeyword">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoTopicKeyword" id="islimit_ancestor_emoTopicKeyword1" value="1" class="outborder"/><label for="islimit_ancestor_emoTopicKeyword1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicKeyword" id="islimit_ancestor_emoTopicKeyword2" value="2" class="outborder"/><label for="islimit_ancestor_emoTopicKeyword2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicKeyword" id="islimit_ancestor_emoTopicKeyword3" value="3" class="outborder"/><label for="islimit_ancestor_emoTopicKeyword3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicKeyword" id="islimit_ancestor_emoTopicKeyword4" value="4" class="outborder"/><label for="islimit_ancestor_emoTopicKeyword4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicKeyword" id="islimit_ancestor_emoTopicKeyword5" value="5" class="outborder"/><label for="islimit_ancestor_emoTopicKeyword5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoTopicKeyword" name="ancestor_emoTopicKeyword" />
+    <input name="commendancestor_emoTopicKeyword" target="ancestor_emoTopicKeyword" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoTopicKeyword" name="addancestor_emoTopicKeyword" target="ancestor_emoTopicKeyword" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感微博话题关键词限制：</span><span id="endancestor_emoTopicKeyword"></span></div>
+<!--上层转发情感微博话题短语-->
+<div class="search"><span class="rightalign">上层转发情感微博话题短语限制：</span>
+&nbsp;&nbsp;<label for="allowcontrol_ancestor_emoTopicCombinWord">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoTopicCombinWord" value="恢复默认" />
+<span id="span_limit_ancestor_emoTopicCombinWord">
+    &nbsp;&nbsp;<input type="checkbox" name="islimit_ancestor_emoTopicCombinWord" id="islimit_ancestor_emoTopicCombinWord1" value="1" class="outborder"/><label for="islimit_ancestor_emoTopicCombinWord1">反对</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicCombinWord" id="islimit_ancestor_emoTopicCombinWord2" value="2" class="outborder"/><label for="islimit_ancestor_emoTopicCombinWord2">负面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicCombinWord" id="islimit_ancestor_emoTopicCombinWord3" value="3" class="outborder"/><label for="islimit_ancestor_emoTopicCombinWord3">中性</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicCombinWord" id="islimit_ancestor_emoTopicCombinWord4" value="4" class="outborder"/><label for="islimit_ancestor_emoTopicCombinWord4">正面</label>
+    <input type="checkbox" name="islimit_ancestor_emoTopicCombinWord" id="islimit_ancestor_emoTopicCombinWord5" value="5" class="outborder"/><label for="islimit_ancestor_emoTopicCombinWord5">赞赏</label>
+</span>
+<span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtancestor_emoTopicCombinWord" name="ancestor_emoTopicCombinWord" />
+    <input name="commendancestor_emoTopicCombinWord" target="ancestor_emoTopicCombinWord" type="button" value="推荐"/> 
+    <input type="button" id="btnaddancestor_emoTopicCombinWord" name="addancestor_emoTopicCombinWord" target="ancestor_emoTopicCombinWord" value="添加限制" />
+</span>
+</div>
+<div class="search"><span class="rightalign">上层转发情感微博话题短语限制：</span><span id="endancestor_emoTopicCombinWord"></span></div>
+<!--上层转发@用户情感-->
+<div class="search"><span class="rightalign">上层转发@用户情感：</span>
+	 &nbsp;&nbsp;<input id="setancestor_emoAccount" name="ancestor_emoAccount" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_ancestor_emoAccount">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoAccount" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发@用户情感限制：</span><span id="selectedancestor_emoAccount" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_ancestor_emoAccountcode">
+</div>
+<!--上层转发行业情感-->
+<div class="search"><span class="rightalign">上层转发行业情感：</span>
+	 &nbsp;&nbsp;<input id="setancestor_emoBusiness" name="ancestor_emoBusiness" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_ancestor_emoBusiness">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoBusiness" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发行业情感限制：</span><span id="selectedancestor_emoBusiness" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_ancestor_emoBusinesscode">
+</div>
+<!--上层转发地区情感-->
+<div class="search"><span class="rightalign">上层转发地区情感：</span>
+	 &nbsp;&nbsp;<input id="setancestor_emoAreamentioned" name="ancestor_emoAreamentioned" value="设置限制"  type="button">
+	 &nbsp;&nbsp;<label for="allowcontrol_ancestor_emoAreamentioned">值限制：</label>
+	 &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="ancestor_emoAreamentioned" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">上层转发地区情感限制：</span><span id="selectedancestor_emoAreamentioned" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_ancestor_emoAreamentionedcode">
+</div>
+<!--微博类型-->
+<div class="search"><span class="rightalign">微博类型限制：</span><span id="span_limit_weibotype">
+   &nbsp;&nbsp;<input type="checkbox" name="islimit_weibotype" id="islimit_weibotype100" value=100 class="outborder"/><label for="islimit_weibotype100">原创</label>
+            <input type="checkbox" name="islimit_weibotype" id="islimit_weibotype101" value=101 class="outborder"/><label for="islimit_weibotype101">转发</label>
+            <input type="checkbox" name="islimit_weibotype" id="islimit_weibotype102" value=102 class="outborder"/><label for="islimit_weibotype102">评论</label>
+            <input type="checkbox" name="islimit_weibotype" id="islimit_weibotype104" value=104 class="outborder"/><label for="islimit_weibotype104">提问</label>
+            <input type="checkbox" name="islimit_weibotype" id="islimit_weibotype105" value=105 class="outborder"/><label for="islimit_weibotype105">回答</label>
+</span>
+&nbsp;&nbsp;<label for="allowcontrol_weibotype">值限制：</label>
+&nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="weibotype" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">输出过滤：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtfacetfilterlimit" name="facetfilterlimit" />
+    <input name="commendsearchword" target="facetfilterlimit" type="button" value="推荐"/> 
+    <input type="button" id="btnaddfacetfilterlimit" name="addsearchword" target="facetfilterlimit" value="添加限制" />
+    &nbsp;&nbsp;<label for="allowcontrol_facetfilterlimit">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="facetfilterlimit" value="恢复默认" />
+</div>
+<div class="search"><span class="rightalign">输出过滤限制：</span>&nbsp;&nbsp;<span id="endfacetfilterlimit"></span></div>
+<!-- facet limit 统计字段 限制-->
+<div class="search"><span class="rightalign">统计字段：</span>
+    &nbsp;&nbsp;<input id="setfacetlimit" name="facetlimit" value="设置统计字段限制"  type="button">
+    &nbsp;&nbsp;<label for="allowcontrol_facetlimit">值限制：</label>        
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="facetlimit" value="恢复默认" />
+    &nbsp;&nbsp;<input type="button" name="clearfacetlimit" id="clearfacetlimit" value="清空" />
+</div>
+<div class="search"><span class="rightalign">统计字段限制：</span><br/><span id="selectedfacetlimit" style="*vertical-align: middle;"></span>
+</div>
+
+<div class="search"> <span class="rightalign">数据量限制：</span>
+           最小值：<input type="text" name="outputcount_minvalue" id="outputcount_minvalue" value="" class="shortinput" />
+          最大值：<input type="text" name="outputcount_maxvalue" id="outputcount_maxvalue" value="" class="shortinput"/>
+          &nbsp;&nbsp;<label for="allowcontrol_outputcount">值限制：</label>
+    &nbsp;&nbsp;<input type="button" name="btndefaultlimit" target="outputcount" value="恢复默认" />
+</div>
+<div class="search" id="div_download_allow"><span class="rightalign">下载限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="download_allow" value="1" id="download_allow1" /><label for="download_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="download_allow" value="0" id="download_allow0" checked /><label for="download_allow0">禁止</label>
+</div>
+<div class="search" style="display:none" name="download_div"> <span class="rightalign">下载数据量：</span>
+    &nbsp;&nbsp;最大值：<input type="text" name="download_datalimit" id="download_datalimit" value="" class="shortestinput"/>
+    &nbsp;&nbsp;<span id="download_datalimit_tip" style="color:gray"></span>
+</div>
+<div class="search" style="display:none" name="download_div"><span class="rightalign">选择下载字段：</span>
+    <span id="selecteddownloadfieldlimit" style="*vertical-align: middle;"></span>
+</div>
+<div class="search" id="div_updatesnapshot_allow"><span class="rightalign">定时更新快照限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="updatesnapshot_allow" value="1" id="updatesnapshot_allow1" /><label for="updatesnapshot_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="updatesnapshot_allow" value="0" id="updatesnapshot_allow0" /><label for="updatesnapshot_allow0">禁止</label>
+</div>
+<div class="search" id="div_eventalert_allow"><span class="rightalign">事件预警限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="eventalert_allow" value="1" id="eventalert_allow1" /><label for="eventalert_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="eventalert_allow" value="0" id="eventalert_allow0" /><label for="eventalert_allow0">禁止</label>
+</div>

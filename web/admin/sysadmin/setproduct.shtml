@@ -1,0 +1,386 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/bindcontrol.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/bindcontrol.js"></script>
+ <script type="text/javascript">
+  checkuserusage();
+var pid=0;
+var oldres = new Array();
+$(function(){
+		changeTabTitle();
+	
+	bindgroup(1,3);
+	var spArr = window.location.toString().split("pid=");
+	pid = spArr[1];
+	if(typeof(pid)=='undefined')
+	{
+		pid=0;
+	}
+		bindproduct(pid);
+		bindproductinfo(pid);
+		bindresource();
+
+		   $("#frmuser").validate(
+					   
+{
+	submitHandler:function(form)
+               {
+				   //sentresource();
+				   sentresource();
+               },
+	rules:{
+   //addresource:"required",
+},
+    messages:{
+	//label:"",
+}
+});
+});	
+
+
+function bindproduct(id)
+{ 
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=getresourcebypid&id="+id;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+
+
+function searchresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null && data.flag != 0)
+	{
+		$.each(data.children, function(i){
+		//$('#addresource').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#addresource");
+		//存储用户已拥有资源
+		oldres.push(data.children[i].resourceid);									   
+	});
+	}
+	if(pid!=0)
+	{
+		$("#pid").attr("value",pid);
+	}
+	//bindproductresource($('#pid').val());
+	
+}
+
+
+function bindproductinfo(id)
+{ 
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=getproductbyid&id="+id;
+	ajaxCommon(searchnameUrl, getproductinfo, "json");
+}
+
+function getproductinfo(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#lbname').text(data.children[i].label);
+									   
+	});
+	}	
+}
+
+
+function bindroleresource(rid)
+{ 
+	var searchnameUrl = config.modelUrl+"resourcemapping_model.php?type=getmappingbyroleid&roleid="+rid;
+	ajaxCommon(searchnameUrl, searchroleresource, "json");
+}
+
+
+function searchroleresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#addresource').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#addresource");
+		//存储产品原有资源信息
+		oldres.push(data.children[i].resourceid);
+									   
+	});
+	}
+	
+}
+
+
+
+function bindresource()
+{ 
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=gettenantresource";
+	ajaxCommon(searchnameUrl, getalltenantres, "json");
+}
+
+
+function getalltenantres(data)
+{
+	$("#resourceid").empty();
+	if(data!=null)
+	{
+		//$("#resourceid").empty();
+		$.each(data.children, function(i){
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#resourceid");
+		});
+	}
+	else
+	{
+		$("#resourceid").empty();
+		$("<option value=-1>暂无记录</option>").appendTo("#resourceid");
+	}
+	
+}
+//添加资源
+function sentresource()
+{
+	var rid="";
+	
+		
+			 $("#addresource option").each(function() {
+				if(oldres.length>0)
+				{
+				checkresource($(this).val());
+				}
+				if(rid=="")
+				{
+					rid=$(this).val()+",";
+				}
+				else
+				{					
+						rid+=$(this).val()+",";
+				}
+        });        
+if(rid!="")
+{
+	rid = rid.substring(0,rid.length-1);
+}
+if(rid!=-1)
+{
+
+if(rid=="")
+{
+	if(confirm("是否将此产品的可用资源设置为空,此操将删除相关资源的规则信息信息且无法恢复!"))
+	{
+    $.post(config.modelUrl+"productcontroller.php", {resourceid:rid,type:"setresource",productid:pid,delresource:oldres},     
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);   
+		if(!stdata.result)
+		{
+			alert(stdata.msg);
+			window.history.back();
+		}
+		else
+		{ 
+			if(stdata.flag==1)
+			{
+				alert("设置成功!");
+				window.location.href="products.shtml";
+			
+			}
+			else
+			{
+				alert("设置失败!");
+			}
+		}
+    });
+	}//end 将角色权限设置为空
+}//end rid==""
+else
+{
+	 $.post(config.modelUrl+"productcontroller.php", {resourceid:rid,type:"setresource",productid:pid,delresource:oldres},     
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);   
+		 if(!stdata.result)
+		{
+			alert(stdata.msg);
+			window.history.back();
+		}
+		else
+		{ 
+			if(stdata.flag==1)
+			{
+
+				alert("设置成功!");
+				window.location.href="products.shtml";
+			
+			}
+			else
+			{
+				alert("设置失败!");
+			}
+		}
+    });
+}//end rid=-1 
+		}
+
+}
+function setresource(fromid,toid)
+{
+
+			$("#"+fromid+" option:selected").each(function() {  
+                //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+                $(this).appendTo($("#"+toid+":not(:has(option[value="+$(this).val()+"]))"));  
+                //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+                if($("#"+fromid+" option[value="+$(this).val()+"]").length > 0) {  
+                    $("#"+fromid).get(0)  
+                    .removeChild($("#"+fromid+" option[value="+$(this).val()+"]").get(0));  
+                }  
+            });  
+
+}
+
+
+function getresource()
+{
+	bindresource($("#groupid").val());	
+}
+
+
+//检查删除的资源
+function checkresource(id)
+{
+	if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==id)
+			{
+				//oldres.remove(i);
+				oldres.splice(i,1); 
+			}
+		}
+	}
+}
+
+
+//绑定某组资源
+function bindsrcres(gid)
+{
+	if(gid!=0)
+	{
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getresourcebygroup&gid="+gid+"&rid=3";
+	ajaxCommon(searchnameUrl, getresourcebygroup, "json");
+	}
+	else
+	{
+		bindresource();
+	}
+}
+function getresourcebygroup(data)
+{$("#resourceid").empty();
+	if(data!=null)
+	{
+		if(data.children!=null&&data.children.length>0)
+		{
+			
+			//$('#resourceid').append( new Option(data.children[i].label,data.children[i].resourceid));
+			for(var i=0;i<data.children.length;i++)
+			{
+			$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#resourceid");
+			}	
+		}
+		else
+		{
+			$("<option value=-1>暂无记录</option>").appendTo("#resourceid");
+		}
+	}
+	else
+	{
+		$("<option value=-1>暂无记录</option>").appendTo("#resourceid");
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">产品资源分配</span>
+    <a href="products.shtml" style="float: right">产品列表</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">产品名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">
+             &nbsp;&nbsp;<span id='lbname'></span></div>
+	       </label>
+	       </td>
+       </tr>
+        <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">所属资源组：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;<label>
+              <select name="groupid" id="groupid" onchange="bindsrcres(this.value)">
+              </select>
+            </label>
+	       </div>
+	     </label></td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">资源分配：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="64%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td width="42%" height="210" align="center"><select name="resourceid" style="height:200px" size="10" class="mselect" multiple="multiple" id="resourceid">
+	           </select></td>
+	         <td align="center" width="11%"><input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('resourceid', 'addresource')" /><input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('addresource','resourceid')" /></td>
+	         <td align="center" width="47%"><select name="addresource" size="10" style="height:200px" class="mselect" multiple="multiple" id="addresource">
+	           </select></td>
+	         </tr>
+	       </table></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	    </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

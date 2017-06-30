@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript" src="http://192.168.0.30:83/js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript">
+//通过instanceid和elementid获取数据
+//hasformjson 0:通过instanceid和elementid获取数据
+//微博模型需要returnoriginal参数为1返回转发微博对应当原创, 其他模型需要置为 0
+//offset 从第几条开始
+//rows返回多少条
+//标准
+var url = "http://192.168.0.30:83/model/requestdata.php?instanceid=370&elementid=373&hasformjson=0&offset=0&rows=20&returnoriginal=0&token=f6bd11gvmcKUU79XCB8pJ1DiivpHUKtFN+qboZqxsVwHOQ&callback=?";
+//联动
+var url = "http://192.168.0.102/model/requestdata.php?instanceid=794&elementid=816&hasformjson=0&islinkage=1&offset=0&rows=20&returnoriginal=0&token=5a35Dg2IX+eqh8cfRSgZhc1A0zim/knB7HSAFCX84u+z0w&callback=?";
+//叠加
+var url = "http://192.168.0.102/model/requestdata.php?instanceid=1465&elementid=1616&hasformjson=0&isoverlay=1&offset=0&rows=20&returnoriginal=0&token=5a35Dg2IX+eqh8cfRSgZhc1A0zim/knB7HSAFCX84u+z0w&callback=?";
+$.getJSON(url,function(data){
+$("#datares").append("data:"+JSON.stringify(data));
+}).error(function(a){
+$("#datares").append("data:"+JSON.stringify(a));
+	});		
+</script>
+</head>
+<body>
+<div>
+返回结果:
+<div id="datares"></div>
+</div>
+</body>
+</html>

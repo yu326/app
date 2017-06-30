@@ -1,0 +1,4 @@
+01/21/17 16:22:51,489 [14380] INFO updatemysql - D:\app\job\update_mysql.php34 the update weibo_update is beginning
+01/21/17 16:22:51,491 [14380] INFO updatemysql - executeD:\app\job\update_mysql.php50 the sql is:'update weibo_update set status = 0 where status = 1'
+01/21/17 16:22:51,605 [14380] INFO updatemysql - executeD:\app\job\update_mysql.php52the qrsel is:true
+01/21/17 16:22:51,606 [14380] INFO updatemysql - D:\app\job\update_mysql.php40正常结束了哦~

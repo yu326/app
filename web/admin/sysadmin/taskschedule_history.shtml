@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>系统管理--过期定时任务</title>
+<link rel="stylesheet" href="css/jquery_datatables.css" type="text/css" />
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript">
+	function onDetailClick(tar, id, task, datastatus,params, crontime, local, remote, conflictdelay){
+		var v = {};
+		//v.crontime = crontime;
+		v.taskparams = params.taskparams;
+		if("scene" in params){
+			v.scene = params.scene;
+		}
+		v.id = id;
+		v.task = task;
+		v.datastatus = datastatus;
+		v.local = local;
+		v.remote = remote;
+		v.conflictdelay = conflictdelay;
+		v.relativestart = params.relativestart;
+		v.relativeend = params.relativeend;
+		if("nodup" in params){
+			v.nodup = params.nodup;
+		}
+		var trid = 'tr_taskdetail'+v.id;
+	    if($('#'+trid).length > 0){
+	        $('#'+trid).remove();
+	    }
+	    else{
+	        var infohtm = getTaskDetail(v);
+	        var appendhtm = '<tr id="'+trid+'"><td align="left" colspan="12"><div style="text-align:left;padding:5px 10px;overflow-y:scroll;max-height:300px;max-width:790px;word-break:break-all;">'+infohtm+'</div></td></tr>';
+	        var targettr = $(tar).parent().parent();
+	        targettr.after(appendhtm);
+	    }
+	}
+	//getstart 是否显示第一页
+	function searchData(getstart){
+		var oSettings = tbl.fnSettings();
+	    oSettings.sAjaxSource = config.phpPath+"schedulemanager.php?type=gethistory&" + $("#formsearch").serialize();
+	    if(getstart){
+        	oSettings._iDisplayStart = 0;
+	    }
+	    tbl.fnClearTable(0);
+	    tbl.fnDraw();
+	}
+	function initTaskSelect(){
+		if(config.allTask.length == 0){
+			getAllTask(function(data){
+				if(data){
+					config.allTask = data;
+				}
+			});
+		}
+		$("#seltask").append("<option value=''>选择类型</option>");
+		$.each(config.allTask, function(di, ditem){
+			var ophtml = "<option value='"+ditem.id+"'>"+ditem.name+"</option>";
+			$("#seltask").append(ophtml);
+		});
+	}
+	function initTaskPageStyleType(){
+		if(config.allTaskPageStyleType.length == 0){
+			getAllTaskPageStyleType(function(data){
+				if(data){
+					config.allTaskPageStyleType = data;
+				}
+			});
+		}
+		$("#seltaskpagestyletype").append("<option value=''>任务内容类型</option>");
+		var tpthtml = "";
+		$.each(config.allTaskPageStyleType, function(ti, titem){
+				tpthtml += "<option value='"+titem.id+"'>"+titem.name+"</option>";
+		});
+		$("#seltaskpagestyletype").append(tpthtml);
+		$("#s-taskpagestyletype").append(tpthtml);
+	}
+	function initSearchForm(){
+		/*
+		var taskele = $("#seltask");
+		if(taskele.length > 0){
+			taskele.append("<option value=''>选择类型</option>");
+		}
+		for(var item in config.allTask){
+			taskele.append("<option value='"+item+"'>"+config.allTask[item]+"</option>");
+		}
+		*/
+		var tasklevelele = $("#seltasklevel");
+		if(tasklevelele.length > 0){
+			tasklevelele.append("<option value=''>选择级别</option>");
+			tasklevelele.append("<option value='1'>一</option>");
+			tasklevelele.append("<option value='2'>二</option>");
+			tasklevelele.append("<option value='3'>三</option>");
+		}
+		var machineele = $("#selmachine");
+		if(machineele.length > 0){
+			machineele.append("<option value=''>选择机器</option>");
+			$.getJSON(config.phpPath+"schedulemanager.php?type=getmachine&t=history",function(r){
+				if(r){
+					$(r).each(function(i,item){
+						machineele.append("<option value='"+item+"'>"+item+"</option>");
+					});
+				}
+			});
+		}
+		var localele = $("#sellocal");
+		if(localele.length > 0){
+			localele.append("<option value=''>是否本地</option>");
+			localele.append("<option value='1'>是</option>");
+			localele.append("<option value='0'>否</option>");
+		}
+		var remoteele = $("#selremote");
+		if(remoteele.length > 0){
+			remoteele.append("<option value=''>是否远程</option>");
+			remoteele.append("<option value='1'>是</option>");
+			remoteele.append("<option value='0'>否</option>");
+		}
+	}
+  var tbl;
+  $(function(){
+		changeTabTitle();
+		  initTaskSelect();
+		  initTaskPageStyleType();
+		  initSearchForm();
+		  $("span[name=sort]").bind("click",function(){
+			  //ui-icon ui-icon-triangle-1-s   ui-icon ui-icon-carat-2-n-s
+			  var field = $(this).attr("_target");
+			  var thisclass = $(this).children("span").attr("class");
+			  var sortad = "";
+			  //将其他排序字段置为不排序状态
+			  $("span[name=sort][_target!="+field+"]").children("span").attr("class","ui-icon ui-icon-carat-2-n-s");
+			  if(thisclass == "ui-icon ui-icon-carat-2-n-s" 
+				  || thisclass == "ui-icon ui-icon-triangle-1-s"){//当前未排序或当前倒序，则按正序
+			  sortad = "asc";
+			  $(this).children("span").attr("class","ui-icon ui-icon-triangle-1-n");
+			  }
+			  else{
+			  $(this).children("span").attr("class","ui-icon ui-icon-triangle-1-s");
+			  sortad = "desc";
+			  }
+			  $("#txtorderby").val(field+" "+sortad);
+			  searchData(false);
+			  });
+		  $("#btnsearch").bind("click", function(){
+				  searchData(true);
+				  });
+		  tbl = $('#mytbl').dataTable({
+				  "sAjaxSource":config.phpPath+"schedulemanager.php?type=gethistory&" + $("#formsearch").serialize(),
+				  "bLengthChange":false,
+				  "bSort":false,
+				  "iDisplayLength":10,
+				  "aoColumns":
+				  [
+				  { "mDataProp": "id" },
+				  { "fnRender": function (o) {
+				  return getTaskType(o.aData.task);
+				  }
+				  },
+				  { "fnRender": function (o) {
+				  return getTaskPageStyleType(o.aData.taskpagestyletype);
+				  }
+				  },
+
+				  { "mDataProp": "tasklevel" },
+				  { "fnRender": function (o) {
+				  return timeToStr(o.aData.starttime);
+				  }
+				  },
+				  { "fnRender": function (o) {
+												 return timeToStr(o.aData.endtime);
+											 }
+				  },
+				  {
+					  "fnRender":function(o){
+						  return getTenantName(o.aData.tenantid);
+					  }
+				  },
+				  {
+					  "fnRender":function(o){
+						  return getUserName(o.aData.userid);
+					  }
+				  },
+				  { "fnRender": function (o) {
+												 var des = getCrontimeDes(jQuery.parseJSON(o.aData.crontime)); 
+												 var fontSize = 12;
+												 var tdwidth = 150;
+												 var partdes = getPartDes(des, tdwidth, fontSize); 
+												 var deshtml = "";
+												 if(partdes.truncation){
+													 deshtml = "<a title='"+des+"'>"+partdes.retstr+"</a>"; 
+												 }
+												 else{
+													 deshtml =  des;
+												 }
+												 return deshtml;
+											 }
+				  },
+				  //{ "mDataProp": "remarks" },
+				  {
+					  "fnRender":function(o){
+						  var fontSize = 12;
+						  var tdwidth = 150;
+						  var partdes = getPartDes(o.aData.remarks, tdwidth, fontSize); 
+						  var deshtml = "";
+						  if(partdes.truncation){
+							  deshtml = "<a title='"+o.aData.remarks+"'>"+partdes.retstr+"</a>"; 
+						  }
+						  else{
+							  deshtml =  o.aData.remarks;
+						  }
+						  return deshtml;
+					  }
+				  },
+				  { "fnRender": function(o){
+											   //alert(o.aData.taskparams);
+											   return "<a href='javascript:void(0);' onclick='onDetailClick(this,"+o.aData.id+","+o.aData.task+","+o.aData.datastatus+","+o.aData.params+", "+o.aData.crontime+", "+o.aData.local+", "+o.aData.remote+", "+o.aData.conflictdelay+")' >详情</a>";
+										   } }
+		  ]}
+		  );
+  });
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+    style="color: gray">过期定时任务</span>
+    <p />
+<form id="formsearch" name="formsearch">
+<table width="98%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td><select id="seltask" name="task"></select>&nbsp;&nbsp;
+		<select id="seltaskpagestyletype" name="taskpagestyletype"></select>&nbsp;&nbsp;
+		<select id="seltasklevel" name="tasklevel"></select>&nbsp;&nbsp;
+		<select id="sellocal" name="local"></select>&nbsp;&nbsp;
+		<select id="selremote" name="remote"></select>&nbsp;&nbsp;
+		<span style="display:inline-block;">ID:<input id="selidstart" name="id_start" value='-1' class="shortinput"/>到<input id="selidend" name="id_end" value='-1' class="shortinput"/></span>
+		<input id="btnsearch" name="btnsearch" value="筛选" type="button" /><input type="hidden" id="txtorderby" name="orderby"></td>
+	</tr>
+</table>
+</form> 
+<p />
+<table width="98%" border="0" cellspacing="0" cellpadding="0"
+    class="list" id="mytbl">
+    <thead>
+    <tr>
+		<th scope="col" style="width: 50px"><span name="sort" _target="id" style="display:inline-block;cursor:pointer">ID<span class="ui-icon ui-icon-triangle-1-n" style="display:inline-block;"></span></span></th>
+		<th scope="col" style="width: 80px">类型</th>
+		<th scope="col" style="width: 70px">内容类型</th>
+		<th scope="col" style="width: 40px"><span name="sort" _target="tasklevel" style="display:inline-block;cursor:pointer">级别<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 75px"><span name="sort" _target="starttime" style="display:inline-block;cursor:pointer">生效时间<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th><!--定时任务生效时间-->
+		<th scope="col" style="width: 75px"><span name="sort" _target="endtime" style="display:inline-block;cursor:pointer">失效时间<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th><!--定时任务失效时间-->
+		<th scope="col" style="width: 40px"><span name="sort" _target="tenantid" style="display:inline-block;cursor:pointer">租户<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 55px"><span name="sort" _target="userid" style="display:inline-block;cursor:pointer">用户名<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 150px;">定时计划</th>
+        <th scope="col">摘要</th>
+        <th scope="col" style="width: 40px">详情</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div id="Pagination" class="pagination"></div> 
+</div>
+</div>
+</div>
+</body>
+</html>

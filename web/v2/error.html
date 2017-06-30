@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<base></base>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>博晓通</title>
+<script language="javascript">
+var _base_ = document.getElementsByTagName( "base" )[0];
+var head = document.getElementsByTagName( "head" )[0];
+var b_url = "";
+var sh=false;
+ var pathhost = "www.inter3i.com";
+ if(window.location.host != pathhost){
+        sh = true;
+        _base_.setAttribute("href","");
+ }
+if(!sh){
+	var reg = /^\/(\w+)($|\/+.*)/i;
+	var t = window.location.pathname.match(reg);
+	if(t != null){
+	    b_url= location.protocol+"//"+location.host+"/"+t[1]+"/";
+	}
+	else{
+		b_url = location.protocol+"//"+location.host+"/error/";
+	}
+	_base_.href = b_url;
+}
+var jqcss=document.createElement("link"); 
+jqcss.setAttribute("rel", "stylesheet"); 
+jqcss.setAttribute("type", "text/css");  
+jqcss.setAttribute("href", b_url+"css/login.css");
+head.appendChild(jqcss);
+window.onload = function(){
+	var imglogo = document.getElementById('imgerrorlogo');
+	var imgerr = document.getElementById('imgerror');
+	if(imglogo){
+	    imglogo.src = b_url+'images/errorlogo.png';
+	}
+    if(imgerr){
+        imgerr.src = b_url+'images/error.jpg';
+    }
+    var errele = document.getElementById("perrortext");
+    if(errele){
+	    try{
+			var req = GetRequest();
+			if(req['error'] != undefined && req['error'] != ""){
+				errele.innerHTML = req['error'];
+			}
+			else if(req['error'] == ""){
+				errele.innerHTML = "发生未知错误!";
+			}
+			else{
+				errele.innerHTML = "对不起，您访问的地址不存在!";
+			}
+	    }
+	    catch(e){
+	    	errele.innerHTML = "操作失败!";
+	    }
+    }
+};
+function GetRequest() {
+	   var url = location.search; //获取url中"?"符后的字串
+	   var theRequest = new Object();
+	   if (url.indexOf("?") != -1) {
+	      var str = url.substr(1);
+	      var strs = str.split("&");
+	      for(var i = 0; i < strs.length; i ++) {
+	         theRequest[strs[i].split("=")[0]]=decodeURIComponent(strs[i].split("=")[1]);
+	      }
+	   }
+	   return theRequest;
+}
+function closeWin(){
+	window.open('','_parent','');   
+	window.close();   
+}
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33831791-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<style type="text/css">
+<!--
+.bannerfont{
+	font-family: "隶书";
+}
+.style4 {
+	font-size: 16px;
+	font-weight: bold;
+}
+.STYLE5 {
+	font-size: 18px;
+	font-weight: bold;
+	font-family: "黑体";
+}
+
+
+
+-->
+</style>
+</head>
+
+<body>
+<div id="mybody">
+    <div id="top"><img id="imgerrorlogo" width="132" height="60" align="absmiddle" /><span class="bannerfont" style="vertical-align:bottom;font-size:30px;font-family:宋体;font-weight:700;" >社交媒体分析系统</span>  </div>
+<div class="content" >
+	   <div class="zcright" >
+         <img id="imgerror" width="284" height="315" class="img1"/> 
+ <div class="eleft" >
+			 <p>&nbsp;</p>
+			 <p class="STYLE5" id="perrortext"></p>
+			 <!--
+	  <p ><span class="fontbb">如果对操作有疑问，您可以查看<a href="other/aboutus/help.html" target="_blank" class="ar">帮助</a>或<a href="#" target="_blank" class="ar">咨询客服</a>！</span></p>
+			 <p >您还可以访问以下链接：</p>
+			 <p >&gt;&gt; <a href="javascript:history.go(-1);" class="ab">返回刚才页面</a><br />
+		     &gt;&gt; <a href="#" class="ab">返回网站首页</a><br />
+		     &gt;&gt; <a href="#" class="ab">返回个人中心</a></p>
+			 <p style="text-align:right; padding-right:80px">
+			   <input type="submit" name="Submit" value="关闭本页" class="buttons" onclick = "closeWin();"/>
+			 </p>
+			 -->
+      </div>
+		</div>
+	</div>
+		<div id="bottom">
+		©2011 - 2012 博晓通&nbsp;&nbsp;&nbsp;&nbsp;<a style="color:white" href="http://www.miibeian.gov.cn" target="_blank">京ICP备12047578号</a>
+		</div>
+</div>
+</body>
+</html>

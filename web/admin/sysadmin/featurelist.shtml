@@ -1,0 +1,1480 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+	label {
+		vertical-align: middle
+	}
+	input[type=checkbox] {
+		vertical-align: middle;
+	}
+	.formtable .tdtip {
+		color:red;
+	}
+	.selwordsbox {
+		border: 1px solid #CCC;
+		padding: 1.5px 0 1.5px 1.5px;
+		margin: 3px 0 0 2px;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/parts/popAddDictionary.js"></script>
+<script type="text/javascript">
+	var _this=this;
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	//var pageCount;//存储总页数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	var featureParr = []; //父级分类
+	//var currCarr = []; //当前父级下的子类数组
+	var featureUser = [];
+	var featureField = {};
+		//删除按钮
+	var deletecodearr = [];
+	var deletebtn = "<input type='button' value='删除' name='deleteitem' style='background-color:#2E6E9E;color:#FFFFFF;' />";
+	var deleteselectedbtn = "<input type='button' value='取消' name='deleteitemselected' style='background-color:#EA3D3D;color:#FFFFFF;' />";
+	this.setSelectedCountPosition = function(){
+		$("#selectdiv").css({
+			'display':'inline-block',
+			'position':'absolute',
+			'width':"20px",
+			'z-index': 1005,
+			'left': $("#selectedcount").offset().left,
+			'top': $("#selectedcount").offset().top - 40
+		});
+		$("#selectedcount").attr("currstate", "unfolded");
+	};
+	this.hideSelectedCount = function(){
+		$("#selectdiv").hide();
+		$("#selectedcount").attr("currstate", "folded");
+	};
+	this.deleteSubmitBtn = function(selector){
+		var checkedlen = deletecodearr.length;
+		if(checkedlen > 0){
+			var deletesubmitbtn = "<input type='button' id='confirmdelete' name='confirmdelete' value='确认删除' />&nbsp;<input type='button' id='selectedcount' name='selectedcount' value='已选择"+checkedlen+"条' currstate='folded' />";
+			$("#"+selector+"").empty().append(deletesubmitbtn);
+		}
+		else{
+			$("#"+selector+"").empty()
+		}
+	};
+	//
+	var configFeatureInfo = {
+		verified_reason: {
+			label: "认证原因",
+			feature_type:"text",
+			formatter: null
+		},
+		description: {
+			label: "简介",
+			feature_type:"text",
+			formatter: null
+		},
+		text: {
+			label: "关键词",
+			feature_type:"text",
+			formatter: null
+		},
+		pg_text: {
+			label: "段关键词",
+			feature_type:"text",
+			formatter: null
+		},
+		column: {
+			label: "子级栏目",
+			feature_type:"text",
+			formatter: null
+		},
+		column1: {
+			label: "父级栏目",
+			feature_type:"text",
+			formatter: null
+		},
+		post_title: {
+			label: "标题",
+			feature_type:"text",
+			formatter: null
+		},
+		productType: {
+			label: "产品型号",
+			feature_type:"text",
+			formatter: null
+		},
+		impress: {
+			label: "买家印象",
+			feature_type:"text",
+			formatter: null
+		},
+		commentTags: {
+			label: "单评论的标签",
+			feature_type:"text",
+			formatter: null
+		},
+		proClassify: {
+			label: "详细商品分类",
+			feature_type:"text",
+			formatter: null
+		},
+		promotionInfos: {
+			label: "促销信息",
+			feature_type:"text",
+			formatter: null
+		},
+		productFullName: {
+			label: "产品全名",
+			feature_type:"text",
+			formatter: null
+		},
+		productColor: {
+			label: "产品颜色",
+			feature_type:"text",
+			formatter: null
+		},
+		productSize: {
+			label: "产品尺寸",
+			feature_type:"text",
+			formatter: null
+		},
+		productDesc: {
+			label: "产品描述",
+			feature_type:"text",
+			formatter: null
+		},
+		productComb: {
+			label: "产品组合",
+			feature_type:"text",
+			formatter: null
+		},
+		detailParam: {
+			label: "规格参数",
+			feature_type:"text",
+			formatter: null
+		},
+		compName: {
+			label: "公司名称",
+			feature_type:"text",
+			formatter: null
+		},
+		compAddress: {
+			label: "公司地址",
+			feature_type:"text",
+			formatter: null
+		},
+		phoneNum: {
+			label: "公司电话",
+			feature_type:"text",
+			formatter: null
+		},
+		compURL: {
+			label: "公司URL",
+			feature_type:"text",
+			formatter: null
+		},
+		serviceProm: {
+			label: "服务承诺",
+			feature_type:"text",
+			formatter: null
+		},
+		logisticsInfo: {
+			label: "物流",
+			feature_type:"text",
+			formatter: null
+		},
+		payMethod: {
+			label: "支付方式",
+			feature_type:"text",
+			formatter: null
+		},
+		serviceComment: {
+			label: "对服务的评论",
+			feature_type:"text",
+			formatter: null
+		},
+		apdComment: {
+			label: "追评内容",
+			feature_type:"text",
+			formatter: null
+		},
+		ancestor_text: {
+			label: "上层转发关键词",
+			feature_type:"text",
+			formatter: null
+		},
+		wb_topic: {
+			label: "微博话题",
+			feature_type:"text",
+			formatter: null
+		},
+		ancestor_wb_topic: {
+			label: "上层转发微博话题",
+			feature_type:"text",
+			formatter: null
+		},
+		wb_topic_keyword: {
+			label: "微博话题关键词",
+			feature_type:"text",
+			formatter: null
+		},
+		ancestor_wb_topic_keyword: {
+			label: "上层转发微博话题关键词",
+			feature_type:"text",
+			formatter: null
+		},
+		source: {
+			label: "应用来源",
+			feature_type:"text",
+			formatter: null
+		},
+		host_domain: {
+			label: "主机域名",
+			feature_type:"text",
+			formatter: null
+		},
+		ancestor_host_domain: {
+			label: "上层转发主机域名",
+			feature_type:"text",
+			formatter: null
+		},
+		combinWord: {
+			label: "组合关键词",
+			feature_type:"combintext",
+			formatter: function (item) {
+				var re = new RegExp("##", "g");
+				var re2 = new RegExp("#", "g");
+				var tmp = item.replace(re, ",").replace(re2, "");
+				return tmp;
+			}
+		},
+		ancestor_combinWord: {
+			label: "上层转发组合关键词",
+			feature_type:"combintext",
+			formatter: function (item) {
+				var re = new RegExp("##", "g");
+				var re2 = new RegExp("#", "g");
+				var tmp = item.replace(re, ",").replace(re2, "");
+				return tmp;
+			}
+		},
+		wb_topic_combinWord: {
+			label: "微博话题组合关键词",
+			feature_type:"combintext",
+			formatter: function (item) {
+				var re = new RegExp("##", "g");
+				var re2 = new RegExp("#", "g");
+				var tmp = item.replace(re, ",").replace(re2, "");
+				return tmp
+			}
+		},
+		ancestor_wb_topic_combinWord: {
+			label: "上层转发微博话题组合关键词",
+			feature_type:"combintext",
+			formatter: function (item) {
+				var re = new RegExp("##", "g");
+				var re2 = new RegExp("#", "g");
+				var tmp = item.replace(re, ",").replace(re2, "");
+				return tmp
+			}
+		},
+		users_friends_id: {
+			label: "查粉丝",
+			feature_type:"uniqueuser",
+			formatter: function(item){
+				var ret = ""
+				$.each(featureUser, function(ui, uitem){
+					if(uitem.userid == item){
+						ret = uitem.screen_name; 	
+						return false;
+					}
+				});
+				return ret;
+			} 
+		},
+		usersfriend: {
+			label: "查关注",
+			feature_type:"uniqueuser",
+			formatter: function(item){
+				var ret = ""
+				$.each(featureUser, function(ui, uitem){
+					if(uitem.userid == item){
+						ret = uitem.screen_name; 	
+						return false;
+					}
+				});
+				return ret;
+			} 
+		},
+		account: {
+			label: "@用户",
+			feature_type:"uniqueuser",
+			formatter: function(item){
+				var ret = ""
+				$.each(featureUser, function(ui, uitem){
+					if(uitem.userid == item){
+						ret = uitem.screen_name; 	
+						return false;
+					}
+				});
+				return ret;
+			} 
+		},
+		ancestor_account: {
+			label: "上层转发@用户",
+			feature_type:"uniqueuser",
+			formatter: function(item){
+				var ret = ""
+				$.each(featureUser, function(ui, uitem){
+					if(uitem.userid == item){
+						ret = uitem.screen_name; 	
+						return false;
+					}
+				});
+				return ret;
+			} 
+		},
+		userid: {
+			label: "用户名",
+			feature_type:"uniqueuser",
+			formatter: function(item){
+				var ret = ""
+				$.each(featureUser, function(ui, uitem){
+					if(uitem.userid == item){
+						ret = uitem.screen_name; 	
+						return false;
+					}
+				});
+				return ret;
+			}
+		},
+		screen_name: {
+			label: "作者昵称",
+			feature_type:"text",
+			formatter: null
+		},
+		NRN: {
+			label: "提及人名",
+			feature_type:"text",
+			formatter: null
+		},
+		ancestor_NRN: {
+			label: "上层转发提及人名",
+			feature_type:"text",
+			formatter: null
+		},
+		organization:{
+			label:"机构",
+		  feature_type:"text",
+		  formatter: null
+	    },
+		ancestor_organization:{
+			label:"上层转发机构",
+		  feature_type:"text",
+		  formatter: null
+		 }
+	};
+	$(function () {
+			changeTabTitle();
+		if ($("#addfeatureworddiv").length == 1) {
+			$("#addfeatureworddiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 540,
+				height: 500,
+				close: function () {
+					$("#addfeature_pclass_select").val("");
+					$("#addfeature_pclass_text").val("");
+					$("#addfeature_class_select").val("");
+					$("#addfeature_class_text").val("");
+					$("#addfeature_pclass_add").attr("opttype", "select");
+					$("#addfeature_class_add").attr("opttype", "select");
+
+					$("#ro_pclass_tip").text("");
+					$("#ro_class_tip").text("");
+					$("#ro_field_tip").text("");
+					$("#ro_keyword_tip").text("");
+				}
+			});
+		}
+		$.each(["pclass", "class"], function (k, item) {
+			$("#addfeature_" + item + "_text").bind("change", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+		$("#addfeature_pclass_select").bind("change", function () {
+			$("#ro_pclass_tip").text("");
+			var pclass = $("#addfeature_pclass_select").val();
+			getChildClass("addfeature_class_select", pclass);
+		});
+		$("#feature_pclass").bind("change", function () {
+			$("#ro_class_tip").text("");
+			var pclass = $("#feature_pclass").val();
+			getChildClass("feature_class", pclass);
+		});
+		$("#addfeature_keyword").bind("focus", function(){
+			$("#ro_keyword_tip").text("");
+		});
+		$("#addfeatureword").bind("click", function () {
+			addFeatureWordHtml();
+		});
+		$("#addfeature_pclass_add").bind("click", function () {
+			var addtype = $(this).attr("opttype");
+			if (addtype == "select") {
+				//隐藏下拉选择,显示input,新增
+				$("#addfeature_pclass_text").css("display", "");
+				$("#addfeature_pclass_select").css("display", "none");
+
+				$("#addfeature_class_text").css("display", "");
+				$("#addfeature_class_select").css("display", "none");
+
+				$("#addfeature_class_add").css("display", "none");
+				$(this).attr("opttype", "add")
+				//更改新增为选择
+				$(this).text("选择父类");
+			} 
+			else if (addtype == "add") {
+				//显示下拉选择,隐藏input,新增
+				$("#addfeature_pclass_text").css("display", "none");
+				$("#addfeature_pclass_select").css("display", "");
+
+				$("#addfeature_class_text").css("display", "none");
+				$("#addfeature_class_select").css("display", "");
+
+				$("#addfeature_class_add").css("display", "");
+
+				$(this).attr("opttype", "select")
+				//更改新增为新增
+				$(this).text("新增父类");
+			}
+		});
+		$("#addfeature_class_add").bind("click", function () {
+			var addtype = $(this).attr("opttype");
+			if (addtype == "select") {
+				//隐藏下拉选择,显示input,新增
+				$("#addfeature_class_text").css("display", "");
+				$("#addfeature_class_select").css("display", "none");
+
+				$(this).attr("opttype", "add")
+				//更改新增为选择
+				$(this).text("选择子类");
+			} else if (addtype == "add") {
+				//显示下拉选择,隐藏input,新增
+				$("#addfeature_class_text").css("display", "none");
+				$("#addfeature_class_select").css("display", "");
+
+				$(this).attr("opttype", "select")
+				//更改新增为新增
+				$(this).text("新增子类");
+			}
+		});
+
+		$("#feature_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#feature_export").bind("click", function(){
+			exportRequest();
+		});
+		getFClass(); //获取父级下拉菜单
+		getFField(); //获取字段
+		$("#featurewordinfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+		$("#feature_import").bind("click", function(){
+			var jsonstr = $("#featureexportresult").val();
+			var jsonarr = jQuery.parseJSON(jsonstr);
+			var dataobj = {};
+			dataobj.type = "importfeaturejson";
+			dataobj.data = jsonarr;
+			if(jsonarr!=""&&jsonarr!=null&&jsonarr[0]["feature_pclass"]!=undefined){
+				$("#featureexportresult").val("");
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: config.modelUrl + "feature_model.php",
+					data: JSON.stringify(dataobj),
+					beforeSend:function(){
+					},
+					complete:function(){
+					},
+					success: function (msg) {
+						if (msg.flag == 1) {
+							//弹出分词窗体
+							searchRequest(pagesize);
+						}
+						else{
+							alert("添加失败,请重新添加!");
+						}
+					}
+				});
+			}
+
+		});
+		//begin:旧的特征分类转换成多级结构的特征分类,同时会删除旧的结构特征分类,by zuo 2016-8-5
+		$("#new_feature_import").bind("click", function(){
+			var jsonstr = $("#featureexportresult").val();
+			var jsonarr = jQuery.parseJSON(jsonstr);
+			var dataobj = {};
+			dataobj.type = "importfeaturenewjson";
+			dataobj.data = jsonarr;
+			if(jsonarr!=""&&jsonarr!=null&&jsonarr[0]["feature_pclass"]!=undefined){
+				$("#featureexportresult").val("");
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: config.modelUrl + "feature_model.php",
+					data: JSON.stringify(dataobj),
+					beforeSend:function(){
+					},
+					complete:function(){
+					},
+					success: function (msg) {
+						if (msg.flag == 1) {
+							//弹出分词窗体
+							searchRequest(pagesize);
+						}
+						else{
+							alert("添加失败,请重新添加!");
+						}
+					}
+				});
+			}
+
+		});
+		//begin:旧的特征分类转换成多级结构的特征分类,同时会删除旧的结构特征分类,by zuo 2016-8-5
+	});
+	function classFormatter(fclass){
+		var re = new RegExp("##", "g");
+		var re2 = new RegExp("#", "g");
+		var tmp = fclass.replace(re, ",").replace(re2, "");
+		var tmparr = tmp.split(",");
+		return tmparr[1];
+	}
+	function getFClass(){
+		var searchUrl = config.modelUrl + "feature_model.php?type=selectfeaturepclass";
+		ajaxRequest(searchUrl, function (data) {
+			if (data.errorcode != undefined) {
+				alert(data.errormsg);
+				return false;
+			}
+			if (data.totalcount > 0) {
+				var poption = "<option value='-1' >未选择</option>";
+				$.each(data.datalist, function (di, ditem) {
+					featureParr.push(ditem.feature_pclass);
+					//为父级下拉菜单添加选项
+					poption += "<option >" + ditem.feature_pclass + "</option>";
+				});
+				//为父级下拉菜单添加选项
+				$("#feature_pclass").empty().append(poption);
+			}
+		}, "json");
+	}
+	function getChildClass(targetid, pclass, sltclass) {
+		var searchUrl = config.modelUrl + "feature_model.php?type=selectfeatureclass&feature_pclass=" + encodeURIComponent(pclass);
+		ajaxRequest(searchUrl, function (data) {
+			if (data.errorcode != undefined) {
+				alert(data.errormsg);
+				return false;
+			}
+			$("#" + targetid + "").empty().append("<option value='-1' >未选择</option>");
+			if (data.totalcount > 0) {
+				var classopthtml = "";
+				//currCarr = []; //每次只保存当前父级下的二级元素
+				$.each(data.datalist, function (di, ditem) {
+					//currCarr.push(ditem.feature_class);
+					classopthtml += "<option>" + classFormatter(ditem.feature_class) + "</option>"
+				});
+				$("#" + targetid + "").append(classopthtml);
+				if(sltclass != undefined){
+					$("#" + targetid + "").val(classFormatter(sltclass));
+				}
+			}
+		}, "json");
+	}
+	function getFField(){
+		if(featureField.totalcount != undefined && featureField.totalcount > 0){
+			var ffhtml = "<option value='-1' >未选择</option>";
+			$.each(featureField.datalist, function (di, listitem) {
+					$.each(listitem, function (ki, kitem){
+						var lb = "";
+						if (configFeatureInfo[kitem] != undefined) {
+							lb = configFeatureInfo[kitem].label;
+						}
+						ffhtml += "<option value='"+kitem+"' >" + lb + "</option>"
+					});
+			});
+			$("#feature_field").empty().append(ffhtml);
+		}
+		else{
+			$.ajax({
+				url:config.modelUrl + "feature_model.php?type=selectfeaturefield",
+				type:"GET",
+				dataType:"json",
+				async:false,
+				success:function(data){
+					if(data.totalcount > 0) {
+						featureField = data;
+						var ffhtml = "<option value='-1' >未选择</option>";
+						$.each(featureField.datalist, function (di, listitem) {
+							$.each(listitem, function (ki, kitem){
+								var lb = "";
+								if (configFeatureInfo[kitem] != undefined) {
+									lb = configFeatureInfo[kitem].label;
+								}
+								ffhtml += "<option value='"+kitem+"' >" + lb + "</option>"
+							});
+						});
+						$("#feature_field").empty().append(ffhtml);
+					}
+				}
+			});
+		}
+	}
+	function getUsernameByid(data){
+		//把社交媒体账户的userid存在数组,查找对应的用户名
+		var userids = [];
+		$.each(data.datalist, function(dai, daitem){
+			if(daitem.feature_field && configFeatureInfo[daitem.feature_field[0]] != undefined  && configFeatureInfo[daitem.feature_field[0]].feature_type == "uniqueuser"){
+				userids.push(daitem.feature_keyword);	
+			}
+		});
+		if(userids.length > 0){
+			$.ajax({
+				url:config.modelUrl + "feature_model.php?type=getusernamebyids&userids="+userids.join(",")+"",
+				type:"GET",
+				dataType:"json",
+				async:false,
+				beforeSend : function() {
+					$("#waitimg").parents("tr").first().remove();
+					$("#featurewordinfo").append("<tr><td colspan='6'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				},
+				complete:function(XMLHttpRequest, textStatus) {
+					$("#waitimg").parents("tr").first().remove();
+				},
+				success:function(res){
+					if(res[0].totalcount > 0) {
+						featureUser = res[0].datalist; 
+					}
+				}
+			});
+		}
+	}
+	function exportRequest(){
+		var fpc = $("#feature_pclass").val();
+		var fc = $("#feature_class").val();
+		var ff = $("#feature_field").val();
+		var fk = $("#feature_keyword").val();
+
+		var param = "";
+		if (fpc != -1) {
+			param += "&feature_pclass=" + encodeURIComponent(fpc) + "";
+		}
+		if (fc != -1) {
+			param += "&feature_class=" + encodeURIComponent(fc) + "";
+		}
+		if (ff != -1) {
+			param += "&feature_field=" + ff + "";
+		}
+		if (fk != "") {
+			param += "&feature_keyword=" + encodeURIComponent(fk) + "";
+		}
+		var searchnameUrl = config.modelUrl + "feature_model.php?type=selectfeatureinfo&page=1"+ param; //searchfeatureclass
+		ajaxRequest(searchnameUrl, function(data){
+				if (data.errorcode != undefined) {
+					alert(data.errormsg);
+					return false;
+				}
+				if(data.datalist.length > 0){
+					var resstr = JSON.stringify(data.datalist);
+					$("#featureexportresult").val(resstr);
+				}
+		}, "json", function(){}, function(){}, function(){});
+	}
+	function searchRequest(pagesize, curpage) {
+		$("#featurewordinfo tr:not(:first)").remove();
+		var fpc = $("#feature_pclass").val();
+		var fc = $("#feature_class").val();
+		var ff = $("#feature_field").val();
+		var fk = $("#feature_keyword").val();
+
+		var param = "";
+		if (fpc != -1) {
+			param += "&feature_pclass=" + encodeURIComponent(fpc) + "";
+		}
+		if (fc != -1) {
+			param += "&feature_class=" + encodeURIComponent(fc) + "";
+		}
+		if (ff != -1) {
+			param += "&feature_field=" + ff + "";
+		}
+		if (fk != "") {
+			param += "&feature_keyword=" + encodeURIComponent(fk) + "";
+		}
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "feature_model.php?type=selectfeatureinfo&page=" + curpage2 + "&pagesize=" + pagesize + param; //searchfeatureclass
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#featurewordinfo").append("<tr><td colspan='6'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			getUsernameByid(data);
+			$.each(data.datalist, function (di, ditem) {
+				var pk = ditem.feature_keyword;
+				if (ditem.feature_field && configFeatureInfo[ditem.feature_field[0]] !=undefined &&  configFeatureInfo[ditem.feature_field[0]].formatter != null) {
+					pk = configFeatureInfo[ditem.feature_field[0]].formatter(pk);
+				}
+				var dff = []
+                if(ditem.feature_field){
+                    $.each(ditem.feature_field, function (dfi, dfitem) {
+                        if(configFeatureInfo[dfitem] != undefined){
+                            dff.push(configFeatureInfo[dfitem].label);
+                        }
+                    });
+                }
+				
+				var fclass = "";
+                if(ditem.feature_class){
+                    fclass = classFormatter(ditem.feature_class);
+                }
+				fhtml = "<tr><td><span id='"+ditem.guid+"' >"+deletebtn+"</span></td><td>" + ditem.feature_pclass + "</td><td>" + fclass + "</td><td>" + pk + "</td><td>" + dff.join(",") + "</td><td><a href='javascript:void(0)' id='feature" + di + "' >修改</a></td></tr>";
+		
+				//fhtml = "<tr><td><input type='checkbox' name='checklist' id='checkfeture" + ditem.guid + "' value='" + ditem.guid + "'></input></td><td>" + ditem.feature_pclass + "</td><td>" + fclass + "</td><td>" + pk + "</td><td>" + dff.join(",") + "</td><td><a href='javascript:void(0)' id='feature" + di + "' >修改</a></td></tr>";
+				$("#featurewordinfo").append(fhtml);
+				$("#feature" + di + "").bind("click", function () {
+					addFeatureWordHtml(ditem);
+				});
+			});
+			fhtml="<tr><td colspan='8' align='left'><div style='text-align:left;' id='eventalertdeletediv'></div></td><tr>";
+		
+			//fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#featurewordinfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#featurewordinfo").append(str);
+		}
+		//绑定删除按钮
+		_this.deleteSubmitBtn("eventalertdeletediv");
+		$("#featurewordinfo").find("input[name=deleteitem]").die("click");
+		$("#featurewordinfo").find("input[name=deleteitem]").live("click", function(){
+		
+			var pid = $(this).parent("span").attr("id");
+			//var parent_id=$(this).parent("span").attr("parent_id");
+			//var pidarr = pid.split("_");
+			//var code = pidarr[1];
+			
+			deletecodearr = arrayAppend(deletecodearr, pid);
+			$("#"+pid+"").empty().append(deleteselectedbtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#featurewordinfo").find("input[name=deleteitemselected]").die("click");
+		$("#featurewordinfo").find("input[name=deleteitemselected]").live("click", function(){
+			var pid = $(this).parent("span").attr("id");
+			//var pidarr = pid.split("_");
+			//var code = pidarr[1];
+			deletecodearr = arrayDelete(deletecodearr, pid);
+			$("#"+pid+"").empty().append(deletebtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#confirmdelete").die("click");
+		$("#confirmdelete").live("click", function(){
+			if(confirm("确定删除"+deletecodearr.length+"条数据?")){
+				deletetenant(deletecodearr);
+				//重置按钮
+				deletecodearr.length = 0;
+				searchRequest(pagesize, 1);
+			}
+			else{
+				return false;
+			}
+			
+		});
+		$("#selectedcount").die("click");
+		$("#selectedcount").live("click", function(){
+			var selectshortcutdiv = "<div id='selectdiv'><input type='button' name='selectall' id='selectall' value='全选' style='margin:0;'/><input type='button' name='selectnone' id='selectnone' value='清空' style='margin:0;'/></div>";
+			if($("#selectdiv").length == 0){
+				$("body").append(selectshortcutdiv);
+			}
+			var currstate = $("#selectedcount").attr("currstate");
+			if(currstate == 'folded'){
+				_this.setSelectedCountPosition();
+			}
+			else{
+				_this.hideSelectedCount();
+			}
+			$("#selectdiv").bind("mouseleave", function(){
+				_this.hideSelectedCount();
+			});
+			$("#selectall").unbind("click");
+			$("#selectall").bind("click", function(){
+				$("#featurewordinfo").find("input[name=deleteitem]").each(function(i, item){
+					var pid = $(item).parent("span").attr("id");
+					//var pidarr = pid.split("_");
+					//var code = pidarr[1];
+					//var parent_id=$(this).parent("span").attr("parent_id");
+					
+					deletecodearr = arrayAppend(deletecodearr, pid);
+					$(item).parent().empty().append(deleteselectedbtn);
+					
+
+				});
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				_this.setSelectedCountPosition();
+			});
+			$("#selectnone").unbind("click");
+			$("#selectnone").bind("click", function(){
+				$("#featurewordinfo").find("input[name=deleteitemselected]").each(function(i, item){
+					//var parent_id=$(this).parent("span").attr("parent_id");
+					//var pid = $(item).parent("span").attr("id");
+					//var pidarr = pid.split("_");
+					//var code = pidarr[1];
+					$(item).parent().empty().append(deletebtn);
+				});
+				//清空点击时,清空全局数组
+				deletecodearr.length = 0;
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				$("#selectdiv").remove();
+			});
+		});	
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", !this.checked);
+		});
+	}
+
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			delid.push(val)
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if (confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletetenant(delid);
+			}
+		}
+	}
+
+	function deletetenant(tid) {
+		var dataobj = {
+			type: "deletefeatureword",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "feature_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						searchRequest(pagesize, curpage2);
+					} else {
+						alert("删除失败!");
+					}
+				}
+			}
+		});
+	}
+	//父类下拉选择
+	function addFPclass(targetid) {
+		if(featureParr != undefined && featureParr.length > 0) {
+			var pcopt = "<option value='-1' >未选择</option>";
+			$.each(featureParr, function (pi, pitem) {
+				pcopt += "<option>" + pitem + "</option>";
+			});
+			if(targetid == undefined){
+				targetid =  "addfeature_pclass_select";
+			}
+			$("#"+targetid+"").empty().append(pcopt);
+		}
+	}
+	function featurefieldDisplay(featureField, ditem){
+		var ffhtml = "";
+		$.each(featureField, function (di, listitem) {
+				var spanffhtml = "";
+				var divcheck = "style='border-bottom:1px solid #DADADA;'";
+				$.each(listitem, function (ki, kitem) {
+					var check = "style='margin:3px;cursor:pointer;display:inline-block;'";
+					var checkattr = "";
+					if (ditem != undefined) {
+					$.each(ditem.feature_field, function (ffi, ffitem) {
+						if (ffitem == kitem) {
+						check = "style='margin:3px;cursor:pointer;display:inline-block;background-color:#0C98E6'";
+						divcheck = "style='border:1px solid red;'";
+						checkattr = "slt=true";
+						}
+						});
+					}
+					var lb = "";
+					if (configFeatureInfo[kitem] != undefined) {
+						lb = configFeatureInfo[kitem].label;
+					}
+					spanffhtml += "<span ftype='type_" + di + "' fieldname='" + kitem + "' " + check + " " + checkattr + " >" + lb + "</span>";
+				});
+				ffhtml += "<div pftype='type_" + di + "' " + divcheck + ">" + spanffhtml + "</div>";
+		});
+		$("#addfeature_field").empty().append(ffhtml);
+		var oldft = "";
+		$("#addfeature_field span[ftype]").bind("click", function () {
+			$("#ro_field_tip").text("");
+			//其他类别取消选择
+			var slt = $(this).attr("slt");
+			var ft = $(this).attr("ftype");
+			if(slt != undefined && slt){
+				$(this).removeAttr("slt");
+				$(this).css("background-color", "");
+
+				var len = $("#addfeature_field div[pftype="+ft+"] span[ftype="+ft+"][slt=true]").length;
+				if(len == 0){
+					$("#addfeature_field div[pftype="+ft+"]").css("border", "");
+					$("#addfeature_field div[pftype="+ft+"]").css("border-bottom", "1px solid #DADADA");
+					$("#ro_keyword_tip").text("");
+				}
+			}
+			else{
+				$("#addfeature_field div[pftype]").css("border", "");
+				//自身选中
+				$(this).attr("slt", true);
+				$(this).css("background-color", "#0C98E6");
+				$("#addfeature_field div[pftype=" + ft + "]").css("border", "1px solid red");
+
+				$("#addfeature_field div[pftype!=" + ft + "]").css("border-bottom", "1px solid #DADADA");
+				$("#addfeature_field div[pftype!=" + ft + "] span[ftype]").css("background-color", "");
+				$("#addfeature_field div[pftype!=" + ft + "] span[ftype]").removeAttr("slt");
+
+				var opttype = $("#addfeatureworddiv").attr("addopttype");
+				if (oldft != ft) {
+					changeFWordadd(ft);
+					oldft = ft; 
+				}
+				if(ft == "type_combintext"){
+					$("#ro_keyword_tip").text("组合词,请以逗号分隔!");
+				}
+				else{
+					$("#ro_keyword_tip").text("");
+				}
+			}
+		});
+	}
+	//新增特征词html初始化
+	function addFeatureWordHtml(ditem) {
+		//显示下拉选择,隐藏input,新增
+		$("#addfeature_pclass_text").css("display", "none");
+		$("#addfeature_pclass_select").css("display", "");
+
+		$("#addfeature_class_text").css("display", "none");
+		$("#addfeature_class_select").css("display", "");
+
+		$("#addfeature_class_add").css("display", "");
+		$("#addfeature_pclass_add").text("新增父类");
+		$("#addfeature_class_add").text("新增子类");
+
+		if (ditem != undefined) {
+			$("#addfeatureworddiv").attr("addopttype", "update");
+			$("#addfeatureworddiv").attr("feature_id", ditem.guid)
+		} else {
+			$("#addfeatureworddiv").attr("addopttype", "add");
+			changeFWordadd();
+		}
+		//父级选择
+		addFPclass();
+		var pclass
+		if (ditem != undefined) {
+			$("#addfeature_pclass_select").val(ditem.feature_pclass);
+		}
+		//二级选择
+		pclass = $("#addfeature_pclass_select").val();
+		if (ditem != undefined) {
+			getChildClass("addfeature_class_select", pclass, ditem.feature_class);
+		} else {
+			if(pclass != -1){
+				getChildClass("addfeature_class_select", pclass);
+			}
+		}
+
+		//显示字段
+		if(featureField.totalcount != undefined && featureField.totalcount > 0){
+			featurefieldDisplay(featureField.datalist, ditem);
+		}
+		else{
+			$.ajax({
+				url:config.modelUrl + "feature_model.php?type=selectfeaturefield",
+				type:"GET",
+				dataType:"json",
+				async:false,
+				success:function(data){
+					if(data.totalcount > 0) {
+						featureField = data;
+						featurefieldDisplay(data.datalist, ditem);
+					}
+				}
+			});
+		}
+
+
+		//修改时 初始化关键词
+		if (ditem != undefined && ditem.feature_keyword != undefined) {
+			var pk = ditem.feature_keyword;
+			if (ditem.feature_field && configFeatureInfo[ditem.feature_field[0]] != undefined && configFeatureInfo[ditem.feature_field[0]].formatter != null) {
+				pk = configFeatureInfo[ditem.feature_field[0]].formatter(pk);
+			}
+			var ftype = configFeatureInfo[ditem.feature_field[0]].feature_type;
+			changeFWordadd("type_"+ftype, "update");
+			if(ftype == "uniqueuser"){
+				var uhtml = "<span style='display:inline-block;border:1px solid #cccccc;padding:1.5px 0 1.5px 1.5px;margin: 2px 0px 2px 2px;width:145px;'><span code='" + ditem.feature_keyword + "'  class='uniqueuseritem' >" + pk + "</span><a onclick='cancleUniqueuser(this)' style='border:1px solid #cccccc;padding:1.5px; color: red; cursor: pointer;'>×</a></span>";
+				$("#addfeature_selected_uniqueuser").empty().append(uhtml);
+			}
+			else{
+				$("#addfeature_keyword").val(pk);
+			}
+		}
+		addFeatureWord();
+	}
+
+	function changeFWordadd(ft, addopttype) {
+		if (ft == "type_uniqueuser") {
+			$("#addfeature_keyword_td").empty().append('<input id="addfeature_uniqueuser" type="button" value="选择用户" name="addfeature_uniqueuser"><div id="addfeature_selected_uniqueuser" style="margin-top:3px" ></div>');
+			$("#addfeature_uniqueuser").bind("click", function () {
+				$("#ro_keyword_tip").text("");	
+				var sltVal = [];
+				$("#addfeature_selected_uniqueuser .uniqueuseritem").each(function(){
+					var tmpobj = {};
+					tmpobj.code = $(this).attr("code"); 
+					tmpobj.name = $(this).text(); 
+					sltVal.push(tmpobj);
+				});
+				myAccountSelect(function (data) {
+					var accounthtml = "";
+					if (data.length > 0) {
+						var len = data.length;
+						$.each(data, function (i, m) {
+							var username = m.name;
+							var userid = m.code;
+							accounthtml += "<span style='display:inline-block;border:1px solid #cccccc;padding:1.5px 0 1.5px 1.5px;margin: 2px 0px 2px 2px;width:145px;'><span code=" + userid + "  class='uniqueuseritem' >" + username + "</span><a onclick='cancleUniqueuser(this)' style='border:1px solid #cccccc;padding:1.5px; color: red; cursor: pointer;'>×</a></span>";
+						});
+						$("#addfeature_selected_uniqueuser").empty().append(accounthtml);
+					} else {
+						$("#addfeature_selected_uniqueuser").empty();
+					}
+				}, sltVal, undefined, undefined, undefined, true, true);
+			});
+		} else {
+			if(addopttype != undefined && addopttype == "update"){
+				$("#addfeature_keyword_td").empty().append("<input type='text' id='addfeature_keyword' name='addfeature_keyword' />")
+			}
+			else{
+				$("#addfeature_keyword_td").empty().append("<textarea id='addfeature_keyword' style='width:135px;' rows='8' ></textarea>")
+			}
+		}
+	}
+
+	function cancleUniqueuser(ele) {
+		$(ele).parent().remove();
+	}
+
+	function submitFeature(){
+		var ty = $("#addfeatureworddiv").attr("addopttype");
+		if (ty != "add") {
+			var feature_id = $("#addfeatureworddiv").attr("feature_id");
+		}
+		var tp = $("#addfeature_pclass_add").attr("opttype");
+		var addfeature_pclass = $("#addfeature_pclass_select").val();
+		if (tp == "add") { //新增父类
+			addfeature_pclass = $("#addfeature_pclass_text").val();
+		}
+		if (addfeature_pclass == "" || addfeature_pclass == -1) {
+			$("#ro_pclass_tip").text("父类不能为空!");
+			return false;
+		} else {
+			addfeature_pclass = commonFun.trim(addfeature_pclass);
+			if (addfeature_pclass.length > 50) {
+				$("#ro_pclass_tip").text("最多50个字符!")
+				return false;
+			} else {
+				var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+				if (reg.test(addfeature_pclass)) {
+					$("#ro_pclass_tip").text("不能含有特殊字符!");
+					return false;
+				}
+			}
+		}
+
+		var ctype = $("#addfeature_class_add").attr("opttype");
+		var addfeature_class = $("#addfeature_class_select").val();
+		if (tp == "add" || ctype == "add") {
+			addfeature_class = $("#addfeature_class_text").val();
+			/*
+			var hasitem = false;
+			$.each(currCarr, function (ci, citem) {
+				if (addfeature_class == citem) {
+					hasitem = true;
+				}
+			});
+			if (hasitem) {
+				$("#ro_class_tip").text("子类已存在,请更改!");
+				$("#addfeature_pclass_text").focus();
+				return false;
+			}
+			*/
+		}
+		if (addfeature_class == "" || addfeature_class == -1) {
+			$("#ro_class_tip").text("子类不能为空!");
+			return false;
+		} else {
+			addfeature_class = commonFun.trim(addfeature_class);
+			if (addfeature_class.length > 50) {
+				$("#ro_class_tip").text("最多50个字符!")
+				return false;
+			} else {
+				var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+				if (reg.test(addfeature_class)) {
+					$("#ro_class_tip").text("不能含有特殊字符!");
+					return false;
+				}
+			}
+		}
+		var addff = [];
+		$("#addfeature_field span[ftype][slt=true]").each(function () {
+			var fld = $(this).attr("fieldname");
+			addff.push(fld);
+			//当是用户信息的字段 verified_reason description screen_name userid , solr添加 新的用户信息表
+			//同时给feature_field 添加 用户信息对应字段
+			switch(fld){
+				case "verified_reason":
+				case "description":
+				case "screen_name":
+					addff.push("users_"+fld);
+					break;
+				case "userid":
+					addff.push("users_id");
+					break;
+				default:
+					break;
+			}
+		});
+		if (addff.length == 0) {
+			$("#ro_field_tip").text("没有选择字段!");
+			return false;
+		} else {
+			var addfeature_field = addff;
+		}
+
+		var addfeature_keywordArr = [];
+		if ($("#addfeature_keyword").length > 0) {
+			var addfeature_keyword = $("#addfeature_keyword").val();
+			if (addfeature_keyword == undefined || addfeature_keyword == '') {
+				$("#ro_keyword_tip").text("关键词不能为空!");
+				return false;
+			}
+			else{
+				var reg = new RegExp("[#！￥……（）【】；：。，、？]"); //不包含逗号
+				if (reg.test(addfeature_keyword)) {
+					$("#ro_keyword_tip").text("不能含有特殊字符(#)!");
+					return false;
+				}
+			}
+			addfeature_keywordArr = addfeature_keyword.split('\n');
+		} else {
+			if ($("#addfeature_selected_uniqueuser .uniqueuseritem").length > 0) {
+				$("#addfeature_selected_uniqueuser .uniqueuseritem").each(function () {
+					addfeature_keywordArr.push($(this).attr("code"));
+				});
+				if(ty == "update"){
+					if(addfeature_keywordArr.length > 1){
+						$("#ro_keyword_tip").text("修改,只能选择一个用户!");
+						return false;
+					}
+				}
+			} else {
+				$("#ro_keyword_tip").text("请选择用户!");
+				return false;
+			}
+		}
+
+		var searchnameUrl = config.modelUrl + "feature_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify({
+				feature_pclass: addfeature_pclass,
+				feature_class: addfeature_class,
+				feature_keyword: addfeature_keywordArr,
+				feature_field: addfeature_field,
+				type: "checkfeatureexist"
+			}),
+			beforeSend:function(){
+				btnWaitDisplay("#addfeatureworddiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addfeatureworddiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						getUsernameByid(data);
+						var existArr = [];
+						$.each(data.datalist, function(ddi, dditem){
+							var pk = dditem.feature_keyword;
+							if(dditem.feature_field && configFeatureInfo[dditem.feature_field[0]] != undefined && configFeatureInfo[dditem.feature_field[0]].formatter != null) {
+								pk = configFeatureInfo[dditem.feature_field[0]].formatter(pk);
+							}
+							if(pk){
+								existArr.push(pk); 
+							}
+						});
+						$("#ro_keyword_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						return false;
+					} else {
+						var type = "addfeatureword";
+						var dataobj = {
+							feature_pclass: addfeature_pclass,
+							feature_class: addfeature_class,
+							feature_field: addfeature_field,
+							type: type,
+							feature_keyword: addfeature_keywordArr
+						};
+						if (ty == "update") {
+							type = "updatefeatureword";
+							dataobj = {
+								feature_id:feature_id,
+								feature_pclass: addfeature_pclass,
+								feature_class: addfeature_class,
+								feature_field: addfeature_field,
+								feature_keyword: addfeature_keywordArr,
+								type: type
+							};
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "feature_model.php",
+							data: JSON.stringify(dataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addfeatureworddiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addfeatureworddiv", feature_id);
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									//弹出分词窗体
+									if(confirm("特征词添加成功，是否需要将特征词添加到分词字典？")){
+										$("#dict_area1").val($("#addfeature_keyword").val());
+										addDicWord2();
+									}
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#addfeatureworddiv").dialog("close");
+									} else {
+										searchRequest(pagesize);
+										$("#addfeatureworddiv").dialog("close");
+									}
+									if(!featureParr.inArray(addfeature_pclass)){
+										featureParr.push(addfeature_pclass);
+										addFPclass();
+										addFPclass("feature_pclass");
+									}
+
+								} else {
+									if (feature_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert("添加失败,请重新添加!");
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		//var buttons = $(targetor).dialog( "option", "buttons" );
+		//buttons["确定"].css("background-color", "#DADADA");
+		//var waitimg = "<img src='"+config.imagePath+"loading.gif'  style='padding:10px;padding-left:215px;' id='waitimg'/>";
+		//$(targetor).dialog("option", "buttons",[{html:waitimg, click:function(){}}]);
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+		/*
+		$(targetor).dialog( "option", "show", function(){
+			$(":button").attr("disabled","disabled"); //按钮不可用
+		});
+		*/
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitFeature();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addFeatureWord() {
+		$("#addfeatureworddiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addfeatureworddiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+			var feature_id = $("#addfeatureworddiv").attr("feature_id");
+		}
+		$("#addfeatureworddiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addfeatureworddiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+	<!--#include file="top.shtml"-->
+	<div id="content">
+		<!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+        <a href="index.shtml">首页</a>&gt; <span style="color: gray">特征词管理</span> 
+			<a href="javascript:void(0)" id="addfeatureword" style="float: right">新增特征词</a>
+			<div>
+				父类：
+				<select id="feature_pclass">
+					<option value="-1">未选择</option>
+				</select>
+				子类：
+				<select id="feature_class">
+					<option value="-1">未选择</option>
+				</select>
+				字段：
+				<select id="feature_field">
+					<option value="-1">未选择</option>
+				</select>
+				关键词： <input type="text" name="feature_keyword" id="feature_keyword" />
+				<input type="button" name="feature_search" value="查询" id="feature_search" />
+				<!--
+				<div>导出JSON: <input type="radio" name="feature_export" id="feature_export1" value="1" /><label for="feature_export1">是</label><input type="radio" name="feature_export" id="feature_export0" value="0" checked="checked" /><label for="feature_export0">否</label></div>
+				-->
+			</div>
+			<table id="featurewordinfo" name="featurewordinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+				<tr>
+					<th width="4%" scope="col">选择</th>
+					<th width="13%" scope="col">父类</th>
+					<th width="11%" scope="col">子类</th>
+					<th width="7%" scope="col">关键词</th>
+					<th width="21%" scope="col">字段</th>
+					<th width="10%" scope="col">操作</th>
+				</tr>
+			</table>
+			<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+			<div><input type="button" name="feature_export" value="导出JSON" id="feature_export" />(可以通过上方过滤条件导出特征分类json)</div>
+			<div><input type="button" id="feature_import" value="导入JSON">(添加JSON,点击导入会添加上特征分类,结构和导出的相同,guid不需要)</div>
+			<div><input type="button" id="new_feature_import" value="导入新JSON">(添加新JSON,会将旧的特征分类转换成多级结构的特征分类同时删除旧的特征分类,guid不需要)</div>
+			<div id="featureexportdiv">
+				<textarea id="featureexportresult" style="width:99%;height:300px;"></textarea>
+			</div>
+		</div>
+	</div>
+	<div id="addfeatureworddiv" style="display:none;" addopttype="add" feature_id="" >
+		<table class="formtable">
+			<tr>
+				<td class="tdleft">父类：</td>
+				<td id="addfeature_pclass_td" width="150">
+					<input type="text" name="addfeature_pclass_text" id="addfeature_pclass_text" style="display:none;" />
+					<select id="addfeature_pclass_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td>
+					<a id="addfeature_pclass_add" opttype="select" href='javascript:void(0)'>新增父类</a>
+				</td>
+				<td class="tdtip" id="ro_pclass_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">子类：</td>
+				<td>
+					<input type="text" name="addfeature_class_text" id="addfeature_class_text" style="display:none;" />
+					<select id="addfeature_class_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td>
+					<a id="addfeature_class_add" opttype="select" href='javascript:void(0)'>新增子类</a>
+				</td>
+				<td class="tdtip" id="ro_class_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">字段：</td>
+				<td colspan = '2'>
+					<div id="addfeature_field" style="border:1px solid #DADADA;width:340px;"></div>
+				</td>
+				<td class="tdtip" id="ro_field_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">关键词：</td>
+				<td id="addfeature_keyword_td" colspan = '2'>
+					<textarea rows="8" style="width:135px;" id="addfeature_keyword"></textarea>
+				</td>
+				<td class="tdtip" id="ro_keyword_tip"></td>
+			</tr>
+		</table>
+	</div>
+	<!--#include file="popAddDictionary.shtml"-->
+	<!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>
+

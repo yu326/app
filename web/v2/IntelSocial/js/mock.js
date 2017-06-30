@@ -1,0 +1,517 @@
+//折线图和饼状数据
+window.page1Data = {
+	line: {
+        "categoryname":"",
+        "categoryvalue":"",
+        "totalcount":10,
+        "facet":{
+            "name":"created_at"
+        },
+        "datalist":[
+            {
+                "range":"1462032000",
+                "rangeend":"1462118400",
+                "count:original_url":"3304"
+            },
+            {
+                "range":"1462118400",
+                "rangeend":"1462204800",
+                "count:original_url":"1463"
+            },
+            {
+                "range":"1462204800",
+                "rangeend":"1462291200",
+                "count:original_url":"66"
+            },
+            {
+                "range":"1462291200",
+                "rangeend":"1462377600",
+                "count:original_url":"65"
+            },
+            {
+                "range":"1462377600",
+                "rangeend":"1462464000",
+                "count:original_url":"40"
+            },
+            {
+                "range":"1462464000",
+                "rangeend":"1462550400",
+                "count:original_url":"51"
+            },
+            {
+                "range":"1462550400",
+                "rangeend":"1462636800",
+                "count:original_url":"65"
+            },
+            {
+                "range":"1462636800",
+                "rangeend":"1462723200",
+                "count:original_url":"49"
+            },
+            {
+                "range":"1462723200",
+                "rangeend":"1462809600",
+                "count:original_url":"60"
+            },
+            {
+                "range":"1462809600",
+                "rangeend":"1462896000",
+                "count:original_url":"56"
+            }
+        ]
+    },
+	
+	pie: {
+        "categoryname":"City Tier",
+        "totalcount":5,
+        "datalist":[
+            {
+                "text":"tier1",
+                "frq":50
+            },
+            {
+                "text":"tier2",
+                "frq":20
+            },
+            {
+                "text":"tier3",
+                "frq":15
+            },
+            {
+                "text":"tier4",
+                "frq":10
+            },
+            {
+                "text":"tier5",
+                "frq":5
+            }
+        ]
+    }
+};
+
+
+
+//地图数据
+window.page2Data = {
+	"categoryname":"",
+	"categoryvalue":"",
+	"totalcount":48,
+	"facet":{
+		"name":"province"
+	},
+	"datalist":[
+		{
+			"text":"340000",
+			"alias":"Anhui",
+			"count:original_url":"419"
+		},
+		{
+			"text":"330000",
+			"alias":"Zhejiang",
+			"count:original_url":"320"
+		},
+		{
+			"text":"320000",
+			"alias":"Jiangsu",
+			"count:original_url":"221"
+		},
+		{
+			"text":"310000",
+			"alias":"Shanghai",
+			"count:original_url":"161"
+		},
+		{
+			"text":"430000",
+			"alias":"Hunan",
+			"count:original_url":"109"
+		},
+		{
+			"text":"370000",
+			"alias":"Shandong",
+			"count:original_url":"108"
+		},
+		{
+			"text":"440000",
+			"alias":"Guangdong",
+			"count:original_url":"102"
+		},
+		{
+			"text":"450000",
+			"alias":"Guangxi",
+			"count:original_url":"78"
+		},
+		{
+			"text":"510000",
+			"alias":"Sichuan",
+			"count:original_url":"68"
+		},
+		{
+			"text":"360000",
+			"alias":"Jiangxi",
+			"count:original_url":"67"
+		}
+	]
+};
+
+
+
+
+//标签数据
+window.page3Data = {
+	"categoryname":"",
+	"categoryvalue":"",
+	"totalcount":204026,
+	"facet":{
+		"name":"text"
+	},
+	"datalist":[
+		{
+			"text":"不错",
+			"count:original_url":"61"
+		},
+		{
+			"text":"楼主",
+			"count:original_url":"13"
+		},
+		{
+			"text":"美女",
+			"count:original_url":"33"
+		},
+		{
+			"text":"漂亮",
+			"count:original_url":"28"
+		},
+		{
+			"text":"乌镇",
+			"count:original_url":"10"
+		},
+		{
+			"text":"图片",
+			
+		   "count:original_url":"25"
+		},
+		{
+			"text":"拍",
+			"count:original_url":"31"
+		},
+		{
+			"text":"支持",
+			"count:original_url":"16"
+		},
+		{
+			"text":"照片",
+			"count:original_url":"21"
+		},
+		{
+			"text":"顶",
+			"count:original_url":"29"
+		},
+		{
+			"text":"地方",
+			"count:original_url":"26"
+		},
+		{
+			"text":"说明",
+			"count:original_url":"36"
+		},
+		{
+			"text":"楼",
+			"count:original_url":"25"
+		},
+		{
+			"text":"感觉",
+			"count:original_url":"33"
+		},
+		{
+			"text":"车",
+			"count:original_url":"31"
+		},
+		{
+			"text":"喜欢",
+			"count:original_url":"17"
+		},
+		{
+			"text":"删除",
+			"count:original_url":"34"
+		},
+		{
+			"text":"黄山",
+			 "count:original_url":"30"
+		},
+		{
+			"text":"玩",
+			"count:original_url":"11"
+		},
+		{
+			"text":"管理员",
+			"count:original_url":"30"
+		}
+	]
+};
+
+
+
+//男女数据
+window.page4Data = {
+	"categoryname":"Gender",
+	"totalcount":2,
+	"datalist":[
+		{
+			"text":"男",
+			"frq":69
+		},
+		{
+			"text":"女",
+			"frq":31
+		}
+	]
+};
+
+//表格数据
+window.page5Data = {
+	left: {
+		"fieldlist":[
+			{
+				"text":"Offical Account",
+				"value":"text"
+			},
+			{
+				"text":"Weekly Content #",
+				"value":"frq"
+			},
+			{
+				"text":"Total Read",
+				"value":"col2"
+			},
+			{
+				"text":"NRI",
+				"value":"col3"
+			},
+			{
+				"text":"logo",
+				"value":"col4"
+			}
+		],
+		"snapshot":[
+			{
+				"categoryname":"Intel Family",
+				"totalcount":7,
+				"datalist":[
+					{
+						"text":"Intel China",
+						"frq":33,
+						"col2":44,
+						"col3":4444,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel Bussiness",
+						"frq":3,
+						"col2":4567,
+						"col3":4333,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel IOT",
+						"frq":3,
+						"col2":4567,
+						"col3":4333,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel HR",
+						"frq":3,
+						"col2":4567,
+						"col3":4333,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel SSD",
+						"frq":3,
+						"col2":4567,
+						"col3":4333,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel PR",
+						"frq":3,
+						"col2":4567,
+						"col3":4333,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Intel CCE",
+						"frq":3,
+						"col2":4,
+						"col3":5,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					}
+				]
+			},
+			{
+				"categoryname":"Media",
+				"totalcount":5,
+				"datalist":[
+					{
+						"text":"Guokr",
+						"frq":3,
+						"col2":44,
+						"col3":5555,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Huxiu",
+						"frq":4,
+						"col2":454,
+						"col3":7777,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"ifanr",
+						"frq":4,
+						"col2":454,
+						"col3":777,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Geekpark",
+						"frq":5,
+						"col2":454,
+						"col3":777,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Digtle",
+						"frq":4,
+						"col2":454,
+						"col3":777,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					}
+				]
+			}
+		]
+	},
+	
+	right: {
+		"fieldlist":[
+			{
+				"text":"Offical Account",
+				"value":"text"
+			},
+			{
+				"text":"Weekly Content #",
+				"value":"frq"
+			},
+			{
+				"text":"Total Read",
+				"value":"col2"
+			},
+			{
+				"text":"NRI",
+				"value":"col3"
+			},
+			{
+				"text":"logo",
+				"value":"col4"
+			}
+		],
+		"snapshot":[
+			{
+				"categoryname":"Partner",
+				"totalcount":10,
+				"datalist":[
+					{
+						"text":"xiaomi",
+						"frq":4,
+						"col2":554,
+						"col3":5555,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Lenovo",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"ASUS",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Acer",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Huawei",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Ali Cloud",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Dell",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"IBM China",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"HP",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"Microsoft",
+						"frq":5,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					}
+				]
+			},
+			{
+				"categoryname":"Competiter",
+				"totalcount":2,
+				"datalist":[
+					{
+						"text":"Qualcomm",
+						"frq":34,
+						"col2":444,
+						"col3":66666,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					},
+					{
+						"text":"AMD",
+						"frq":4,
+						"col2":56,
+						"col3":788,
+						"col4":"http://intel.inter3i.com/IntelSocial/images/logo/oIWsFt2Uq6zX8LaRVtiqdtcBlj6c.jpg"
+					}
+				]
+			}
+		]
+	}
+};

@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle;
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/parts/foltop_config_part_authconfig.js"></script>
+<script type="text/javascript" src="js/parts/user_config_part_authconfig.js"></script>
+<script type="text/javascript" src="js/parts/topic_config_part_authconfig.js"></script>
+<script type="text/javascript" src="js/parts/weibo_config_part_authconfig.js"></script>
+<script type="text/javascript" src="js/base_util.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/parts/limitconfig.js"></script>
+ <script type="text/javascript">
+  checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+var datajson = null;
+var fcpac = null;
+var tid;
+var roleid;
+var currmodelid;
+var currtenantid;
+var currauthid;
+$(function(){
+		changeTabTitle();
+	$("#setqx").dialog({
+        width:900,
+        height:620,
+        modal:true,
+        autoOpen:false,
+        title:"设置权限",
+        buttons: {
+            "确定":function(){
+               if(fcpac != null){
+                     datajson = fcpac.getParams();
+                     if(datajson && currmodelid && currtenantid){
+                    	  var url = config.modelUrl + "resource_model.php";
+                    	  var postdata = {};
+                    	  postdata.type = "updatetenantrule";
+                    	  postdata.modelid = currmodelid;
+                    	  postdata.tenantid = currtenantid;
+                    	  postdata.jsondata = datajson;
+						  postdata.currauthid = currauthid;
+                    	  $.ajax({
+                    		  url: url,
+                    	        dataType: "json",
+                    	        type:"post",
+                    	        cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+                    	        contentType:"application/json",
+                    	        data:JSON.stringify(postdata),
+                    	        success:function(data)
+                    	        {
+                    	            if(data.result === false){
+                    	                alert(data.msg);
+										return false;
+									}
+									else{
+										$("#setqx").dialog("close");
+									}
+                    	        } 
+                        	});
+                     }
+               }
+            },
+            "取消":function(){$(this).dialog("close");}
+        }
+     });
+	tid = commonFun.queryString("tid"); 
+	roleid = commonFun.queryString("roleid"); 
+	searchRequest(pagesize,1); 
+});
+function searchRequest(pagesize, curpage){ 
+	$("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"resource_model.php?type=getresinfobytenant&gid="+tid+"&roleid="+roleid+"&currpage="+curpage2+"&pagesize="+pagesize;
+	ajaxCommon(searchnameUrl, searchname, "json");
+}
+function searchname(data){
+	//显示分页
+	totalCount = data.totalcount;
+	if(totalCount>0){
+		var str = "";
+		$.each(data.children, function(i, item){
+			str += "<tr><td>"+item.resourcename+"</td><td>"+item.rolename+"</td><td>"+item.description+"</td><td>"+item.updatetime+"</td><td><a  href=\"javascript:void(0)\" onclick=\"setmodelrule("+item.id+","+item.resourceid+","+tid+", '"+item.resourcename+"');\">设置权限</a></td></tr>";
+		});
+		$("#userinfo").append(str);
+		/* var str=$("<tr><td></td><td colspan='5' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>"); 
+		   $("#userinfo").append(str);*/
+	}
+	else{
+		var str=$("<tr><td colspan='5'>暂无记录!</td></tr>"); 
+		$("#userinfo").append(str);
+	}
+	$("#pagestyle").empty();
+	if(totalCount>pagesize) {
+		pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+	}
+}
+	
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if(delid=='')
+		{
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+     }); 
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后相关角色和用户信息将无法恢复!"))
+		 {
+			 deleteresource(delid);
+		 }
+	 }
+}
+
+function deleteresource(rid)
+{
+	var searchnameUrl =  config.modelUrl+"resource_model.php?type=deleteresource&rid="+rid+"&gid="+$("#resourcetype").val();
+	ajaxCommon(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("删除成功!");
+			searchRequest(pagesize, curpage2,$("#resourcetype").val());
+		}
+		else
+		{
+			alert("删除失败!");
+		}
+	}
+}
+
+function setmodelrule(id,modelid,tid, modelname)
+{
+	//var initUrl = config.modelUrl+"resource_model.php?type=getrulebytenant&rid="+modelid+"&gid="+tid;
+	currauthid = id;
+	var initUrl = config.modelUrl+"resource_model.php?type=getrulebytenant&id="+id;
+    var jsondata;
+	$.ajax({
+		url: initUrl,
+		dataType: "json",
+		cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+		async:false,  //同步请求
+		success:function(data)
+		{
+			jsondata = data;
+
+		} 
+	});
+	var accountdata;
+	$.ajax({
+        url: config.modelUrl+"resource_model.php?type=getaccountjson&resourceid="+modelid+"&tid="+tid,
+        dataType: "json",
+        cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+        async:false,  //同步请求
+        success:function(data)
+        {
+            if(data){
+                if(data.result){
+                    accountdata = data.data;
+                }
+                else{
+                    alert(data.msg);
+                    return false;
+                }
+            }    
+        } 
+    });
+	if(jsondata && accountdata){
+		fcpac = createAuthConfigObject(accountdata,jsondata,"#setqx");
+		if(fcpac != null){
+			currmodelid = modelid;
+			currtenantid = tid;
+		   $("#setqx").dialog("option","title", '设置权限-'+modelname+'');
+		   $("#setqx").dialog("open");
+		   $("#setqx").empty();
+		   fcpac.render();
+		}
+	}
+
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+	<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">设置角色权限</span>
+		<span style="float:right;"><a href="setuptenantlist.shtml">设置角色权限</a></span>
+  <br/>
+  <br/>
+              <br/>
+  <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+       <!--<th width="8%" scope="col">选择</th>-->
+	     <th width="19%" scope="col">资源名称</th>
+         <th width="20%" scope="col">所属角色</th>
+	     <th width="22%" scope="col">说明</th>
+	     <th width="13%" scope="col">创建时间</th>
+	     <th width="13%" scope="col">操作</th>
+       </tr>
+</table>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<div id="setqx">
+<div id="modelcontent"></div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

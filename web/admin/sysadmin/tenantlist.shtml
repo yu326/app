@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--租户管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip{
+	color:red;
+}
+
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+$(function(){
+		changeTabTitle();
+	if($("#addreadonlyuserdiv").length == 1){
+		$("#addreadonlyuserdiv").dialog({
+			autoOpen: false,
+			modal:true,
+			width: 613,
+			height:310,
+			close:function(){
+				$("#readonly_username").val("");
+				$("#readonly_realname").val("");
+				$("#readonly_password").val("");
+				$("#readonly_email").val("");
+				$("#ro_username_tip").text("");
+				$("#ro_realname_tip").text("");
+				$("#ro_password_tip").text("");
+				$("#ro_email_tip").text("");
+			}
+		});
+	}
+	$.each(["username", "realname", "password"], function(k, item){
+		$("#readonly_"+item+"").bind("change", function(){
+			if($(this).val().length > 0){
+				$("#ro_"+item+"_tip").text("");
+			}
+		});
+	});
+	$("#readonly_email").bind("change", function(){
+			if($(this).val().length < 255){
+				$("#ro_email_tip").text("");
+			}
+	});
+
+	$("#userinfo tr:not(:first)").remove();
+	searchRequest(pagesize);
+
+});
+
+//checkuserpure(1,0);
+
+function searchRequest(pagesize, curpage)
+{ $("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"tenant_user_model.php?type=getalltenant"+"&currpage="+curpage2+"&pagesize="+pagesize;
+	
+	ajaxRequest(searchnameUrl, searchname, "json");
+}
+
+
+function searchname(data){
+if(data.result)
+{
+		//显示分页
+		totalCount = data.totalcount
+		
+	
+	if(totalCount>0)
+	{
+		$.each(data.children, function(i){
+								
+				var tel = data.children[i].tel;
+				if(tel == ""){
+					tel = "&nbsp;";
+				}
+				var contact = data.children[i].contact;
+				if(contact == ""){
+					contact = "&nbsp;";
+				}
+				var email = data.children[i].email;
+				if(email == ""){
+					email = "&nbsp;";
+				}
+				var description = data.children[i].description;
+				if(description == ""){
+					description = "&nbsp;";
+				}
+				var str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].tenantid+"'></input></td><td>"+data.children[i].tenantname+"</td><td>"+tel+"</td><td>"+contact+"</td><td>"+email+"</td><td>"+data.children[i].weburl+"</td><td>"+description+"</td><td>"+data.children[i].updatetime+"</td><td> <a id='addtuser"+data.children[i].tenantid+"' href='javascript:void(0)'>新增用户</a> <a href='modifytenant.shtml?tenantid="+data.children[i].tenantid+"'>修改</a></td></tr>"); 
+		$("#userinfo").append(str);
+		$("#addtuser"+data.children[i].tenantid+"").bind("click", function(){
+			addTenantUser(data.children[i]);
+		});
+				
+		})
+		var str=$("<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>"); 
+		$("#userinfo").append(str);
+		}
+		else
+		{
+var str=$("<tr><td colspan='9'>暂无记录!</td></tr>"); 
+		$("#userinfo").append(str);
+		}
+	
+		$("#pagestyle").empty();
+		if(totalCount>pagesize){
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize,curpage2);
+		}
+	}
+	else
+	{
+		alert(data.msg);
+	}
+}
+
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if(delid=='')
+		{
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+     }); 
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后相关角色和用户信息将无法恢复!"))
+		 {
+			 deletetenant(delid);
+		 }
+	 }
+}
+
+function deletetenant(tid)
+{
+	var searchnameUrl =  config.modelUrl+"tenant_user_model.php?type=deletetenant&tid="+tid;
+	ajaxRequest(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.result)
+		{
+			alert(data.msg);
+			searchRequest(pagesize, curpage2);
+		}
+		else
+		{
+			alert(data.msg);
+		}
+	}
+}
+function addTenantUser(item){
+	$("#readonly_username").css("display", "");
+	$("#readonly_username_td label").remove();
+
+	$("#readonly_usertype").empty().append("<option value='1'>租户用户</option>");
+	$("#readonly_usertype").css("display", "none");
+	$("#readonly_usertype_td").children("label").remove().end().append("<label>租户用户</label>");
+
+	//所属租户
+	$("#readonly_tenantid").empty().append("<option value='"+item.tenantid+"'>"+item.tenantname+"</option>");;
+	$("#readonly_tenantid").css("display", "none");
+	$("#readonly_tenantid_td").children("label").remove().end().append("<label>"+item.tenantname+"</label>");
+
+	$("#readonly_binduserid").parents("tr").css("display", "none");
+	$("#readonly_binduserid").val("");
+	$("#readonly_bindusername").text("");
+	addNewUser();
+}
+function addNewUser(userid){
+	$("#addreadonlyuserdiv").dialog("open");
+	var dialogtitle = "";
+	if(userid == undefined){
+		dialogtitle = "新增用户";
+	}
+	else{
+		dialogtitle = "修改用户";
+	}
+	$("#addreadonlyuserdiv").dialog({title:dialogtitle});
+	$("#addreadonlyuserdiv").dialog("option", "buttons", {
+		"确定":function(){
+			var readonly_username = $("#readonly_username").val();
+			if(readonly_username == ""){
+				$("#ro_username_tip").text("请填写用户名!");
+				return false;
+			}
+			else{
+				if(readonly_username.length > 50){
+					$("#ro_username_tip").text("最多50个字符!")
+					return false;
+				}
+				else{
+					var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+					if(reg.test(readonly_username)){
+						$("#ro_username_tip").text("不能含有特殊字符!");
+						return false;
+					}
+				}
+
+			}
+			var tid = $("#readonly_tenantid").val();
+			var usertype = $("#readonly_usertype").val();
+			if(usertype == -1){
+				tid = -1;
+			}
+
+			var searchnameUrl = config.modelUrl+"user_model.php";
+			//ajaxRequest(searchnameUrl, checkExits, "json");
+			$.ajax({
+					type:"POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: searchnameUrl,
+					data: JSON.stringify({username:readonly_username,tid:tid,type:"checkuserexist"}), 
+					success:function (data){
+						if(userid != undefined){
+							data.flag = 0;
+						}
+						if(data!=null){
+						if(data.flag==1){
+							//alert("用户名称已存在,请更改");
+							$("#ro_username_tip").text("用户名称已存在,请更改!");
+							$("#readonly_username").focus();
+						}
+						else{
+							var readonly_username = $("#readonly_username").val();
+							var readonly_realname = $("#readonly_realname").val();
+							if(readonly_realname == ""){
+								$("#ro_realname_tip").text("真实姓名不能为空!");
+								return false;
+							}
+							else{
+								if(readonly_realname.length > 50){
+									$("#ro_realname_tip").text("最多50个字符!")
+										return false;
+								}
+								else{
+									var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+									if(reg.test(readonly_realname)){
+										$("#ro_realname_tip").text("不能含有特殊字符!");
+										return false;
+									}
+								}
+							}
+							var readonly_password = $("#readonly_password").val();
+							if(readonly_password == ""){
+								$("#ro_password_tip").text("请填写密码!");
+								return false
+							}
+							else{
+								if(readonly_password.length > 20){
+									$("#ro_password_tip").text("密码最多20位!");
+									return false;
+								}
+							}
+							var secpwd = MD5(readonly_password);
+
+							var readonly_email = $("#readonly_email").val();
+							if(readonly_email.length > 255){
+								$("#ro_email_tip").text("最多255个字符!");
+								return false;
+							}
+							else{
+								if(readonly_email != ""){
+									var reg = new RegExp(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/g);
+									if(!reg.test(readonly_email)){
+										$("#ro_email_tip").text("邮件格式不正确!");
+										return false;
+									}
+								}
+							}
+							var binduserid = $("#readonly_binduserid").val();
+							var usertype = $("#readonly_usertype option:selected").val();
+							var tid = $("#readonly_tenantid").val();
+							if(usertype == -1){
+								tid = -1;
+							}
+							var alloweditinfo = $("input[name=readonly_alloweditinfo]:checked").val();
+							var type = "adduser";
+							var dataobj = {username:readonly_username, realname:readonly_realname,email:readonly_email,binduserid:binduserid,type:type,tid:tid,alloweditinfo:alloweditinfo, usertype:usertype, password:secpwd};
+							if(userid != undefined){
+								type = "updateuser";
+								dataobj= {username:readonly_username, realname:readonly_realname,email:readonly_email,binduserid:binduserid,type:type,tid:tid,alloweditinfo:alloweditinfo, usertype:usertype, userid:userid}
+							}
+							$.ajax({
+								type:"POST",
+								contentType: "application/json",
+								dataType: "json",
+								url: config.modelUrl+"user_model.php",
+								data: JSON.stringify(dataobj), 
+								success:function(msg){
+								//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+								if(msg.flag==1){
+								if(userid !=undefined){
+									alert("修改成功");
+									var pid = $("#modifyuser"+userid+"").parents("table").attr("id");
+									if(pid == "userinfo"){
+										searchRequest(pagesize, curpage2);
+									}
+									else{
+										readonlyUserRequest(pagesize, curpage2);
+									}
+									$("#addreadonlyuserdiv").dialog("close");
+								}
+								else{
+									if(confirm("添加成功，是否继续添加!")){
+										$("#readonly_username").val("");
+										$("#readonly_realname").val("");
+										$("#readonly_password").val("");
+										$("#readonly_email").val("");
+									}
+									else
+									{
+										$("#usertype").val(usertype);
+										searchRequest(pagesize, curpage2);
+										$("#addreadonlyuserdiv").dialog("close");
+									}
+
+								}
+								}
+								else{
+									if(userid != undefined){
+										alert("修改失败,请重试!");
+									}
+									else{
+										alert("添加失败,请重新添加!");
+									}
+								}
+								}
+
+								});
+}
+						}
+						}
+
+				});
+		},
+		"取消":function(){
+			$(this).dialog("close");
+		}
+	});
+
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+	<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">租户管理</span> 
+		<span style="float: right"><a href="addtenant.shtml">新增租户</a></span>
+<p/>
+<table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+       	<th width="4%" scope="col">选择</th>
+	     <th width="13%" scope="col">租户名称</th>
+         <th width="11%" scope="col">电话</th>
+	     <th width="7%" scope="col">联系人</th>
+	     <th width="11%" scope="col">电子邮件</th>
+         <th width="12%" scope="col">二级域名</th>
+         <th width="12%" scope="col">说明</th>
+         <th width="13%" scope="col">创建时间</th>
+	     <th width="20%" scope="col">操作</th>
+       </tr>
+</table>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<div id="addreadonlyuserdiv" style="display:none;" tenantuserid="-1" userid="-1">
+	<table class="formtable">
+		<tr>
+			<td class="tdleft"><input type="hidden" name="readonly_userid" id="readonly_userid" />用户名：</td>
+			<td id="readonly_username_td"><input type="text" name="readonly_username" id="readonly_username" /></td>
+			<td class="tdtip" id="ro_username_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">真实姓名：</td>
+			<td><input type="text" name="readonly_realname" id="readonly_realname" /></td>
+			<td class="tdtip" id="ro_realname_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">密码：</td>
+			<td><input type="password" name="readonly_password" id="readonly_password" /></td>
+			<td class="tdtip" id="ro_password_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">用户类型：</td>
+			<td id="readonly_usertype_td">
+				<select type="text" name="readonly_usertype" id="readonly_usertype">
+					<option value="-1">系统用户</option>
+					<option value="1">租户用户</option>
+					<option value="2">只读用户</option>
+				</select>
+			</td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">所属租户：</td>
+			<td id="readonly_tenantid_td"><select name="readonly_tenantid" id="readonly_tenantid" ></select></td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">所属用户：</td>
+			<td><input type="hidden" name="readonly_binduserid" id="readonly_binduserid" /><label id="readonly_bindusername"></label></td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft" >电子邮件：</td>
+			<td><input type="text" name="readonly_email" id="readonly_email" /></td>
+			<td class="tdtip" id="ro_email_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft" >允许用户修改个人信息：</td>
+			<td><input type="radio" name="readonly_alloweditinfo" id="readonly_alloweditinfo1" value="1" checked="checked" />是
+				<input type="radio" name="readonly_alloweditinfo" id="readonly_alloweditinfo0" value="0" />否
+			</td>
+			<td class="tdtip" id="ro_alloweditinfo_tip"></td>
+		</tr>
+		<!--
+		<tr>
+			<td colspan="2" align="center">
+				<input class="buttono" type="submit" value="提 交" id="submitonlyreaduser" />
+				<input class="buttono" type="button" value="取 消" id="cancleonlyreaduser" />
+			</td>
+		</tr>
+		-->
+	</table>
+</div>
+
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

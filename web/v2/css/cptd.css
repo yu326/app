@@ -1,0 +1,30 @@
+#dh{
+ color:#03abdc; line-height:35px; vertical-align:middle; margin-left:10px; *+margin-top:10px
+}
+#dh img{margin-right:5px; vertical-align:text-bottom}
+#left{
+width:200px; color:#03abdc; float:left
+}
+#left ul{margin:0; padding:0px}
+#left ul li{
+line-height:30px;background-image:url(../images/libg.gif); padding-left:20px; list-style:none; margin-left:10px 
+}
+#left img {
+margin-left:5px
+}
+
+#right{
+width:700px; float:left;  margin-left:35px; margin-bottom:20px
+}
+#right h1{
+font-size:14px; font-weight:bold; color:#21447a; height:30px; background-image:url(../images/h1bg.gif); margin-top:0px; vertical-align:middle
+}
+
+#right  p{
+line-height:20px; text-indent:25px; margin:0px
+}
+ .t{
+line-height:25px; text-indent:0px; margin:0px; color:#21447a; font-weight:bold
+}
+ .lx{float:right; margin:10px 0px 10px 10px }
+.dot{margin-right:5px; margin-left:-10px;}

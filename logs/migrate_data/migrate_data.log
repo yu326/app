@@ -1,0 +1,13 @@
+04/20/17 17:51:53,176 [33408] DEBUG migrate_data - migrate_data.php - get task from DBserver:[localhost:3306] DBName:[weibo_info_2].
+04/20/17 17:51:53,195 [33408] INFO migrate_data - migrate_data.php - 任务33404启动
+04/20/17 17:51:53,199 [33408] DEBUG migrate_data - enter connectDBs
+04/20/17 17:51:53,200 [33408] DEBUG migrate_data -  D:\app\job\migrate_data.php connectDBs 246 数据迁移--+-连接源主机--+-源主机没有配置，将当前机器作为源主机,Dbserver:[localhost:3306 DBName:[weibo_info_2] solrHost:[http://192.168.0.151:9000/solrstore/].
+04/20/17 17:51:53,201 [33408] DEBUG migrate_data - exit connectDBs
+04/20/17 17:51:53,201 [33408] DEBUG migrate_data - enter migrateData
+04/20/17 17:51:53,202 [33408] DEBUG migrate_data - enter exportData
+04/20/17 17:51:53,203 [33408] DEBUG migrate_data -  D:\app\job\migrate_data.php exportData 482 数据迁移--+-exportData--+-生成查询条件:[sourceid:].
+04/20/17 17:51:53,204 [33408] DEBUG migrate_data -  D:\app\job\migrate_data.php exportData 491 数据迁移--+-exportData--+-用户自定义的查询条件--+-排序条件: TaskParam order:[created].
+04/20/17 17:51:53,204 [33408] DEBUG migrate_data - enter solr_retrieve
+04/20/17 17:51:53,205 [33408] DEBUG migrate_data - solr_retrieve param:q=sourceid:&start=0&rows=100
+04/20/17 17:51:53,229 [33408] DEBUG migrate_data - solr_retrieve curl_exec time:0.023264169692993164062
+04/20/17 17:51:53,235 [33408] FATAL migrate_data - migrate_data.php - 任务33404异常HTTP Code = 400

@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<base></base>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script language="javascript">
+var head = document.getElementsByTagName( "head" )[0];
+var _base_ = document.getElementsByTagName( "base" )[0];
+var b_url = "";
+var sh=false;
+ var pathhost = "www.inter3i.com";
+ if(window.location.host != pathhost){
+        sh = true;
+        _base_.setAttribute("href","");
+ }
+
+if(!sh){
+    var reg = /^\/(\w+)($|\/+.*)/i;
+    var t = window.location.pathname.match(reg);
+    if(t != null && t[1]){
+        b_url= location.protocol+"//"+location.host+"/"+t[1]+"/";
+        _base_.setAttribute("href",b_url);
+    }
+    else{
+        location.href = "error.html";
+    }
+}
+/*
+var jqcss=document.createElement("link"); 
+jqcss.setAttribute("rel", "stylesheet"); 
+jqcss.setAttribute("type", "text/css");  
+jqcss.setAttribute("href", "css/login.css");
+head.appendChild(jqcss);
+*/
+var md5ele = document.createElement("script");
+md5ele.setAttribute("type","text/javascript"); 
+md5ele.setAttribute("src", "js/md5.js");
+head.appendChild(md5ele);
+
+function jqonload(){
+	if(!this.readyState || this.readyState=='loaded' || this.readyState=='complete'){
+		var righturl = false;
+        $.ajax({url:"model/checkuser.php",dataType:"json",type:"POST",data:{type:"checkweburl"},async:false,
+            success:function(d){
+				if(d != undefined && d.tenantid!=null && d.tenantid!=""){
+					$.getScript('js/common.js',function(){
+						  $(function(){
+							  /*
+							  //图片加载时,对图片压缩处理
+							  $("#logimg").bind("load",function(){
+								  picresize(this,200,90);
+                              });
+							  //对图片加载失败时 error处理
+							  $("#logimg").bind("error",function(){
+								  var imgsrc = $(this).attr("src");
+								  if(imgsrc!="" && imgsrc != "images/logo.gif"){
+									  $(this).attr("src", "images/logo.gif")
+								  }
+							  });
+							  //先加载租户对应的文件夹租户logo,并为图片绑定error事件, 当找不到此文件时,触发error事件,加载默认博晓通logo 
+							  if(d.selfstyle == 1){
+								  $("#logimg").attr("src", "tenant/"+d.tenantid+"/logo.png");
+							  }
+							  else{
+								  $("#logimg").attr("src", "images/logo.gif")
+							  }
+							  */
+							  //先加载租户对应当foot, 发送ajax请求, 请求失败时,使用默认的foot
+							  // 请求HTML
+							  //head & body
+							  var customerhead = false;
+							  if(d.selfstyle == 1){
+								  var tenant_url = "tenant/"+d.tenantid+"/";
+								  $("base").attr("href", tenant_url);
+								  $.ajax({type: "GET", url: "head.html", async:false,  // 同步请求
+										  dataType: "text", 
+										  success: function(data){
+											  $("head").append(data);
+											  $.ajax({type:"GET", url:"body.html", async:false, 
+												  dataType:"html",
+												  success:function(bdata){
+													  customerhead = true;
+													  $("#mybody").append(bdata);
+												  },
+												  error:function(){ //加载自己的body
+													alert("未提供body.html!");
+												  }
+											  });
+										  },
+										  error:function(){
+											  $("base").removeAttr("href");
+											  loadDefault(d);
+										  }
+									});
+							  }
+							  else{
+								  $("base").removeAttr("href");
+								  loadDefault(d);
+							  }
+							  if(!customerhead){
+								  var now = new Date(); 
+								  var year = now.getFullYear();
+								  if(d.selfstyle == 1){
+									  var tenant_url = "tenant/"+d.tenantid+"/";
+									  $("base").attr("href", tenant_url);
+									  $.ajax({type: "GET", url: "foot.html", async:false,  // 同步请求
+										  dataType: "html", 
+										  success: function(data){
+											  $("#mybody").after(data);
+										  },
+										  error:function(){
+										  $("base").removeAttr("href");
+											var footer = '<div id="foot">©2011 - '+year+' 博晓通 &nbsp;&nbsp;&nbsp;&nbsp;<a style="color:white" href="http://www.miibeian.gov.cn" target="_blank">京ICP备12047578号</a></div>';
+											  $("#mybody").after(footer);
+										  }
+									  });
+								  }
+								  else{
+									  $("base").removeAttr("href");
+									  var footer = '<div id="foot">©2011 - '+year+' 博晓通 &nbsp;&nbsp;&nbsp;&nbsp;<a style="color:white" href="http://www.miibeian.gov.cn" target="_blank">京ICP备12047578号</a></div>';
+									  $("#mybody").after(footer);
+								  }
+							  }
+
+							  $('body').bind('keypress',function(event){
+								  if(event.keyCode == "13"){
+									  userlogin();
+									  return false;
+								  }
+							  });
+							  $("#btnsubmit").click(function(){
+								  userlogin();
+								  return false;
+							  });
+
+							  $("#username").val("");
+							  $("#password").val("");
+							  $("#mark").val("");
+							  $("#username").focus();
+							  $("#username").bind("focus", function(){
+								  $("#username").removeAttr("style");
+								  $("#username").val("");
+							  });
+							  $("#passwordvalidate").bind("focus", function(){
+								  $("#passwordvalidate").hide(); //替换为password类型
+								  $("#passwordvalidate").val(""); //替换为password类型
+								  $("#password").val("");
+								  $("#password").show();
+								  $("#password").focus();
+							  });
+							  $("#mark").bind("focus", function(){
+								  $("#mark").removeAttr("style");
+								  $("#mark").val("");
+							  });
+						  });
+					  });
+					
+				}
+				else{
+					$("#logimg").css("display", "none");
+				}
+                righturl = d.result;
+            },
+            error:function(){
+                righturl = false;
+            }
+        });
+        if(!righturl){
+            location.href = "error.html";
+            return false;
+        }	
+
+	}
+}
+
+var jqscript = document.createElement("script");
+jqscript.setAttribute("type","text/javascript"); 
+jqscript.setAttribute("src", "js/jquery-1.6.4.min.js"); 
+if(!+[1,]){
+    jqscript.onreadystatechange = jqonload;
+}
+else{
+    jqscript.onload = jqonload;
+}
+head.appendChild(jqscript);
+
+function loadDefault(d){
+	$("base").removeAttr("href");
+	var jqcss=document.createElement("link"); 
+	jqcss.setAttribute("rel", "stylesheet"); 
+	jqcss.setAttribute("type", "text/css");  
+	jqcss.setAttribute("href", "css/login.css");
+	head.appendChild(jqcss);
+	var tenant_url = location.protocol+"//"+location.host+"/";
+	var defaultbody = '<div id="top"> <span> <img id="logimg" width="200" height="90" /> </span> <span id="webdesc"> </span> </div> <div id="login"> <div id="login_left"> <ul> <li>用户名：<input name="username" id="username" type="text" size="35" /></li> <li>密<img src="'+tenant_url+'images/empty.gif" width="15" height="1" />码：<input name="password" id="password" type="password" size="35" /><input name="passwordvalidate" id="passwordvalidate" type="text" size="35" style="display:none" /></li> <li>验证码：<input name="mark" id="mark" type="text" size="16" />&nbsp;&nbsp;<img id="imgvalidate" src="'+tenant_url+'model/validate.php" align="middle" /> &nbsp;&nbsp;<a href="javascript:void(0)" onClick="reloadvalidate()">看不清</a></li> <li><a href="#">找回密码</a>  <a href="#">用户注册</a><input id="btnsubmit" type="button" class="but" value=" "/></li> </ul> </div> <div id="login_right"></div> </div>';
+	$("#mybody").append(defaultbody);
+	//title
+	document.title = d.webname;
+	$("#webdesc").text(d.webname);;
+
+	//图片加载时,对图片压缩处理
+	$("#logimg").bind("load",function(){
+			picresize(this,200,90);
+			});
+	//对图片加载失败时 error处理
+	$("#logimg").bind("error",function(){
+		var imgsrc = $(this).attr("src");
+		if(imgsrc!="" && imgsrc != ""+tenant_url+"images/logo.gif"){
+			$(this).attr("src", ""+tenant_url+"images/logo.gif")
+		}
+	});
+	//先加载租户对应的文件夹租户logo,并为图片绑定error事件, 当找不到此文件时,触发error事件,加载默认博晓通logo 
+	if(d.selfstyle == 1){
+		$("#logimg").attr("src", tenant_url+"tenant/"+d.tenantid+"/logo.png");
+	}
+	else{
+		$("#logimg").attr("src", ""+tenant_url+"images/logo.gif")
+	}
+}
+function userlogin()
+{
+	var username = $("#username").val();
+	var pwd = MD5($("#password").val());
+	var mark= $("#mark").val();
+
+	var flag = true;
+	if(username == ""){
+		$("#username").val("请输入用户名");
+		$("#username").css({"border":"1px solid red", "color":"red"});
+		flag = false;
+	}
+	if($("#password").val() == ""){
+		$("#password").hide();
+		$("#password").val("");
+		$("#passwordvalidate").css({"border":"1px solid red", "color":"red", "display":""});
+		$("#passwordvalidate").val("请输入密码");
+		flag = false;
+	}
+	if(mark == ""){
+		$("#mark").val("请输入验证码");
+		$("#mark").css({"border":"1px solid red", "color":"red"});
+		flag = false;
+	}
+	if(flag){
+		var tenant_url = location.protocol+"//"+location.host+"/";
+		$.post(tenant_url+"model/checkuser.php", {username:username,type:"login",password:pwd,mark:mark},     
+		function(r){
+			if(r.result){
+				var tenant_url = location.protocol+"//"+location.host+"/";
+				window.location.href=tenant_url+"index.html";
+			}
+			else{
+				var tenant_url = location.protocol+"//"+location.host+"/";
+				$("#imgvalidate").attr("src",tenant_url+"model/validate.php?"+Math.random());
+				if(r.errortype == 2){ //用户名错误
+					$("#username").val(r.msg);
+					$("#username").css({"border":"1px solid red", "color":"red"});
+				}
+				else if(r.errortype == 3){ //密码错误
+					$("#password").hide();
+					$("#password").val("");
+					$("#passwordvalidate").css({"border":"1px solid red", "color":"red", "display":""});
+					$("#passwordvalidate").val(r.msg);
+
+				}
+				else if(r.errortype == 4){
+					$("#username").val(r.msg);
+					$("#username").css({"border":"1px solid red", "color":"red"});
+				}
+				else{
+					$("#mark").val(r.msg);
+					$("#mark").css({"border":"1px solid red", "color":"red"});
+				}
+			}
+		},"json");
+	}
+}
+function reloadvalidate(){
+	var tenant_url = location.protocol+"//"+location.host+"/";
+	$("#imgvalidate").attr("src",tenant_url+"model/validate.php?"+Math.random());
+}
+
+</script>
+<script type="text/javascript">
+
+/* bert 2015-8-21 由于网络限制,请求Google易超时,失败.
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33831791-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+  */
+
+</script></head>
+<body>
+	<div id="mybody">
+		<!--
+    	<div id="top">
+			<span>
+				<img id="logimg" width="200" height="90" /> 
+			</span>
+			<span id="webdesc">
+			</span>
+        </div>
+    	<div id="login">
+        	<div id="login_left">
+            	<ul>
+                	<li>用户名：<input name="username" id="username" type="text" size="35" /></li>
+                    <li>密<img src="images/empty.gif" width="15" height="1" />码：<input name="password" id="password" type="password" size="35" /><input name="passwordvalidate" id="passwordvalidate" type="text" size="35" style="display:none" /></li>
+                    <li>验证码：<input name="mark" id="mark" type="text" size="16" />&nbsp;&nbsp;<img id="imgvalidate" src="model/validate.php" align="middle" /> &nbsp;&nbsp;<a href="javascript:void(0)" onClick="reloadvalidate()">看不清</a></li>
+                    <li><a href="#">找回密码</a>  <a href="#">用户注册</a><input id="btnsubmit" type="button" class="but" value=" "/></li>
+                    
+                </ul>
+            </div>
+            <div id="login_right"></div>
+        </div>
+		-->
+    </div>
+</body>
+</html>

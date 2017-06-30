@@ -1,0 +1,945 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--用户管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+#readonly_search_div label {
+    display: inline-block;
+    margin-left: 10px;
+    text-align: right;
+    vertical-align: middle;
+    width: 72px;
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip{
+	color:red;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript">
+   checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+var deladmin=0;
+
+$(function(){
+		changeTabTitle();
+	searchRequest(pagesize,1); 
+	if($("#addreadonlyuserdiv").length == 1){
+		$("#addreadonlyuserdiv").dialog({
+			autoOpen: false,
+			modal:true,
+			width: 613,
+			height:343,
+			close:function(){
+				$("#readonly_username").val("");
+				$("#readonly_realname").val("");
+				$("#readonly_password").val("");
+				$("#readonly_email").val("");
+				$("#readonly_expiretime").val("");
+				$("#ro_username_tip").text("");
+				$("#ro_realname_tip").text("");
+				$("#ro_password_tip").text("");
+				$("#ro_email_tip").text("");
+				$("#ro_expiretime_tip").text("");
+			}
+		});
+	}
+	if($("#readonlyuserlistdiv").length == 1){
+		$("#readonlyuserlistdiv").dialog({
+			autoOpen: false,
+			modal:true,
+			height:250,
+			width:755 
+		});
+	}
+	if($("#modifypwddiv").length == 1){
+		$("#modifypwddiv").dialog({
+			autoOpen: false,
+			modal:true,
+			width: 443,
+			//height:240,
+			close:function(){
+				$("#newpwd").val("");
+				$("#newpwd_tip").text("");
+				$("#renewpwd").val("");
+				$("#renewpwd_tip").text("");
+			}
+		});
+	}
+	/*
+	$("#submitonlyreaduser").bind("click", function(){
+		var readonly_username = $("#readonly_username").val();
+		var tid = $("#addreadonlyuserdiv").attr("tenantuserid");
+		var searchnameUrl = config.modelUrl+"user_model.php?type=checkuserexist&username="+readonly_username+"&tid="+tid;
+		ajaxRequest(searchnameUrl, checkExits, "json");
+	});
+	$("#cancleonlyreaduser").bind("click", function(){
+		$("#addreadonlyuserdiv").dialog("close");
+	});
+	*/
+	$.each(["username", "realname", "password", "expiretime"], function(k, item){
+		$("#readonly_"+item+"").bind("change", function(){
+			if($(this).val().length > 0){
+				$("#ro_"+item+"_tip").text("");
+			}
+		});
+	});
+	$("#readonly_email").bind("change", function(){
+			if($(this).val().length < 255){
+				$("#ro_email_tip").text("");
+			}
+	});
+	$("#newpwd").bind("change", function(){
+		$("#newpwd_tip").text("");
+	});
+	$("#renewpwd").bind("change", function(){
+		$("#renewpwd_tip").text("");
+	})
+
+
+	//新增用户
+	$("#adduser").bind("click", function(){
+			addUser();
+	});
+	$("#readonly_search").bind("click", function () {
+		searchRequest(pagesize);
+	});
+	$("#readonly_reset").bind("click", function(){
+		$("#readonly_search_div [id^='readonly_'][type!=button]").each(function(i, item){
+			$(item).val("");
+		});
+	});
+
+});
+function updateUser(item){
+	$("#readonly_userid").val(item.userid);
+	$("#readonly_username").val(item.username);
+	$("#readonly_username").css("display", "none");
+	$("#readonly_username_td").children("label").remove().end().append("<label>"+item.username+"</label>");
+	$("#readonly_realname").val(item.realname);
+
+	$("#readonly_password").val("");
+	$("#readonly_password").parents("tr").css("display", "none");
+
+	var usertypename = ""
+	if(item.usertype == -1){
+		usertypename = "系统用户";
+		if(item.userid == 40){
+			$("#readonly_expiretime_tr").css("display", "none");
+		}
+		else{
+			$("#readonly_expiretime_tr").css("display", "");
+		}
+	}
+	else if(item.usertype == 1){
+		usertypename = "租户用户";
+	}
+	else{
+		usertypename = "只读用户";
+	}
+	$("#readonly_usertype").empty().append("<option value='2'>"+usertypename+"</option>");
+	$("#readonly_usertype").css("display", "none");
+	$("#readonly_usertype_td").children("label").remove().end().append("<label>"+usertypename+"</label>");
+
+	var tname = item.tenantname;
+	if(tname == null){
+		tname = "系统租户";
+	}
+	$("#readonly_tenantid").parents("tr").css("display", "");
+	$("#readonly_tenantid").empty().append("<option value='"+item.tenantid+"'>"+tname+"</option>");;
+	$("#readonly_tenantid").css("display", "none");
+	$("#readonly_tenantid_td").children("label").remove().end().append("<label>"+tname+"</label>");
+
+	$("#readonly_binduserid").val(item.userid);
+	$("#readonly_bindusername").text(item.username);
+	if(item.usertype != 2){
+		$("#readonly_binduserid").parents("tr").css("display", "none");
+	}
+	$("#readonly_email").val(item.email);
+	if(item.expiretime){
+		$("#readonly_expiretime").val(timeToStr(item.expiretime));
+	}
+	$("input[name=readonly_alloweditinfo][id=readonly_alloweditinfo"+item.alloweditinfo+"]").attr("checked", true);
+	if(item.usertype == -1){
+		$("input[name=readonly_alloweditinfo]").parents("tr").css("display", "none");
+	}
+	else{
+		$("input[name=readonly_alloweditinfo]").parents("tr").css("display", "");
+	}
+	addNewUser(item.userid);
+}
+function addReadonlyUser(item){
+	$("#readonly_username").css("display", "");
+	$("#readonly_username_td label").remove();
+
+	$("#readonly_password").parents("tr").css("display", "");
+
+	$("#readonly_usertype").empty().append("<option value='2'>只读用户</option>");
+	$("#readonly_usertype").css("display", "none");
+	$("#readonly_usertype_td").children("label").remove().end().append("<label>只读用户</label>");
+
+	$("#readonly_tenantid").parents("tr").css("display", "");
+	$("#readonly_tenantid").empty().append("<option value='"+item.tenantid+"'>"+item.tenantname+"</option>");;
+	$("#readonly_tenantid").css("display", "none");
+	$("#readonly_tenantid_td").children("label").remove().end().append("<label>"+item.tenantname+"</label>");
+
+	$("#readonly_binduserid").parents("tr").css("display", "");
+	$("#readonly_binduserid").val(item.userid);
+	$("#readonly_bindusername").text(item.username);
+	addNewUser();
+}
+function addUser(){
+	$("#readonly_username").css("display", "");
+	$("#readonly_username_td label").remove();
+
+	$("#readonly_password").parents("tr").css("display", "");
+
+	$("#readonly_binduserid").parents("tr").css("display", "none");
+	$("#readonly_binduserid").val("");
+	$("#readonly_bindusername").text("");
+
+	$("#readonly_usertype").css("display", "");
+	$("#readonly_usertype_td label").remove();
+	$("#readonly_usertype").empty().append("<option value='-1'>系统用户</option><option value='1'>租户用户</option>");
+
+	$("#readonly_tenantid").parents("tr").css("display", "none");
+	$("input[name=readonly_alloweditinfo]").parents("tr").css("display", "none");
+	$("#readonly_usertype").bind("change", function(){
+			var ut = $(this).val();
+			if(ut == 1){
+			$("#readonly_tenantid").parents("tr").css("display", "");
+			$("#readonly_tenantid").css("display", "");
+			$("#readonly_tenantid_td").children("label").remove();
+
+			$("input[name=readonly_alloweditinfo]").parents("tr").css("display", "");
+			var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenant";
+			ajaxRequest(searchnameUrl, function(data){
+				if(data!=null){
+				$("#readonly_tenantid").empty();
+				$.each(data.children, function(i){
+					//$('#readonly_tenantid').append( new Option(data.children[i].tenantname,data.children[i].tenantid) );
+					$('#readonly_tenantid').append("<option value='"+data.children[i].tenantid+"'>"+data.children[i].tenantname+"</option>");
+
+					});
+				}
+				else
+				{
+				$("#readonly_tenantid").empty();
+				//$('#readonly_tenantid').append( new Option('请选择',-1) );
+				$('#readonly_tenantid').append("<option value='-1'>请选择</option>");
+				}
+				}
+				, "json");
+			}
+			else{
+				$("#readonly_tenantid").parents("tr").css("display", "none");
+				$("input[name=readonly_alloweditinfo]").parents("tr").css("display", "none");
+			}
+	});
+	addNewUser();
+}
+function addNewUser(userid){
+	$("#addreadonlyuserdiv").dialog("open");
+	var dialogtitle = "";
+	if(userid == undefined){
+		dialogtitle = "新增用户";
+	}
+	else{
+		dialogtitle = "修改用户";
+	}
+	$("#addreadonlyuserdiv").dialog({title:dialogtitle});
+	$("#addreadonlyuserdiv").dialog("option", "buttons", {
+		"确定":function(){
+			var readonly_username = $("#readonly_username").val();
+			if(readonly_username == ""){
+				$("#ro_username_tip").text("请填写用户名!");
+				return false;
+			}
+			else{
+				if(readonly_username.length > 50){
+					$("#ro_username_tip").text("最多50个字符!")
+					return false;
+				}
+				else{
+					var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+					if(reg.test(readonly_username)){
+						$("#ro_username_tip").text("不能含有特殊字符!");
+						return false;
+					}
+				}
+
+			}
+			var tid = $("#readonly_tenantid").val();
+			var usertype = $("#readonly_usertype").val();
+			if(usertype == -1){
+				tid = -1;
+			}
+
+			var searchnameUrl = config.modelUrl+"user_model.php";
+			//ajaxRequest(searchnameUrl, checkExits, "json");
+			$.ajax({
+					type:"POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: searchnameUrl,
+					data: JSON.stringify({username:readonly_username,tid:tid,type:"checkuserexist"}), 
+					success:function (data){
+						if(userid != undefined){
+							data.flag = 0;
+						}
+						if(data!=null){
+						if(data.flag==1){
+							//alert("用户名称已存在,请更改");
+							$("#ro_username_tip").text("用户名称已存在,请更改!");
+							$("#readonly_username").focus();
+						}
+						else{
+							var readonly_username = $("#readonly_username").val();
+							var readonly_realname = $("#readonly_realname").val();
+							if(readonly_realname == ""){
+								$("#ro_realname_tip").text("真实姓名不能为空!");
+								return false;
+							}
+							else{
+								if(readonly_realname.length > 50){
+									$("#ro_realname_tip").text("最多50个字符!")
+										return false;
+								}
+								else{
+									var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+									if(reg.test(readonly_realname)){
+										$("#ro_realname_tip").text("不能含有特殊字符!");
+										return false;
+									}
+								}
+							}
+							if(userid == undefined){
+								var readonly_password = $("#readonly_password").val();
+								if(readonly_password == ""){
+									$("#ro_password_tip").text("请填写密码!");
+									return false
+								}
+								else{
+									if(readonly_password.length > 20){
+										$("#ro_password_tip").text("密码最多20位!");
+										return false;
+									}
+								}
+								var secpwd = MD5(readonly_password);
+							}
+
+							var readonly_email = $("#readonly_email").val();
+							if(readonly_email.length > 255){
+								$("#ro_email_tip").text("最多255个字符!");
+								return false;
+							}
+							else{
+								if(readonly_email != ""){
+									var reg = new RegExp(/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/g);
+									if(!reg.test(readonly_email)){
+										$("#ro_email_tip").text("邮件格式不正确!");
+										return false;
+									}
+								}
+							}
+							var readonly_expiretime = $("#readonly_expiretime").val();
+							if(readonly_expiretime != ""){
+								readonly_expiretime = getTimeSec(readonly_expiretime);
+							}
+
+							var binduserid = $("#readonly_binduserid").val();
+							var usertype = $("#readonly_usertype option:selected").val();
+							var tid = $("#readonly_tenantid").val();
+							if(usertype == -1){
+								tid = -1;
+							}
+							var alloweditinfo = $("input[name=readonly_alloweditinfo]:checked").val();
+							var type = "adduser";
+							var rrname = readonly_realname;
+							var dataobj = {username:readonly_username, realname:rrname,email:readonly_email,expiretime:readonly_expiretime,binduserid:binduserid,type:type,tid:tid,alloweditinfo:alloweditinfo, usertype:usertype, password:secpwd};
+							if(userid != undefined){
+								type = "updateuser";
+								dataobj= {username:readonly_username, realname:rrname,email:readonly_email,expiretime:readonly_expiretime,binduserid:binduserid,type:type,tid:tid,alloweditinfo:alloweditinfo, usertype:usertype, userid:userid}
+							}
+							$.ajax({
+								type:"POST",
+								contentType: "application/json",
+								dataType: "json",
+								url: config.modelUrl+"user_model.php",
+								data: JSON.stringify(dataobj), 
+								success:function(msg){
+								//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+								if(msg.flag==1){
+								if(userid !=undefined){
+									alert("修改成功");
+									var pid = $("#modifyuser"+userid+"").parents("table").attr("id");
+									if(pid == "userinfo"){
+										searchRequest(pagesize, curpage2);
+									}
+									else{
+										readonlyUserRequest(pagesize, curpage2);
+									}
+									$("#addreadonlyuserdiv").dialog("close");
+								}
+								else{
+									if(confirm("添加成功，是否继续添加!")){
+										$("#readonly_username").val("");
+										$("#readonly_realname").val("");
+										$("#readonly_password").val("");
+										$("#readonly_email").val("");
+										$("#readonly_expiretime").val("");
+									}
+									else
+									{
+										$("#usertype").val(usertype);
+										searchRequest(pagesize, curpage2);
+										$("#addreadonlyuserdiv").dialog("close");
+									}
+
+								}
+								}
+								else{
+									if(userid != undefined){
+										alert("修改失败,请重试!");
+									}
+									else{
+										alert("添加失败,请重新添加!");
+									}
+								}
+								}
+
+								});
+}
+						}
+						}
+
+				});
+		},
+		"取消":function(){
+			$(this).dialog("close");
+		}
+	});
+
+}
+function setPassword(userid){
+	$("#modifypwddiv").dialog("open");
+	$("#modifypwddiv").dialog({title:"设置密码"});
+	$("#modifypwddiv").dialog("option", "buttons", {
+			"确定":function(){
+				var newpwd = $("#newpwd").val();
+				if(newpwd == ""){
+					$("#newpwd_tip").text("请填写新密码!");
+					return false;
+				}
+				else{
+					if(newpwd.length > 20){
+						$("#newpwd_tip").text("密码最多20位!");
+						return false;
+					}
+					/*
+					else{
+						//正确格式为：以字母开头，长度在6~18之间，只能包含字符、数字和下划线。
+						var reg = new RegExp("/^[a-zA-Z]\w{5,17}$/","g"); 
+						if(!reg.test(newpwd)){
+							$("#newpwd_tip").text("密码格式不正确!");
+							return false;
+						} 
+					}
+					*/
+				}
+				var renewpwd = $("#renewpwd").val();
+				if(renewpwd != newpwd){
+					$("#renewpwd_tip").text("密码不一致");
+					return false;
+				}
+				var secpwd = MD5(newpwd);
+				var pwsUrl = config.modelUrl+"user_model.php";
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: pwsUrl,
+					data: JSON.stringify({userid:userid,password:secpwd,type:"updatepwd"}), 
+					success: function (msg) {
+					if(msg.flag==1)
+					{
+						alert("修改成功!");
+						$("#modifypwddiv").dialog("close");
+					}
+					else
+					{
+						alert("修改失败!");
+						return;
+					}
+					},
+					error: function (msg) {
+					}
+					});
+			},
+				"取消":function(){
+					$(this).dialog("close");
+				}
+
+			});
+}
+function searchRequest(pagesize, curpage){ 
+	$("#userinfo").empty();
+	var param = "";
+	//用户名
+	var rsusername = $("#readonly_search_username").val();
+	if(rsusername){
+		param += "&username=" + commonFun.trim(rsusername) + "";
+	}
+	//真实姓名
+	var rsrealname = $("#readonly_search_realname").val();
+	if(rsrealname){
+		param += "&realname=" +encodeURIComponent(commonFun.trim(rsrealname))+ "";
+	}
+	//电子邮件
+	var rsemail = $("#readonly_search_email").val();
+	if(rsemail){
+		param += "&email=" +commonFun.trim(rsemail)+ "";
+	}
+	//失效时间
+	var rststart = $("#readonly_search_expiretimestart").val();
+	if(rststart){
+		param += "&expiretimestart=" +getTimeSec(rststart)+ "";
+	}
+	var rstend = $("#readonly_search_expiretimeend").val();
+	if(rstend){
+		param += "&expiretimeend=" +getTimeSec(rstend)+ "";
+	}
+	//允许修改信息
+	var rsainfo = $("#readonly_search_alloweditinfo").val();
+	if(rsainfo){
+		param += "&alloweditinfo=" +rsainfo+ "";
+	}
+	//用户类型
+	var usertype = $("#readonly_search_usertype").val();
+	if(usertype){
+		param += "&usertype=" + usertype + "";
+	}
+	//所属租户
+	var rstenantname = $("#readonly_search_tenantname").val();
+	if(rstenantname && usertype != -1){
+		param += "&tenantname=" +commonFun.trim(rstenantname)+ "";
+	}
+
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=getuserlist"+"&currpage="+curpage2+"&pagesize="+pagesize+param;
+	//ajaxRequest(searchnameUrl, getuser, "json");
+	if(usertype == -1 || usertype == 1){
+		var headhtml = '<tr> <th scope="col" width="24">选择</th> <th scope="col" width="60">用户名</th> <th scope="col" width="70">真实姓名</th> <th scope="col" width="55">所属租户</th><th scope="col" width="140">电子邮件</th> <th scope="col" width="120">失效时间</th> <th scope="col" width="116">允许用户修改<br/>个人信息(包含密码)</th> <th scope="col" width="200">操作</th></tr>';
+	}
+	else{
+		var headhtml = '<tr> <th scope="col" width="24">选择</th> <th scope="col" width="60">用户名</th> <th scope="col" width="70">真实姓名</th> <th scope="col" width="55">所属租户</th><th scope="col" width="90">所属用户</th> <th scope="col" width="140">电子邮件</th> <th scope="col" width="120">失效时间</th> <th scope="col" width="116">允许用户修改<br/>个人信息(包含密码)</th> <th scope="col" width="110">操作</th> </tr>';
+	}
+	$("#userinfo").append(headhtml);
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: searchnameUrl,
+		cache : false, // 默认为true， false时不会从浏览器缓存中加载请求信息
+		success:function(data){
+			if(!data.result){
+				alert(data.msg);
+			}
+			else{
+				totalCount = data.totalcount;
+				if(totalCount>0){
+					$.each(data.children, function(i, item){
+						var tname;
+						var str = "";
+						var allowedit = "";
+						if(item.alloweditinfo == 1){
+							allowedit ="是";
+						}
+						else{
+							allowedit ="否";
+						}
+						var email = item.email;
+						if(email == ""){
+							email = "&nbsp;";
+						}
+						var expiretime = "";
+						if(item.expiretime){
+							expiretime = timeToStr(item.expiretime);
+						}
+						if(item.usertype == -1){
+							tname = "系统租户";
+							str=$("<tr><td><input type='checkbox' name='checklist' id='"+item.username+"' value='"+item.userid+"' /></td><td><a href='javascript:void(0)' title='"+item.username+"'>"+item.username+"</a></td><td title='"+item.realname+"'>"+item.realname+"</td><td title='"+tname+"'>"+tname+"</td><td title='"+item.email+"'>"+email+"</td><td title='"+expiretime+"'>"+expiretime+"</td><td>"+allowedit+"</td><td><a href='javascript:void(0)' id='modifyuser"+item.userid+"'>修改用户</a>&nbsp;&nbsp;<a href='setupuserrole.shtml?userid="+item.userid+"&tid="+item.tenantid+"'>设置用户角色</a>&nbsp;&nbsp;<a href='javascript:void(0)' id='modifypwd"+item.userid+"'>设置密码</a></td></tr>");
+						}
+						else if(item.usertype == 1){
+							tname = "租户用户";
+							str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+item.userid+"' /></td><td><a href='javascript:void(0)' title='"+item.username+"'>"+item.username+"</a></td><td title='"+item.realname+"'>"+item.realname+"</td><td title='"+item.tenantname+"'>"+item.tenantname+"</td><td title='"+item.email+"'>"+email+"</td><td title='"+expiretime+"'>"+expiretime+"</td><td>"+allowedit+"</td><td><a href='javascript:void(0)' id='modifyuser"+item.userid+"'>修改用户</a>&nbsp;&nbsp;<a href='setupuserrole.shtml?userid="+item.userid+"&tid="+item.tenantid+"'>设置用户角色</a>&nbsp;&nbsp;<a href='javascript:void(0)' id='modifypwd"+item.userid+"'>设置密码</a><br/><a href='javascript:void(0)' id='addreadonlyuser"+item.userid+"' binduserid='"+item.userid+"' tenantuserid='"+item.tenantid+"'>新增只读用户</a>&nbsp;&nbsp;<a href='javascript:void(0)' id='readonlyuserlist"+item.userid+"' binduserid='"+item.userid+"' tenantuserid='"+item.tenantid+"'>只读用户列表</a></td></tr>");
+						}
+						else{
+							tname = "只读用户";
+							str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+item.userid+"' /></td><td><a href='javascript:void(0)' title='"+item.username+"'>"+item.username+"</a></td><td title='"+item.realname+"'>"+item.realname+"</td><td title='"+item.tenantname+"'>"+item.tenantname+"</td><td title='"+item.bindusername+"'>"+item.bindusername+"</td><td title='"+item.email+"'>"+email+"</td><td title='"+expiretime+"'>"+expiretime+"</td><td>"+allowedit+"</td><td><a href='javascript:void(0)' id='modifyuser"+item.userid+"'>修改用户</a>&nbsp;&nbsp;<a href='javascript:void(0)' id='modifypwd"+item.userid+"' >设置密码</a></td></tr>");
+						}
+						$("#userinfo").append(str);
+						$("#modifypwd"+item.userid+"").bind("click", function(){
+							setPassword(item.userid);
+						});
+						//添加只读用户
+						$("#addreadonlyuser"+data.children[i].userid+"").bind("click", function(){
+							addReadonlyUser(item);
+						});
+						$("#readonlyuserlist"+data.children[i].userid+"").bind("click",function(){
+							$("#readonlyuserlistdiv").attr("tenantuserid", item.tid);;
+							$("#readonlyuserlistdiv").attr("userid", item.userid);;
+							readonlyUserRequest(pagesize,1);
+							$("#readonlyuserlistdiv").dialog("open");
+							$("#readonlyuserlistdiv").dialog({title:item.username+"的只读用户"});
+						});
+						//修改用户
+						$("#modifyuser"+item.userid+"").bind("click", function(){
+							updateUser(item);
+						});
+					});
+					delhtml = $("<tr><td>&nbsp;</td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect(this)' value='删除'></td></tr>"); 
+					$("#userinfo").append(delhtml);
+				}	
+				else{
+					var str=$("<tr><td colspan='9'>暂无记录!</td></tr>"); 
+					$("#userinfo").append(str);
+				}
+				$("#pagestyle").empty();
+				if(totalCount > pagesize){
+					pageDisplay(totalCount, searchRequest, "pagestyle", pagesize,curpage2);
+				}
+			}
+		}
+	});
+}
+
+function readonlyUserRequest(pagesize,curpage){
+	$("#readonlyuserlist tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var usertype = 2
+	var binduserid = $("#readonlyuserlistdiv").attr("userid");
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=getuserlist"+"&currpage="+curpage2+"&pagesize="+pagesize+"&usertype="+usertype+"&binduserid="+binduserid;
+	//var searchnameUrl =  config.modelUrl+"user_model.php?type=getalluser"+"&currpage="+curpage2+"&pagesize="+pagesize+"&tid=3&usertype=2&binduserid="+binduserid;
+	ajaxRequest(searchnameUrl, readonlyuserlist, "json");
+}
+function readonlyuserlist(data){
+	if(!data.result) {
+		alert(data.msg);
+		window.history.back();
+	}
+	else
+	{
+		//显示分页
+		totalCount = data.totalcount
+			if(totalCount>0){
+				$.each(data.children, function(i){
+						var allowedit = "";
+						if(data.children[i].alloweditinfo == 1){
+							allowedit ="是";
+						}
+						else{
+							allowedit ="否";
+						}
+						var email = data.children[i].email;
+						if(email == ""){
+							email = "&nbsp;";
+						}
+						var expiretime = "";
+						if(data.children[i].expiretime){
+							expiretime = timeToStr(data.children[i].expiretime);
+						}
+
+						var str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].userid+"'></input></td><td><a href='javascript:void(0)' title='"+data.children[i].username+"'>"+data.children[i].username+"</a></td><td title='"+data.children[i].realname+"'>"+data.children[i].realname+"</td><td title='"+data.children[i].email+"'>"+email+"</td><td title='"+expiretime+"'>"+expiretime+"</td><td>"+allowedit+"</td><td><a href='javascript:void(0)' id='modifyuser"+data.children[i].userid+"'>修改用户</a>&nbsp;&nbsp;<a href='javascript:void(0)' id='modifypwd"+data.children[i].userid+"'>设置密码</a></td></tr>");
+					$("#readonlyuserlist").append(str);
+					$("#roupdateuser"+data.children[i].userid+"").bind("click", function(){
+							var binduserid = $(this).attr("binduserid");
+							var tid = $(this).attr("tenantuserid");
+							$("#addreadonlyuserdiv").attr("tenantuserid", tid);;
+							$("#addreadonlyuserdiv").attr("userid", binduserid);;
+							$("#addreadonlyuserdiv").dialog("open");
+					});
+					$("#modifypwd"+data.children[i].userid+"").bind("click", function(){
+						setPassword(data.children[i].userid);
+					});
+						//修改用户
+						$("#modifyuser"+data.children[i].userid+"").bind("click", function(){
+							updateUser(data.children[i]);
+						});
+
+				});
+				var str=$("<tr><td>&nbsp;</td><td colspan='6' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect(this)' value='删除'></td></tr>"); 
+				$("#readonlyuserlist").append(str);
+			}
+			else{
+				var str=$("<tr><td colspan='7'>暂无记录!</td></tr>"); 
+				$("#readonlyuserlist").append(str);
+			}
+		if(totalCount>pagesize)
+		{
+			$("#readonlyuserlist").append("<tr><td colspan='6'><div id='rolistpagestyle' style='margin: 5px;text-align:left' class='pages'></div></td></tr>");
+			pageDisplay(totalCount, readonlyUserRequest, "rolistpagestyle", pagesize,curpage2);
+		}
+	}//end checkpure
+}
+
+function senduser(userid){
+	window.location.href= "../model/modifyuser.shtml?userid="+encodeURIComponent(userid);
+}
+
+
+function selectall(ele)
+{
+	var pid = $(ele).parents("table").attr("id");
+	$("#"+pid+" :checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall(ele)
+{
+	var pid = $(ele).parents("table").attr("id");
+	$("#"+pid+" :checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect(ele)
+{
+	var pid = $(ele).parents("table").attr("id");
+	var delid='';
+	var arrChk=$("#"+pid+" input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if($(this).attr("id")!="admin" && $(this).attr("id")!="tenantadmin")
+		{
+		if(delid=='')
+		{
+			
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+		}
+		else
+		{
+			deladmin=1;
+		}
+     }); 
+	 if(deladmin==1)
+	 {
+		 alert("删除数据中包含超级管理员账户，您没有删除此账户的权限!");
+		 deladmin=0;
+		 return;
+	 }
+	 else
+	 {
+	 if(delid=='')
+	 {
+		 alert("请选择要删除的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后将无法恢复!"))
+		 {
+			 deletetenant(delid, pid);
+		 }
+	 }
+	 }
+}
+
+function deletetenant(uid, pid)
+{
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=deleteuser&uid="+uid;
+	ajaxRequest(searchnameUrl, function (data){
+		if(data!=null){
+			if(!data.result){
+				alert(data.msg);
+				window.history.back();
+			}
+			else{
+				if(data.flag==1){
+					alert("删除成功!");
+					if(pid == "userinfo"){
+						searchRequest(pagesize, curpage2);
+					}
+					else{
+						readonlyUserRequest(pagesize, curpage2);
+					}
+				}
+				else{
+					alert("删除失败!");
+				}
+			}
+		}
+	}
+	, "json");
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+	<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; 
+		<span style="color: gray">用户管理</span> 
+		<a href="javascript:void(0)" style="float: right" id="adduser">新增用户</a>
+		<br/>
+  <br/>
+  <div id="readonly_search_div">
+	  <label for="readonly_search_username">用户名：</label><input type="text" id="readonly_search_username" class="shortinput" />
+	  <label for="readonly_search_realname">真实姓名：</label><input type="text" id="readonly_search_realname" class="shortinput" />
+	  <label for="readonly_search_tenantname">所属租户：</label><input type="text" id="readonly_search_tenantname" class="shortinput" />
+	  <label for="readonly_search_email">电子邮件：</label><input type="text" id="readonly_search_email" class="shortinput" />
+	  <br/>
+	  <label for="readonly_search_expiretime">失效时间：</label><input id="readonly_search_expiretimestart" name="readonly_search_expiretimestart" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> 至 <input id="readonly_search_expiretimeend" name="readonly_search_expiretimeend" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+	  <br/>
+	  <label for="readonly_search_usertype">用户类型：</label><select name="readonly_search_usertype" id="readonly_search_usertype">
+		  <option value="-1">系统用户</option>
+		  <option value="1">租户用户</option>
+		  <option value="2">只读用户</option>
+	  </select> 
+	  <label for="readonly_search_alloweditinfo" style="width:90px;margin-left:0;">允许信息修改：</label><select id="readonly_search_alloweditinfo">
+		  <option value="">请选择</option>
+		  <option value="1">是</option>
+		  <option value="0">否</option>
+	  </select>
+	  <input type="button" name="readonly_search" value="查询" id="readonly_search" />
+	  <input type="button" name="readonly_reset" value="清空" id="readonly_reset" />
+	  <span>使用*进行模糊查询</span>
+  </div>
+  <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list wbtable">
+    <tr>
+      <th scope="col" width="24">选择</th>
+      <th scope="col">用户名</th>
+      <th scope="col">真实姓名</th>
+      <th scope="col">所属租户</th>
+      <th scope="col">电子邮件</th>
+      <th scope="col">失效时间</th>
+      <th scope="col" width="184">操作</th>
+    </tr>
+  </table>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+<div id="divaddast" title="新增租户" class="openwindow"></div>
+<div id="divaddspt" title="修改租户信息" class="openwindow"></div>
+<div id="modifypwddiv" style="display:none;">
+	<table class="formtable">
+		<tr>
+			<td class="tdleft">新密码：</td>
+			<td><input type="password" name="newpwd" id="newpwd" /></td>
+			<td class="tdtip" id="newpwd_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">确认新密码：</td>
+			<td><input type="password" name="renewpwd" id="renewpwd" /></td>
+			<td class="tdtip" id="renewpwd_tip"></td>
+		</tr>
+	</table>
+</div>
+<div id="addreadonlyuserdiv" style="display:none;" tenantuserid="-1" userid="-1">
+	<table class="formtable">
+		<tr>
+			<td class="tdleft"><input type="hidden" name="readonly_userid" id="readonly_userid" />用户名：</td>
+			<td id="readonly_username_td"><input type="text" name="readonly_username" id="readonly_username" /></td>
+			<td class="tdtip" id="ro_username_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">真实姓名：</td>
+			<td><input type="text" name="readonly_realname" id="readonly_realname" /></td>
+			<td class="tdtip" id="ro_realname_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">密码：</td>
+			<td><input type="password" name="readonly_password" id="readonly_password" /></td>
+			<td class="tdtip" id="ro_password_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">用户类型：</td>
+			<td id="readonly_usertype_td">
+				<select type="text" name="readonly_usertype" id="readonly_usertype">
+					<option value="-1">系统用户</option>
+					<option value="1">租户用户</option>
+					<option value="2">只读用户</option>
+				</select>
+			</td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">所属租户：</td>
+			<td id="readonly_tenantid_td"><select name="readonly_tenantid" id="readonly_tenantid" ></select></td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft">所属用户：</td>
+			<td><input type="hidden" name="readonly_binduserid" id="readonly_binduserid" /><label id="readonly_bindusername"></label></td>
+			<td class="tdtip" id="ro_usertype_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft" >电子邮件：</td>
+			<td><input type="text" name="readonly_email" id="readonly_email" /></td>
+			<td class="tdtip" id="ro_email_tip"></td>
+		</tr>
+		<tr id="readonly_expiretime_tr">
+			<td class="tdleft">失效时间：</td>
+			<td>
+				<input id="readonly_expiretime" name="readonly_expiretime" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+			</td>
+			<td class="tdtip" id="ro_expiretime_tip"></td>
+		</tr>
+		<tr>
+			<td class="tdleft" >允许用户修改个人信息：</td>
+			<td>
+				<input type="radio" name="readonly_alloweditinfo" id="readonly_alloweditinfo1" value="1" checked="checked" />是
+				<input type="radio" name="readonly_alloweditinfo" id="readonly_alloweditinfo0" value="0" />否
+			</td>
+			<td class="tdtip" id="ro_alloweditinfo_tip"></td>
+		</tr>
+		<!--
+		<tr>
+			<td colspan="2" align="center">
+				<input class="buttono" type="submit" value="提 交" id="submitonlyreaduser" />
+				<input class="buttono" type="button" value="取 消" id="cancleonlyreaduser" />
+			</td>
+		</tr>
+		-->
+	</table>
+</div>
+<div id="readonlyuserlistdiv" style="display:none;" title="只读用户列表" tenantuserid="-1" userid="-1">
+  <table id="readonlyuserlist" name="readonlyuserlist" width="98%" border="0" cellspacing="0" cellpadding="0" class="list wbtable">
+    <tr>
+      <th scope="col" width="28">选择</th>
+      <th scope="col" width="100">用户名</th>
+      <th scope="col" width="100">真实姓名</th>
+      <th scope="col" width="175">电子邮件</th>
+      <th scope="col" width="80">失效时间</th>
+	  <th scope="col" width="125">允许用户修改<br/>个人信息(包含密码)</th> 
+      <th scope="col" width="100">操作</th>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

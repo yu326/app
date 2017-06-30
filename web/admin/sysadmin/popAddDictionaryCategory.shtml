@@ -1,0 +1,48 @@
+
+	<div id="dictionary_category_div" style="display:none;" addopttype="add" area_id="" >
+		<table class="formtable">
+		
+				
+	
+				<tr>
+				<td class="tdleft">选择父类：</td>
+				<td id="" width="150">
+					<input type="text" name="dict_parent_text" id="dict_parent_text" style="display:none;" />
+					<select id="dict_parent_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td>
+					<a id="dict_parent_button" opttype="select" href='javascript:void(0)'>新增父类</a>
+				</td>
+				<td class="tdtip" id="dictionary_pclass_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">选择子类：</td>
+				<td>
+					<input type="text" name="dict_child_text" id="dict_child_text" style="display:none;" />
+					<select id="dict_child_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td>
+			
+				</td>
+				<td class="tdtip" id="dictionary_class_tip"></td>
+			</tr>
+				<tr>
+				<td class="tdleft">子类状态：</td>
+				<td colspan = '2'>
+					<select id="add_state" style='width:65px;'>
+					<option value='-1'>未选择</option>
+					<option value='1'>默认</option>
+					<option value='2'>禁用</option>
+					<option value='3'>其他</option>
+				</select>
+				</td>
+				<td class="tdtip" id="dictionary_state_tip"></td>
+			</tr>
+			
+		</table>
+	</div>
+	

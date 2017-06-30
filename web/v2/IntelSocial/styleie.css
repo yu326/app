@@ -1,0 +1,653 @@
+@font-face {
+	font-family: 'intel';
+	src: url("fonts/intel.ttf");
+}
+
+* {
+	font-style: normal;
+	font-weight: normal;
+    font-family: 'intel', 'Microsoft YaHei';
+    box-sizing:border-box;
+}
+
+/*当屏幕分辨率大于800时*/
+@media screen and (min-width: 800px){
+	html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 1349px;
+	overflow-x: hidden;
+}
+
+body {
+	height: 100%;
+	width: 100%;
+	background: black;
+}
+
+/*
+*@ 页头
+**/
+#header {text-align:right;}
+
+#header .logo {
+	width: 170px;
+	height: 67px;
+	margin-top: 40px;
+	margin-right: 50px;
+}
+
+/*
+*@ 内容部分
+**/
+.wrapper {
+	position:relative;
+	height: 100%;
+	width: 100%;
+	margin-top: -70px;
+}
+.page {
+	position: absolute;
+	width: 100%;
+	left: 3000px;
+}
+.page h2 {
+	font-size: 50px;
+	text-align:center;
+	color: #fff;
+	padding: 0;
+	margin: 0;
+}
+
+.page .content {
+	width: 90%;
+	height: 100%;
+	margin: 0 auto;
+	margin-top: 2%;
+}
+
+.loading {
+	position: absolute;
+	top: 40%;
+	width: 124px;
+	left: 50%;
+	margin-left: -62px;
+}
+
+/*
+*@ 页面1
+**/
+#page-1 .content th {
+	text-align: center;
+	font-size: 32px;
+	color: #fff;
+	height: 40px;
+}
+#page-1 .line-wrapper {
+	width: 65%;
+}
+
+#page-1 .line {
+	position: relative;
+}
+
+#page-1 .pie-wrapper {
+}
+
+#page-1 .pie {
+	width: 100%;
+	height: 430px;
+}
+
+/*
+*@ 页面2
+**/
+#page-2 .content th {
+	text-align: center;
+	font-size: 36px;
+	color: #fff;
+	height: 60px;
+}
+
+#page-2 .content td {
+	vertical-align: top;
+}
+
+#page-2 .map {
+	width: 100%;
+	height: 450px;
+	margin-top: -11%;
+	padding-bottom: 13px
+}
+
+#page-2 .top10 {
+	width: 100%;
+	height: 420px;
+	margin-top: -5%;
+}
+
+/*
+*@ 页面3
+**/
+#page-3 .content {
+	margin-top: -2%;
+}
+#page-3 .tag {
+	font-size: 8px;
+	position: relative;
+	margin-top: -3%;
+	left: 50%;
+	margin-left: -400px;
+	width: 800px;
+	height: 620px;
+}
+
+/*
+*@ 页面4
+**/
+#page-4 .content th {
+	text-align: center;
+	font-size: 36px;
+	color: #fff;
+	height: 60px;
+	padding-bottom: 20px;
+}
+
+#page-4 .content td {
+	vertical-align: top;
+}
+
+#page-4 .person {
+	width: 25%;
+	font-size: 30px;
+}
+
+#page-4 .person .gender {
+	width: 80%;
+}
+
+#page-4 .person img {
+	width: 75%;
+}
+
+#page-4 .tag-wrapper {
+	width: 500px;
+	height: 390px;
+}
+
+#page-4 .tag {
+	font-size: 5px;
+	margin-top: -15%;
+	width: 75%;
+	width:350px;
+	height: 350px;
+	margin-top:10px;
+	margin-left:13%;
+}
+
+#page-4 .top10 {
+	margin-top: -10%;
+	width: 100%;
+	height: 410px;
+
+	
+}
+
+/*
+*@ 页面5
+**/
+#page-5 {
+	color: #cccecf;
+	font-size: 15px;
+}
+
+#page-5 .family,
+#page-5 .partner {
+	width: 50%;
+	padding-top: 10px;
+	vertical-align: top;
+}
+
+#page-5 .grid {width: 90%;}
+
+#page-5 .table-title {
+  margin: 5px 0;
+  color: #cccecf;
+  font-size: 18px;
+  height: 40px;
+  line-height: 40px;
+  border-bottom: none;
+  background: #145493;
+}
+
+#page-5 #TD3{
+	padding-left: 55px;
+}
+#page-5 .grid td {
+	text-align: center;
+}
+
+#page-5 .grid .split td {
+	border-bottom: 1px solid #145493;
+}
+
+#page-5 .grid td img {
+	width: 30%;
+	border-radius: 50%;
+}
+#five-text{
+	position: absolute;
+	left:20px;top:570px;
+}
+/*
+*@ 页面6
+**/
+/*#page-6 .content td {
+	vertical-align: top;
+}
+
+#page-6 .top10 {
+	width: 100%;
+	height: 430px;
+	margin-top: -5%;
+	margin-bottom:5%;
+}*/
+/*
+*@ 页面7
+**/
+#page-6 h2{font-size: 38px;}
+#page-6 .content th {
+	text-align: center;
+	font-size: 30px;
+	color: #fff;
+	height: 40px;
+	padding-left:10px;
+}
+#page-6 .pie-body{
+	width:1212px;
+}
+#page-6 .pie1 {
+	width: 450px;
+	height: 450px;
+	margin-left:85px;
+}
+#page-6 .pie2 {
+	width: 450px;
+	height: 450px;
+	margin-left:85px;
+}
+
+
+/*
+*@ 页面8
+**/
+#page-7 h2{font-size: 53px;}
+
+#page-7 #page8div{ width:1000px;height:500px;margin-left:200px; margin-top:10px;}
+
+/*
+*@ 页面9
+**/
+#page-9 h2{font-size: 53px;}
+
+#page-9 #page8div{ width:1000px;height:480px;margin-left:200px; margin-top:10px;}
+
+/*
+*@ 页尾
+**/
+#footer {
+	position: fixed;
+	bottom: 2%;
+	color: #cccecf;
+	font-size: 14px;
+	padding-left: 5%;
+	overflow:hidden;
+}
+
+#footer span {
+	display: block;
+}
+}
+
+
+@media screen and (min-width: 1600px){
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 1903px;
+	overflow-x: hidden;
+}
+
+body {
+	height: 100%;
+	width: 100%;
+	background: black;
+}
+
+/*
+*@ 页头
+**/
+#header {text-align:right;}
+
+#header .logo {
+	width: 238px;
+	height: 94px;
+	margin-top: 56px;
+	margin-right: 90px;
+}
+
+/*
+*@ 内容部分
+**/
+.wrapper {
+	position:relative;
+	height: 100%;
+	width: 100%;
+	margin-top: -98px;
+}
+.page {
+	position: absolute;
+	width: 100%;
+	left: 3000px;
+}
+.page h2 {
+	font-size: 90px;
+	text-align:center;
+	color: #fff;
+	padding: 0;
+	margin: 0;
+}
+
+.page .content {
+	width: 90%;
+	height: 100%;
+	margin: 0 auto;
+	margin-top: 2%;
+}
+
+.loading {
+	position: absolute;
+	top: 40%;
+	width: 174px;
+	left: 50%;
+	margin-left: -87px;
+}
+
+/*
+*@ 页面1
+**/
+#page-1 .content th {
+	text-align: center;
+	font-size: 45px;
+	color: #fff;
+	height: 56px;
+}
+#page-1 .line-wrapper {
+	width: 65%;
+	padding-top: 74px;
+}
+
+#page-1 .line {
+	position: relative;
+	width:1100px;
+}
+
+#page-1 .pie-wrapper {
+}
+
+#page-1 .pie {
+	width: 100%;
+	height: 600px;
+}
+
+/*
+*@ 页面2
+**/
+#page-2 .content th {
+	text-align: center;
+	font-size: 50px;
+	color: #fff;
+	height: 84px;
+}
+
+#page-2 .content td {
+	vertical-align: top;
+}
+
+#page-2 .map {
+	width: 100%;
+	height: 780px;
+	margin-top: -11%;
+	padding-bottom: 18px
+}
+
+#page-2 .top10 {
+	width: 100%;
+	height: 548px;
+	margin-top: -5%;
+}
+
+/*
+*@ 页面3
+**/
+#page-3 .content {
+	margin-top: -2%;
+}
+#page-3 .tag {
+	position: relative;
+	margin-top: -3%;
+	left: 50%;
+	margin-left: -560px;
+	width: 1120px;
+	height: 860px;
+	font-size: 10px;
+}
+
+/*
+*@ 页面4
+**/
+#page-4 .content th {
+	text-align: center;
+	font-size: 50px;
+	color: #fff;
+	height: 84px;
+	padding-bottom: 28px;
+}
+
+#page-4 .content td {
+	vertical-align: top;
+}
+
+#page-4 .person {
+	width: 25%;
+	font-size: 42px;
+}
+
+#page-4 .person .gender {
+	width: 100%;
+}
+
+#page-4 .person img {
+	width: 75%;
+}
+
+#page-4 .tag-wrapper {
+	width: 700px;
+	height: 546px;
+}
+
+#page-4 .tag {
+	font-size: 7px;
+	margin-top: -15%;
+	width: 100%;
+	height: 490px;
+	margin-top:14px;
+	padding-right:10%;
+}
+
+#page-4 .top10 {
+	margin-top: -15%;
+	width: 100%;
+	height: 500px;
+	margin-top: 5px;
+	
+}
+
+/*
+*@ 页面5
+**/
+#page-5 {
+	color: #cccecf;
+	font-size: 18px;
+}
+#page-5 h2{font-size: 60px;}
+#page-5 .family,
+#page-5 .partner {
+	width: 50%;
+	padding-top: 20px;
+	vertical-align: top;
+}
+
+#page-5 .grid {width: 88%;}
+
+#page-5 .table-title {
+  margin: 5px 0;
+  color: #cccecf;
+  font-size: 18px;
+  height: 30px;
+  line-height: 30px;
+  border-bottom: none;
+  background: #145493;
+}
+
+#page-5 .grid td {
+	text-align: center;
+}
+
+#page-5 .grid .split td {
+	border-bottom: 1px solid #145493;
+}
+
+#page-5 .grid td img {
+	width: 40%;
+}
+#five-text{
+	position: absolute;
+	left:80px;top:950px;
+}
+/*
+*@ 页面6
+**/
+/*#page-6 .content td {
+	vertical-align: top;
+}
+
+#page-6 .top10 {
+	width: 100%;
+	height: 630px;
+	margin-top: -1%;
+}*/
+/*
+*@ 页面7
+**/
+#page-6 h2{font-size: 53px;}
+#page-6 .content th {
+	text-align: center;
+	font-size: 42px;
+	color: #fff;
+	height: 56px;
+	padding-left:-10px;
+}
+#page-6 .pie-body{
+	width:100%;
+
+}
+#page-6 .pie-wrapper_1{
+		height:700px;
+		width:50%;
+	}
+#page-6 .pie-wrapper_2{
+		width:50%;
+		height:700px;
+	}
+#page-6 .pie1 {
+	width: 630px;
+	height: 630px;
+	margin-left: 125px;
+}
+#page-6 .pie2 {
+	width: 630px;
+	height: 630px;
+	margin-left: 125px;
+}
+
+
+/*
+*@ 页面8
+**/
+#page-7 h2{font-size: 53px;}
+
+#page-7 #page8div{ width:1400px;height:700px;margin-left:300px; margin-top:80px;}
+
+/*
+*@ 页面9
+**/
+#page-9 h2{font-size: 53px;}
+
+#page-9 #page8div{ width:1400px;height:700px;margin-left:300px; margin-top:80px;}
+
+
+/*
+*@ 页尾
+**/
+#footer {
+	position: fixed;
+	bottom: 2%;
+	color: #cccecf;
+	font-size: 14px;
+	padding-left: 5%;
+	overflow:hidden;
+}
+
+#footer span {
+	display: block;
+}
+};
+
+
+/* Cloud */
+div.jqcloud {
+  font-family: 'Microsoft YaHei';
+  font-size: 10px;
+  line-height: normal;
+}
+
+div.jqcloud span { padding: 0; cursor: default;}
+div.jqcloud span:hover { color: #cbd0c4; }
+
+/* font */
+div.jqcloud span.w10{ font-size: 460%; }
+div.jqcloud span.w9 { font-size: 420%; }
+div.jqcloud span.w8 { font-size: 380%; }
+div.jqcloud span.w7 { font-size: 340%; }
+div.jqcloud span.w6 { font-size: 300%; }
+div.jqcloud span.w5 { font-size: 260%; }
+div.jqcloud span.w4 { font-size: 220%; }
+div.jqcloud span.w3 { font-size: 180%; }
+div.jqcloud span.w2 { font-size: 140%; }
+div.jqcloud span.w1 { font-size: 100%; }
+
+/* colors */
+div.jqcloud span.w10 { color: #08bbd1; }
+div.jqcloud span.w9 { color: #08bbd1; }
+div.jqcloud span.w8 { color: #cbd0c4; }
+div.jqcloud span.w7 { color: #cbd0c4; }
+div.jqcloud span.w6 { color: #cbd0c4; }
+div.jqcloud span.w5 { color: #cbd0c4; }
+div.jqcloud span.w4 { color: #cbd0c4; }
+div.jqcloud span.w3 { color: #cbd0c4; }
+div.jqcloud span.w2 { color: #cbd0c4; }
+div.jqcloud span.w1 { color: #cbd0c4; }
+

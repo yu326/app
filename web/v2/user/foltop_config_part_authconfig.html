@@ -1,0 +1,113 @@
+<fieldset>
+<legend>权限配置</legend>
+<div class="search"><span class="rightalign"> 昵称：</span> <input type="text" name="username" />
+	<input id="commendName" type="button" value="推荐"/>
+	<input type="checkbox" id="usernameanalyse" name="analyse" class="outborder"/>查昵称
+	<input type="checkbox" id="followeranalyse" name="followeranalyse" class="outborder"/>查粉丝
+    <input type="checkbox" id="friendanalyse" name="friendanalyse" class="outborder"/>查关注 
+    <input type="button" id="addCommendUser" name="btnadduser" value="添加限制" />&nbsp;&nbsp;
+    <input type="button" id="adddefault" name="btnadduser" value="添加默认值" />
+</div>
+<div class="search"><span class="rightalign">昵称限制：</span><span id="endusername"></span>
+	&nbsp;&nbsp;<input type="checkbox" id="username_nolimit" name="username_nolimit" class="outborder"/>不限
+</div>
+<div class="search"><span class="rightalign">昵称默认值：</span><span id="default_username"></span>
+</div>
+<div class="search"><span class="rightalign">查粉丝限制：</span><span id="endusersfollower"></span>
+    &nbsp;&nbsp;<input type="checkbox" id="usersfollower_nolimit" name="usersfollower_nolimit" class="outborder"/>不限
+</div>
+<div class="search"><span class="rightalign">查粉丝默认值：</span><span id="default_usersfollower"></span>
+</div>
+<div class="search"><span class="rightalign">查关注限制：</span><span id="endusersfriend"></span>
+    &nbsp;&nbsp;<input type="checkbox" id="usersfriend_nolimit" name="usersfriend_nolimit" class="outborder"/>不限
+</div>
+<div class="search"><span class="rightalign">查关注默认值：</span><span id="default_usersfriend"></span>
+</div>
+<div class="search" id="islimit_followerrank"> <span class="rightalign">粉丝数：</span>
+	最大值：<input type="text" name="followerrank_maxvalue" id="followerrank_maxvalue" value="" class="shortinput"/>
+	最小值：<input type="text" name="followerrank_minvalue" id="followerrank_minvalue" value="" class="shortinput" />
+	默认值：<input type="text" name="default_followerrank_start" id="default_followerrank_start" value="" class="shortinput" />
+	&nbsp;-&nbsp;<input type="text" name="default_followerrank_end" id="default_followerrank_end" value="" class="shortinput" />
+	<!-- 修改次数：<input type="text"  class="shortinput" name="editfollowerrank" value=""> -->
+	&nbsp;&nbsp;<input type="checkbox" id="followerrank_nolimit" name="followerrank_nolimit" class="outborder"/>不限
+</div>
+<div class="search" id="islimit_friendrank"> <span class="rightalign">关注数：</span> 
+	最大值：<input type="text" class="shortinput" name="friendrank_maxvalue" id="friendrank_maxvalue" value="" />
+	最小值：<input type="text" class="shortinput"  name="friendrank_minvalue" id="friendrank_minvalue" value=""  />
+	默认值：<input type="text" name="default_friendrank_start" id="default_friendrank_start" value="" class="shortinput" />
+	&nbsp;-&nbsp;<input type="text" name="default_friendrank_end" id="default_friendrank_end" value="" class="shortinput" />
+	<!-- 修改次数：<input name="editfriendrank" type="text" class="shortinput"  value="" /> -->
+	&nbsp;&nbsp;<input type="checkbox" id="friendrank_nolimit" name="friendrank_nolimit" class="outborder"/>不限
+	</div>
+<div class="search" id="islimit_statusesrank"> <span class="rightalign">文章数：</span>
+	最大值：<input type="text" class="shortinput"  name="statusesrank_maxvalue" id="statusesrank_maxvalue" value=""  />
+	最小值：<input type="text" class="shortinput"  name="statusesrank_minvalue" id="statusesrank_minvalue" value=""  />
+	默认值：<input type="text" name="default_statusesrank_start" id="default_statusesrank_start" value="" class="shortinput" />
+	&nbsp;-&nbsp;<input type="text" name="default_statusesrank_end" id="default_statusesrank_end" value="" class="shortinput" />
+	<!-- 修改次数：<input type="text" class="shortinput"  name="editstatusesrank" value=""> -->
+	&nbsp;&nbsp;<input type="checkbox" id="statusesrank_nolimit" name="statusesrank_nolimit" class="outborder"/>不限
+</div>
+<div class="search" id="islimit_registertime"> <span class="rightalign">博龄：</span>
+	最大值：<input type="text" class="shortinput"  name="registertime_maxvalue" id="registertime_maxvalue" value="" />
+	最小值：<input type="text" class="shortinput"  name="registertime_minvalue" id="registertime_minvalue" value="" />
+	默认值：<input type="text" name="default_registertime_start" id="default_registertime_start" value="" class="shortinput" />
+	&nbsp;-&nbsp;<input type="text" name="default_registertime_end" id="default_registertime_end" value="" class="shortinput" />
+	<!-- 修改次数：<input name="editregistertime" type="text" class="shortinput"  value="" /> -->
+	&nbsp;&nbsp;<input type="checkbox" id="registertime_nolimit" name="registertime_nolimit" class="outborder"/>不限
+</div>
+<div class="search" id="islimit_sex"> <span class="rightalign">性别限制：</span>
+	<input type="checkbox" name="islimit_gender" id="islimit_genderm" value="m" /> 男
+	<input type="checkbox" name="islimit_gender" id="islimit_genderf" value="f" /> 女
+	<!-- 修改次数：<input name="editsex" type="text" class="shortinput"  value="" /> -->
+	&nbsp;&nbsp;<input type="checkbox" id="sex_nolimit" name="sex_nolimit" class="outborder"/>不限
+ </div>
+ <div class="search"> <span class="rightalign">性别默认值：</span>
+    <input type="checkbox" name="default_gender" id="default_genderm" value="m" /> 男
+    <input type="checkbox" name="default_gender" id="default_genderf" value="f" /> 女
+ </div>
+<div class="search" style="display:block;" id="islimit_verified"> <span class="rightalign">认证限制：</span>
+	<input type="checkbox" name="islimit_verified" id="islimit_verified1" value="1"  /> 是
+	<input type="checkbox" name="islimit_verified" id="islimit_verified0" value="0"  /> 否
+	<!-- 修改次数：<input name="editverified" type="text" class="shortinput"  value="" /> -->
+	&nbsp;&nbsp;<input type="checkbox" id="verified_nolimit" name="verified_nolimit" class="outborder"/>不限
+</div>
+<div class="search"> <span class="rightalign">认证默认值：</span>
+    <input type="checkbox" name="default_verified" id="default_verified1" value="1"  /> 是
+    <input type="checkbox" name="default_verified" id="default_verified0" value="0"  /> 否
+ </div>
+<div class="search" > <span class="rightalign">来源限制：</span>
+    <span id="span_limit_source">
+	   <input type="checkbox" name="islimit_source" value="1" />新浪
+	   <input type="checkbox" name="islimit_source" value="2"  />腾讯
+	</span>
+    <!-- 修改次数：<input name="editsource" type="text" class="shortinput"  value="" /> -->
+    &nbsp;&nbsp;<input type="checkbox" id="source_nolimit" name="source_nolimit" class="outborder"/>不限
+</div>
+<div class="search"> <span class="rightalign">来源默认值：</span>
+    <span id="span_default_source">
+    <input type="checkbox" name="default_source" value="1" />新浪
+    <input type="checkbox" name="default_source" value="2"  />腾讯
+    </span>
+ </div>
+<div class="search" id="islimit_areacode"><span class="rightalign">地区：</span>
+	<input id="setarea" name="setarea" value="设置限制"  type="button">&nbsp;&nbsp;
+	<input id="btndefaultarea" name="setarea" value="设置默认值"  type="button">
+</div>
+<div class="search"><span class="rightalign">地区限制：</span><span id="selectedarea" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_areacode">
+	<!-- 修改次数：<input name="editarea" type="text" class="shortinput"  value="" /> -->
+	&nbsp;&nbsp;<input type="checkbox" id="area_nolimit" name="area_nolimit" class="outborder"/>不限
+</div>
+<div class="search"><span class="rightalign">地区默认值：</span><span id="default_area" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="default_areacode">
+</div>
+<!--<div class="search" style="display:block;" id="islimit_facet"> <span class="rightalign">分组查询限制：</span>
+     修改次数：<input name="editfacet" type="text" class="shortinput"  value="" /> 
+</div>-->
+<!--<div class="search" style="display:block;" id="islimit_output"> <span class="rightalign">输出限制：</span>
+     修改次数：<input name="editoutput" type="text" class="shortinput"  value="" /> 
+</div>-->
+<div class="search">
+	<input id="saverule" name="saverule" type="button" class="buttono" value="保存"/>
+</div>
+</fieldset>

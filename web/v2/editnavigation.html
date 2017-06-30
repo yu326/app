@@ -1,0 +1,913 @@
+<script type="text/javascript">
+var pid=0;
+var tid=0;
+var navid=0;
+var allid="";
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+var currmoveid=0;
+var currmoverow=0;
+var maxvalue=0;
+var minvalue=0;
+$(function(){
+	$("#navigationinfo tr:not(:first)").remove();
+	searchRequest(pagesize,1);  //分页请求导航信息
+	$("#mytest").draggable();
+	if($("#divAddorUpdateNav").length == 1){
+		$("#divAddorUpdateNav").dialog({
+			autoOpen: false,
+			modal:true,
+			height:240,
+			width: 443
+		});
+	}
+	$("#btnaddnav").bind("click", function(){
+        $text = $("#label").val();
+        $fontSize = null;   //导航名称字体大小
+        switch($("#sellevel").val()){
+			case "1":
+				$fontSize = 14;
+				break;
+			case "2":
+				$fontSize = 12;
+				break;
+			default:
+				return;
+				break;
+        }
+        if(getStringPx($text, $fontSize) > config.maxNavigationNamePx)
+        { 
+            alert("输入的导航名称超过最大长度");
+            return;
+        }
+		var tasktype = $("#tasktype").val();
+		if(tasktype == 1){
+			addNewNav(); //新增导航
+		}
+		else if(tasktype == 2){
+		    updateNav();
+		}
+	});
+	$("#nav_search").bind("click", function () {
+		searchRequest(pagesize);
+	});
+	$("#nav_reset").bind("click", function(){
+		$("#nav_search_div [id^='nav_'][type!=button]").each(function(i, item){
+			$(item).val("");
+		});
+	});
+
+	$("#sellevel").bind("change",function(){
+		var setnav = $("#sellevel").val();
+		if(setnav == 1){
+			$("#setnavpar").css("display", "none");
+			$("#sethomepage").css("display", "none");
+			$("input[type=radio][name=isdefault][value=0]").attr("checked", "checked");
+			$("#trnavicon").show();
+		}
+		else{
+			$("#trnavicon").hide();
+			$("#setnavpar").css("display", "");
+			$("#sethomepage").css("display", "");
+		}
+
+	});
+	$("#selnavimg").bind("change", function(){
+		var selval = $(this).val();
+		if(selval){
+		    $("#navimg").attr("src",selval);
+		}
+	});
+});
+function searchRequest(pagesize, curpage){ 
+	$("#navigationinfo tr:not(:first)").remove();
+	var param = "";
+	//导航名称
+	var slabel = $("#nav_search_label").val();
+	if(slabel){
+		param += "&label=" + commonFun.trim(slabel) + "";
+	}
+	//级别
+	var slevel = $("#nav_search_level").val();
+	if(slevel){
+		param += "&level=" + slevel + "";
+	}
+	//一级导航名称,通过一级导航查询所属的二级导航
+	var slevel1name = $("#nav_search_level1name").val();
+	if(slevel1name){
+		param += "&level1name="+commonFun.trim(slevel1name)+"";
+	}
+	//更新时间
+	var sustart = $("#nav_search_updatetimestart").val();
+	if(sustart){
+		param += "&updatetimestart=" +getTimeSec(sustart)+ "";
+	}
+	var suend = $("#nav_search_updatetimeend").val();
+	if(suend){
+		param += "&updatetimeend=" +getTimeSec(suend)+ "";
+	}
+
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var URL=config.getNavbytidallUrl+"&currpage="+curpage2+"&pagesize="+pagesize+param;
+	$.ajax({
+		type: "get",
+		contentType: "application/json",
+		dataType: "json",
+		url: URL,
+		success: function (data){
+			if(data!=null){
+				totalCount = data.totalcount
+				if(totalCount>0){
+					var txttype="";
+					var strhome="";
+					var tmpArr = [];
+					var str = "";
+					$.each(data.children, function(di, ditem){
+						if(ditem.ishomepage==0){
+							strhome="否";
+						}
+						else if(ditem.ishomepage==1){
+							strhome="是";
+						}
+						str += "<tr id='"+ditem.id+"' pid='"+ditem.parentid+"' oid='"+ditem.orderid+"'><td><input type='checkbox' name='checklist' id='' value='"+ditem.id+"'></input></td><td>"+ditem.label+"</td><td>"+strhome+"</td><td>"+ditem.level+"</td><td align='center' style='width:120px;'>"+ditem.updatetime+"</td><td><a href='javascript:editnavigate("+ditem.id+", "+ditem.parentid+")'>修改</a></td></tr>";
+						tmpArr.push(ditem.id);
+					});
+					allid = tmpArr.join(",");
+					$("#ids").val(allid);
+					str+="<tr><td colspan='7'><div style='text-align:left;'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></div></td></tr>";
+					$("#navigationinfo").append(str);
+				}
+				else
+				{
+					$("#navigationinfo").append("<tr><td colspan='7'>暂无记录!</td></tr>");
+				}
+				setTimeout('binddrag()', 1000); //间隔一秒调用
+				if(totalCount>pagesize){
+					$("#navigationinfo").append("<tr><td colspan='7'><div id='navpagestyle' style='margin: 5px;text-align:left' class='pages'></div></td></tr>");
+					pageDisplay(totalCount, searchRequest, "navpagestyle", pagesize,curpage2);
+				}
+			}
+		}//end sucess
+	});//end ajax
+}
+
+
+
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	//var delid='';
+	var navL1 = [];
+	var navL2 = [];
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(i,m){
+		var did = $(this).val();
+		var pid = $("#tbltb1 tr[id="+did+"]").attr("pid");
+		if(pid == '0'){ //一级导航
+			navL1.push(did);
+		}
+		else{
+			navL2.push(did);
+		}
+     }); 
+	 if(navL1.length == 0 && navL2.length == 0 ){
+		 alert("请选择要删除的数据记录!");
+	 }
+	 else{
+		 if(navL1.length>0){ //一级导航含有二级导航
+			 var clvs = containchild(navL1.join(",")); //含有二级导航的ids
+		 }
+		 if(clvs!=null && clvs.length>0){
+			 alert(""+clvs+" 含有二级导航,不可删除");
+			 return ;
+		 }
+		 else{  //不含有二级导航时,直接删除
+				//判断二级导航是否含有卡片,还有卡片的不可删除,需要先删除卡片
+			 if(navL2.length > 0){
+				 var tabs = containchild(navL2.join(","));
+			 }
+			 if(tabs!=null && tabs.length > 0){
+				 alert(""+tabs+" 含有页面卡片, 请先删除!");
+				 return;
+			 }
+			 else{
+				 if(confirm("您确认要删除选中数据么，删除后相关模型信息将无法恢复!"))
+				 {
+					 var d1 = navL1.join(",");
+					 var d2 = navL2.join(",");
+					 var dids;
+					 if(d1!="" && d2!= ""){
+						 dids = d1+","+ d2;
+					 }
+					 else if(d1!=""){
+						 dids = d1;
+					 }
+					 else if(d2!=""){
+						 dids = d2;
+					 }
+					 deletetenant(dids);
+				 }
+			 }
+		 }
+	 }
+}
+//只有新增导航时调用
+function addNewNav()
+{
+	var flag = true;
+	var uname = $("#label").val();
+	if(uname == ""){
+		flag = false;
+		alert("请填写导航名称");
+	}
+	var pt = $("#pagetitle").val()
+	if(pt == ""){
+		flag = false;
+		alert("请填写页面名称");
+	}
+	if(flag){
+		var navlevel = $("#sellevel").val();
+		var searchnameUrl = config.checkexistUrl + "&name="+uname+"&navlevel="+navlevel;
+		$.ajax({
+			url: searchnameUrl,
+			dataType: "json",
+			cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+			async:false,  //同步请求
+			success:function(data){
+				checkExits(data);
+			} 
+		});
+	}
+}
+function checkExits(data){
+	if(data!=null){
+		if(data.flag==1){
+			alert("导航名称已存在,请更改");
+			$("#label").focus();
+		}
+		else
+		{
+			var levelid = $("#sellevel").val();
+			var icon = $("#selnavimg").val();
+	        if(levelid != 1 || icon == undefined || icon == ""){
+	            icon = "";
+	        }
+			var  exist;
+			if($('input[type="radio"][name="isdefault"]:checked').val()==1) //设为首页
+			{
+				var navlevel = $("#sellevel").val();
+				var initUrl = config.phpUrl+"modelinterface.php?type=checkhomepage&navlevel="+navlevel;
+					$.ajax({
+							url: initUrl,
+							dataType: "json",
+							cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+							async:false,  //同步请求
+							success:function(data)
+							{
+								exist = data.flag;	
+							} 
+						});
+					
+					if(exist==1)
+					{
+						if(confirm("已存在默认首页，是否进行修改!"))  //修改默认首页
+						{	
+							var navlevel = $("#sellevel").val(); 
+							var ishomepage;
+							if(navlevel== 1){
+								ishomepage = 0;
+							}
+							else{
+								ishomepage = $('input[type="radio"][name="isdefault"]:checked').val();
+							}
+							var parentid;
+							if(navlevel == 1){
+								parentid = 0;
+							}
+							else{
+								parentid = $("#parentid").val();
+							}
+
+							var pname=$("#label").val();
+							var URL=config.phpUrl+"modelinterface.php";
+							$.ajax({
+        						type: "POST",
+        						contentType: "application/json",
+        						dataType: "json",
+        						url: URL,
+        						data: JSON.stringify({label:pname,level:navlevel,pagetype:2,type:"addnavigate",parentid:parentid, pagetitle:$("#pagetitle").val(),ishomepage:ishomepage,modifyhompage:1,icon:icon}), 
+        						success: function (msg) {
+			 							//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+										if(msg.flag==1)
+										{
+											//alert("设置成功!");
+											searchRequest(pagesize,1); 
+											$("#pagetitle").attr("value","");
+											$("#label").attr("value","");
+											$("#parentid").attr("value",0);
+											closediv('divAddorUpdateNav');
+										}
+										else
+										{
+											alert("设置失败，请与管理员联系!");
+										}
+        						},
+        						error: function (msg) {
+        						}
+    						});
+							}
+							else    
+							{
+								var navlevel = $("#sellevel").val(); 
+								//var navlevel = $("#parentid").val() == 0 ? 1 : 2; //父id = 0时 为一级导航,否则为二级
+								var ishomepage;
+								if(navlevel== 1){
+									ishomepage = 0;
+								}
+								else{
+									ishomepage = $('input[type="radio"][name="isdefault"]:checked').val();
+								}
+								var parentid;
+								if(navlevel == 1){
+									parentid = 0;
+								}
+								else{
+									parentid = $("#parentid").val();
+								}
+
+
+								var pname=$("#label").val();
+								var URL=config.phpUrl+"modelinterface.php";
+								$.ajax({
+        							type: "POST",
+        							contentType: "application/json",
+        							dataType: "json",
+        							url: URL,
+        							data: JSON.stringify({label:pname,level:navlevel,pagetype:2,type:"addnavigate",parentid:parentid,pagetitle:$("#pagetitle").val(),ishomepage:ishomepage,modifyhompage:0,icon:icon}), 
+        							success: function (msg) {
+			// var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+									if(msg.flag==1)
+									{
+									//alert("设置成功!");
+									searchRequest(pagesize,1); 
+									$("#pagetitle").attr("value","");
+									$("#label").attr("value","");
+									$("#parentid").attr("value",0);
+									closediv('divAddorUpdateNav');
+									}
+									else
+									{
+									alert("设置失败，请与管理员联系!");
+									}
+        						},
+        							error: function (msg) {
+        						}
+    						});//end ajax
+						}//end 是否更换默认首页
+					}
+					else
+					{
+						var navlevel = $("#sellevel").val(); 
+						//var navlevel = $("#parentid").val() == 0 ? 1 : 2; //父id = 0时 为一级导航,否则为二级
+						var ishomepage;
+						if(navlevel== 1){
+							ishomepage = 0;
+						}
+						else{
+							ishomepage = $('input[type="radio"][name="isdefault"]:checked').val();
+						}
+						var parentid;
+						if(navlevel == 1){
+							parentid = 0;
+						}
+						else{
+							parentid = $("#parentid").val();
+						}
+
+						var pname=$("#label").val();
+						var URL=config.phpUrl+"modelinterface.php";
+						$.ajax({
+        					type: "POST",
+        					contentType: "application/json",
+        					dataType: "json",
+        					url: URL,
+        					data: JSON.stringify({label:pname,level:navlevel,pagetype:2,type:"addnavigate",parentid:parentid, pagetitle:$("#pagetitle").val(),ishomepage:ishomepage,modifyhompage:0,icon:icon}), 
+        					success: function (msg) {
+			//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+							if(msg.flag==1)
+							{
+								//alert("设置成功!");
+								searchRequest(pagesize,1);  
+								$("#pagetitle").attr("value","");
+								$("#label").attr("value","");
+								$("#parentid").attr("value",0);
+								closediv('divAddorUpdateNav');
+							}
+							else
+							{
+								alert("设置失败，请与管理员联系!");
+							}
+        			},
+        			error: function (msg) {
+        			}
+    				});//end ajax
+				}//首页是否存在
+			}//end if 是否选择的是设置主页
+			else  //不设置为首页
+			{
+						var navlevel = $("#sellevel").val(); 
+						//var navlevel = $("#parentid").val() == 0 ? 1 : 2; //父id = 0时 为一级导航,否则为二级
+						var ishomepage;
+						if(navlevel== 1){
+							ishomepage = 0;
+						}
+						else{
+							ishomepage = $('input[type="radio"][name="isdefault"]:checked').val();
+						}
+						var parentid;
+						if(navlevel == 1){
+							parentid = 0;
+						}
+						else{
+							parentid = $("#parentid").val();
+						}
+
+
+						var pname=$("#label").val();
+						var URL=config.phpUrl+"modelinterface.php";
+						$.ajax({
+        					type: "POST",
+        					contentType: "application/json",
+        					dataType: "json",
+        					url: URL,
+        					data: JSON.stringify({label:pname,level:navlevel,pagetype:2,type:"addnavigate",parentid:parentid,pagetitle:$("#pagetitle").val(),ishomepage:ishomepage,modifyhompage:0,icon:icon}), 
+        					success: function (msg) {
+							if(msg.flag==1)
+							{
+								//alert("设置成功!");
+								searchRequest(pagesize,1);  
+								$("#pagetitle").attr("value","");
+								$("#label").attr("value","");
+								$("#parentid").attr("value",0);
+								closediv('divAddorUpdateNav');
+							}
+							else
+							{
+								alert("设置失败，请与管理员联系!");
+							}
+        			},
+        			error: function (msg) {
+        			}
+    				});//end ajax
+			}
+			
+		}
+	}
+}
+
+
+function openTaskDiv(){
+	$("#parentid").removeAttr("disabled");
+	$("#sellevel").removeAttr("disabled");
+	bindmodel(0, 0);
+	$("#tasktype").val(1); //新增导航
+	$("#label").val("") ;
+	$("#pagetitle").val("") ;
+	$("#sellevel").val("1");
+	$("#parentid").val("0");
+	$("input[type=radio][name=isdefault][value=0]").attr("checked", "checked");
+	$("#sethomepage").css("display","none");
+	$("#setnavpar").css("display","none");
+	$("#trnavicon").show();
+
+	$("#divAddorUpdateNav").dialog("open");
+	$("#divAddorUpdateNav").dialog({ title: '新增导航' });
+}	
+	
+function editnavigate(id, parentid)
+{
+	navid = id;
+	bindmodel(id, parentid); //绑定租户导航模块信
+	$("#tasktype").val(2); //修改导航
+	$("#sethomepage").css("display","");
+	$("#setnavpar").css("display","");
+	var searchnameUrl = config.getNavbyidUrl+"&navid="+navid;
+	ajaxRequest(searchnameUrl, getnavigateinfo, "json");
+}
+
+function getnavigateinfo(data){
+	$("#divAddorUpdateNav").dialog("open");
+	$("#divAddorUpdateNav").dialog({ title: '修改导航' });
+	if(data.totalcount>0)
+	{
+		$.each(data.children, function(i,m){
+			$("#label").attr("value", m.label);
+			$("#pagetitle").attr("value",m.pagetitle);
+			$("#sellevel").val(m.level);
+			$("#sellevel").attr("disabled", "disabled");
+			$("#selnavimg").val(m.icon);
+			$("#navimg").attr("src",m.icon);
+			if(m.level != 1){
+				$("#trnavicon").hide();
+				$("#parentid").val(m.parentid);
+				$("input[name=isdefault][value="+m.ishomepage+"]").attr("checked", true);
+			}
+			else{
+				$("#trnavicon").show();
+				$("#sethomepage").css("display","none");
+				$("#setnavpar").css("display","none");
+				$("input[name=isdefault][value=0]").attr("checked", "checked");
+			}
+		});
+	}
+	else
+	{
+		alert("当前导航不存在，请与管理员联系!");
+	}
+}
+
+
+function deletemodel(id)
+{
+	if(confirm("是否删除此模块!"))
+	{
+	var searchnameUrl = config.phpUrl+"modelinterface.php?type=deletenav&id="+id;
+	ajaxRequest(searchnameUrl, deletecomplete, "json");
+	}
+}
+
+function deletecomplete(data)
+{
+	if(data.flag==1){
+		//alert('删除成功');
+		searchRequest(pagesize,1); 
+		//$("#navigationinfo tr:not(:first)").remove();
+		//初始化列表信息
+		window.location.href="navigate.shtml";
+	}
+	else{
+		alert('删除失败');
+	}
+}
+//分配资源
+function setresource(pid,mid,insid)
+{
+	window.location.href="../webview/productver2/index.shtml?modelID="+mid+"&instanceID="+insid+"&navID="+pid+"&isEdit=1&typeID=2";
+}
+//根据租户id查出此租户所有导航
+function bindmodel(id, parentid)
+{
+	var getnavbytidUrl = config.getNavbyTidUrl;  //根据用户查出导航, 并且根据,导航ID选中
+	ajaxRequest(getnavbytidUrl, function(data){
+		if(data!=null && data.totalcount>0){
+			$("#parentid").empty();
+			$.each(data.children, function(i,m){
+				var chk = "";
+				if(id !=0 && m.parentid == parentid){
+					chk = "selected = 'selected'";
+				}
+				$("<option value="+data.children[i].id+" "+chk+" >"+data.children[i].label+"</option>").appendTo("#parentid");
+			});
+		}
+		else
+		{
+			$("#parentid").empty();
+		}
+	}, "json");
+}
+
+
+function bindlevel(mode)
+{
+	if(mode=1)
+	{
+		if($("#parentid").val()!=0)
+		{
+			$('#sellevel').attr("value",2);
+		}
+	}
+}
+
+
+function bindtenant()
+{ 
+	var searchnameUrl = config.phpUrl+"tenant_user_model.php?type=gettenant";
+	ajaxRequest(searchnameUrl, searchtenant, "json");
+}
+
+//绑定租户
+function searchtenant(data)
+{
+	$('#tenantid').empty();
+	$('#tenantid2').empty();
+	$("<option value=0>请选择</option>").appendTo("#tenantid");
+	$("<option value=0>全部</option>").appendTo("#tenantid2");
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#tenantid').append( new Option(data.children[i].tenantname,data.children[i].tenantid));
+		//$('#tenantid2').append( new Option(data.children[i].tenantname,data.children[i].tenantid));
+		$("<option value="+data.children[i].tenantid+">"+data.children[i].tenantname+"</option>").appendTo("#tenantid");
+		$("<option value="+data.children[i].tenantid+">"+data.children[i].tenantname+"</option>").appendTo("#tenantid2");
+									   
+	});
+		$("#tenantid").val(tid);
+		$("#tenantid2").val(tid);
+		
+	}
+}
+//绑定导航信息
+/*
+function bindnav(tenantid)
+{
+	searchRequest(pagesize, 1);
+}
+*/
+function containchild(tid){
+	var res;
+	var url = config.phpUrl+"modelinterface.php?type=iscontainchild&id="+tid;
+	syncAjax(url, "json", '', "GET", function(data){
+		res = data;
+	});
+	return res;
+}
+function deletetenant(tid)
+{
+	var searchnameUrl =  config.phpUrl+"modelinterface.php?type=deletenavigate&id="+tid;
+	ajaxRequest(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			searchRequest(pagesize, 1);
+		}
+		else
+		{
+			alert("删除失败!");
+		}
+	}
+}
+
+
+
+function closediv(divid)
+{
+	$("#"+divid).dialog("close");
+}
+
+function updateNav(){
+	var flag = true;
+	var uname = $("#label").val();
+	if(uname == ""){
+		flag = false;
+		alert("请填写导航名称");
+	}
+	var pt = $("#pagetitle").val()
+	if(pt == ""){
+		flag = false;
+		alert("请填写页面名称");
+	}
+	if(!flag){
+		return false;
+	}
+
+	var URL=config.phpUrl+"modelinterface.php";
+			//var levelid = $("#parentid").val() == 0 ? 1 : 2;
+		var levelid = $("#sellevel").val();
+		var ishomepage;
+		if(levelid == 1){
+			ishomepage = 0;
+		}
+		else{
+			ishomepage = $('input[type="radio"][name="isdefault"]:checked').val();
+		}
+		var parentid = levelid == 1 ? 0 :$("#parentid").val() ;
+		var icon = $("#selnavimg").val();
+		if(levelid != 1 || icon == undefined || icon == ""){
+		    icon = "";
+		}
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: URL,
+			data: JSON.stringify({label:$("#label").val(),parentid:parentid,pagetype:2,type:"updatenavigate",id:navid,pagetitle:$("#pagetitle").val(),ishomepage:ishomepage, icon:icon, level:levelid}), 
+			success: function (msg) {
+			if(msg.flag==1)
+			{
+				//alert("修改成功!");
+				searchRequest(pagesize,1); 
+				closediv('divAddorUpdateNav');
+			}
+			else
+			{
+				alert("设置失败，请与管理员联系!");
+				return;
+			}
+		},
+		error: function (msg) {
+		}
+	});//end ajax
+
+}
+
+function updateorder(totalid)
+{
+	var URL=config.phpUrl+"modelinterface.php?type=updatenavorder&id="+totalid;
+	$.ajax({
+        type: "GET",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        success: function (data) {
+			if(data.result==1){
+				//alert("设置成功!");
+				searchRequest(pagesize,1); //支持分页后，替换上两行
+			}
+			else{
+				alert("设置失败!");
+			}
+		}//end sucess
+   });//end ajax
+}
+</script>
+<div> 
+	<a href="javascript:void(0)" onclick="openTaskDiv()" style="float: right">新增导航</a> 
+	<br/>
+	<div id="nav_search_div">
+		导航名称:<input type="text" id="nav_search_label" />
+		级别:<select id="nav_search_level" >
+				<option value="">请选择</option>
+				<option value="1">一级</option>
+				<option value="2">二级</option>
+			</select>
+		一级名称:<input type="text" id="nav_search_level1name">(查询所属的二级)
+		<br/>
+		更新时间:<input id="nav_search_updatetimestart" name="nav_search_updatetimestart" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">至<input id="nav_search_updatetimeend" name="nav_search_updatetimeend" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+	  <input type="button" name="nav_search" value="查询" id="nav_search" />
+	  <input type="button" name="nav_reset" value="清空" id="nav_reset" />
+	  <span>使用*进行模糊查询</span>
+	</div>
+<table id="navigationinfo" name="navigationinfo" class="table1" align="center" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+<thead>
+	<tr id="mytest" style="height:30px;">
+		<th scope="col" style="width: 80px">选择</th>
+		<th scope="col" style="width: 80px">导航名称</th>
+		<th scope="col" style="width: 40px">首页</th>
+		<th scope="col" style="width: 60px">级别</th>
+		<th scope="col" style="width: 120px" align="center">更新时间</th>
+		<th scope="col" style="width: 80px">操作</th>
+	</tr>
+</thead>
+<tbody id="tbltb1">
+</tbody>
+</table>
+<input type="hidden" id="ids" value="">
+<div id="divAddorUpdateNav" style="display:none;" title="新增导航模块" class="openwindow">
+		<table width="83%" height="133" class="formtable">
+			<tr>
+				<td width="191" class="tdleft">导航名称:</td>
+				<td width="389"><input type="text" name="label" id="label" /></td>
+				<td width="178" class="tdtip"></td>
+			</tr>
+			<tr>
+				<td width="191" class="tdleft">页面名称：</td>
+				<td width="389"><input type="text" name="pagetitle" id="pagetitle"  /></td>
+			</tr>
+			<tr>
+				<td width="191" class="tdleft">级别：</td>
+				<td width="389">
+					<select name="sellevel" id="sellevel">
+						<option value="1">一级</option>
+						<option value="2">二级</option>
+					</select>
+				</td>
+			</tr>
+			<tr id="trnavicon">
+                <td width="191" class="tdleft">导航图标：</td>
+                <td width="389"><img border="0" id="navimg" src="images/pot.gif"/>
+                    <select id="selnavimg">
+                        <option value="images/pot.gif">图标1</option>
+                        <option value="images/pot1.gif">图标2</option>
+                        <option value="images/pot2.gif">图标3</option>
+                        <option value="images/pot3.gif">图标4</option>
+                        <option value="images/pot4.gif">图标5</option>
+                    </select>
+                </td>
+            </tr>
+			<tr id="setnavpar" style="display:none;">
+				<td class="tdleft">所属导航：</td>
+				<td>
+					<select name="parentid" id="parentid">
+					</select>
+				</td>
+				<td class="tdtip"></td>
+			</tr>
+			<tr id="sethomepage" style="display:none;">
+				<td class="tdleft" >设为首页：</td>
+				<td><input type="radio" name="isdefault" value="1"> 是
+					<input type="radio" name="isdefault" value="0" checked="checked"> 否
+				</td>
+				<td class="tdtip"></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center"><input class="buttono" type="submit" value="提 交" id="btnaddnav" />
+					<input type="hidden" name="tasktype" id="tasktype" value="1" />
+					&nbsp;&nbsp;
+					<input class="buttono" type="button" id="btncloseanalysis" value="取 消" onclick="closediv('divAddorUpdateNav')" /></td>
+				<td class="tdtip"></td>
+			</tr>
+		</table>
+</div>
+<script language="javascript">
+	function binddrag()
+	{
+		$("#navigationinfo").tableDnD({
+			onDrop: function(table, row) {
+				var rows = table.tBodies[0].rows;
+				var debugStr = "Row dropped was "+row.id+". New order: ";
+				for (var i=0; i<rows.length; i++) {
+					//alert(rows[i].id);
+					/*
+					if(row.id==rows[i].id)
+					{
+						if(i!=currmoverow)
+						{
+							if( i>currmoverow)
+							{
+								updateorder(row.id,rows[i-1].id);
+								break;
+							}
+
+							if(i<currmoverow)
+							{
+								updateorder(row.id,rows[i+1].id);
+								break;
+							}
+						}
+					}
+					*/
+					if(i+1!=rows.length)
+					{
+						if(i==0)
+						{
+							$("#"+rows[i].id).attr("oid",maxvalue);
+						}
+						else
+						{
+							$("#"+rows[i].id).attr("oid",maxvalue-i);
+						}
+					}
+				}
+				var allid="";
+				for (var j=0; j<rows.length; j++) 
+				{
+					if(j+1!=rows.length)
+					{
+						var oriid = $("#"+rows[j].id).attr("id").split("_")[0];
+						var strid = $("#"+rows[j].id).attr("pid")+"_"+$("#"+rows[j].id).attr("oid");
+						$("#"+rows[j].id).attr("id",oriid+"_"+strid);
+						allid += $("#"+rows[j].id).attr("id")+",";
+					}
+				}
+				allid = allid.substr(0,allid.length-1);
+				updateorder(allid);
+			},
+			onDragStart: function(table, row) {
+				var rows = table.tBodies[0].rows;
+				currmoveid = row.id;
+				if(rows.length>0)
+				{
+					var j = 0;
+					j = parseInt(rows.length)-2;
+					maxvalue = parseInt($("#"+rows[0].id).attr("oid"));
+					minvalue = parseInt($("#"+rows[j].id).attr("oid"));
+				}
+				for (var i=0; i<rows.length; i++) {
+					if(row.id==rows[i].id)
+					{	
+						currmoverow=i;							
+					}
+				}
+			}
+		});
+	}
+</script>

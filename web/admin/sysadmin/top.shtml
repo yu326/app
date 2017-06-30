@@ -1,0 +1,13 @@
+<script type="text/javascript">
+$(function(){
+	$("#btnlogout").bind("click",function(){
+		$.post(config.phpPath+"checkuser.php",{type:"logout"},function(){
+			location.href=config.sitePath+"login.shtml";
+		});
+	});
+});
+</script>
+<div id="top">
+    <div class="smenu"> <a href="index.shtml">首页</a> &nbsp;&nbsp;<a href="#">帮助</a> &nbsp;&nbsp;<a href="javascript:void(0)" id="btnlogout">退出</a> </div>
+    <div class="clear"></div>
+</div>

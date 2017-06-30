@@ -1,0 +1,764 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/jquery.tablednd.0.6.min.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+ $(document).ready(function(){ 
+
+	});
+var pid=0;
+var tid=0;
+var navid=0;
+var allid="";
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+
+	$(function(){
+		changeTabTitle();
+				   var spArr = window.location.toString().split("tenantid=");
+	if(spArr!=""&&spArr!=null)
+	{
+		if(typeof(spArr)=="undefined")
+		{
+			tid=0;
+		}
+		else
+		{
+	tid = spArr[1];
+		}
+	
+	}
+	 $("#navigationinfo tr:not(:first)").remove();
+		searchRequest(10,1,tid); //支持分页后，替换上两行
+	//initpage(tid);
+	//allid = allid.substring(0,allid.length-1);
+	$("#mytest").draggable();
+			 // bindtenant(tid); 
+			 bindmodel(tid); //绑定租户导航模块信息
+			$("#nav_43").draggable();
+					//$("#nav_44").draggable();   
+			 $("#divaddast").dialog({
+		    autoOpen: false,
+		    modal:true,
+		    height:400,
+		    width:600
+        });
+		$("#divaddspt").dialog({
+            autoOpen: false,
+            modal:true,
+            height:400,
+            width:600
+        });
+		$("#frmuser").validate(
+		{
+		submitHandler:function(form)
+               {
+				   checkname(pid);
+               },
+		rules:{
+   				label:"required"			
+				},
+   
+    	messages:{
+					label:"请输入导航名称"
+				}
+	});
+	
+	$("#frmedituser").validate(
+		{
+		submitHandler:function(form)
+               {
+				   checknav();
+               },
+		rules:{
+   				label2:"required"
+			},
+    	messages:{
+					label2:"请输入导航名称"
+				}
+	});
+	
+	
+	
+});
+
+function searchRequest(pagesize, curpage,vid)
+{ $("#navigationinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"modelinterface.php?type=getnavbytidall&currpage="+curpage2+"&pagesize="+pagesize+"&id="+vid;
+	ajaxCommon(searchnameUrl, searchname, "json");
+}
+
+
+function searchname(data){
+		//显示分页
+		totalCount = data.totalcount
+		
+	
+	if(totalCount>0)
+	{var txttype="";
+		$.each(data.children, function(i){
+		if(data.children[i].pagetype==1)
+		{
+			txttype="单模型";
+		}
+		if(data.children[i].pagetype==2)
+		{
+			txttype="多模型";
+		}
+				allid=data.children[i].id+",";	
+									    var str=$("<tr id='nav"+data.children[i].id+"' pid='"+data.children[i].parentid+"' oid='"+data.children[i].orderid+"'><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].id+"'></input></td><td>"+data.children[i].label+"</td><td>"+data.children[i].level+"</td><td>"+txttype+"</td><td>"+data.children[i].updatetime+"</td><td><a href='javascript:setresource("+data.children[i].id+","+data.children[i].modelid+","+data.children[i].instanceid+")'>设置页面</a> <a href='javascript:editnavigate("+data.children[i].id+")'>修改</a></td></tr>"); 
+		$("#navigationinfo").append(str);
+		$("#nav"+data.children[i].id).draggable();
+		})
+		
+		var str=$("<tr><td></td><td colspan='5' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>"); 
+		$("#navigationinfo").append(str);
+				
+		}
+		else
+		{
+var str=$("<tr><td colspan='6'>暂无记录!</td></tr>"); 
+		$("#navigationinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if(totalCount>pagesize){
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+}
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if(delid=='')
+		{
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+     }); 
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后相关模型信息将无法恢复!"))
+		 {
+			 deletetenant(delid);
+		 }
+	 }
+}
+
+function checkname()
+{
+		var uname = $("#label").val();
+		var searchnameUrl = config.modelUrl+"modelinterface.php?type=checkexist&name="+uname+"&id="+tid;
+		ajaxCommon(searchnameUrl, checkExits, "json");
+
+}
+
+
+function checkExits(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("导航名称已存在,请更改");
+			$("#label").focus();
+		}
+		else
+		{
+			var  exist;
+			if($('input[type="radio"][name="isdefault"]:checked').val()==1)
+			{
+				var initUrl = config.modelUrl+"modelinterface.php?type=checkhomepage";
+					$.ajax({
+							url: initUrl,
+							dataType: "json",
+							cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+							async:false,  //同步请求
+							success:function(data)
+							{
+								exist = data.flag;	
+							} 
+						});
+					
+					if(exist==1)
+					{
+						if(confirm("已存在默认首页，是否进行修改!"))
+						{	
+							var pname=$("#label").val();
+							var URL=config.modelUrl+"modelinterface.php";
+							$.ajax({
+        						type: "POST",
+        						contentType: "application/json",
+        						dataType: "json",
+        						url: URL,
+        						data: JSON.stringify({label:pname,level:$("#level").val(),pagetype:$("#type").val(),type:"addnavigate",tenantid:$("#tenantid").val(),parentid:$("#parentid").val(),pagetitle:$("#pagetitle").val(),ishomepage:$('input[type="radio"][name="isdefault"]:checked').val(),modifyhompage:1}), 
+        						success: function (msg) {
+			 							
+										if(msg.flag==1)
+										{
+											alert("设置成功!");
+											closewindow("divaddast");
+											searchRequest(10,1,tid);
+										}
+										else
+										{
+											alert("设置失败，请与管理员联系!");
+										}
+        						},
+        						error: function (msg) {
+        						}
+    						});
+							}
+							else   //判断是否更行默认首页
+							{
+								var pname=$("#label").val();
+								var URL=config.modelUrl+"modelinterface.php";
+								$.ajax({
+        							type: "POST",
+        							contentType: "application/json",
+        							dataType: "json",
+        							url: URL,
+        							data: JSON.stringify({label:pname,level:$("#level").val(),pagetype:$("#type").val(),type:"addnavigate",tenantid:$("#tenantid").val(),parentid:$("#parentid").val(),pagetitle:$("#pagetitle").val(),ishomepage:$('input[type="radio"][name="isdefault"]:checked').val(),modifyhompage:0}), 
+        							success: function (msg) {
+			// var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+									if(msg.flag==1)
+									{
+										alert("设置成功!");
+										closewindow("divaddast");
+										searchRequest(10,1,tid);
+									}
+									else
+									{
+										alert("设置失败，请与管理员联系!");
+									}
+        						},
+        							error: function (msg) {
+        						}
+    						});//end ajax
+						}//end 是否更换默认首页
+					}
+					else
+					{
+						var pname=$("#label").val();
+						var URL=config.modelUrl+"modelinterface.php";
+						$.ajax({
+        					type: "POST",
+        					contentType: "application/json",
+        					dataType: "json",
+        					url: URL,
+        					data: JSON.stringify({label:pname,level:$("#level").val(),pagetype:$("#type").val(),type:"addnavigate",tenantid:$("#tenantid").val(),parentid:$("#parentid").val(),pagetitle:$("#pagetitle").val(),ishomepage:$('input[type="radio"][name="isdefault"]:checked').val(),modifyhompage:0}), 
+        					success: function (msg) {
+			//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+							if(msg.flag==1)
+							{
+								alert("设置成功!");
+								closewindow("divaddast");
+								searchRequest(10,1,tid);
+							}
+							else
+							{
+								alert("设置失败，请与管理员联系!");
+							}
+        			},
+        			error: function (msg) {
+        			}
+    				});//end ajax
+				}//首页是否存在
+			}//end if 是否选择的是设置主页
+			else
+			{
+				var pname=$("#label").val();
+						var URL=config.modelUrl+"modelinterface.php";
+						$.ajax({
+        					type: "POST",
+        					contentType: "application/json",
+        					dataType: "json",
+        					url: URL,
+        					data: JSON.stringify({label:pname,level:$("#level").val(),pagetype:$("#type").val(),type:"addnavigate",tenantid:$("#tenantid").val(),parentid:$("#parentid").val(),pagetitle:$("#pagetitle").val(),ishomepage:$('input[type="radio"][name="isdefault"]:checked').val()}), 
+        					success: function (msg) {
+			//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+							if(msg.flag==1)
+							{
+								alert("设置成功!");
+								closewindow("divaddast")
+							}
+							else
+							{
+								alert("设置失败，请与管理员联系!");
+							}
+        			},
+        			error: function (msg) {
+        			}
+    				});//end ajax
+			}
+			
+		}
+	}
+}
+function closewindow(divid)
+{
+	$("#"+divid).dialog("close");
+}
+
+function openTaskDiv(divid){
+	if(divid=='divaddast')
+	{
+		userid=0;
+	}
+		$("#"+divid).dialog("open");
+}	
+	
+
+
+
+function editnavigate(id)
+{
+	navid=id;
+	pid=id;
+	var searchnameUrl = config.modelUrl+"modelinterface.php?type=getnavbyid&navid="+id;
+	ajaxCommon(searchnameUrl, getnavigateinfo, "json");
+}
+
+function getnavigateinfo(data)
+{
+openTaskDiv('divaddspt');
+//bindmodel(tid); //绑定租户导航模块信
+	if(data.totalcount>0)
+	{
+		$.each(data.children, function(i){
+		//alert(data.children[i].pagetitle);
+		$("#label2").attr("value",data.children[i].label);
+		$("#pagetitle2").attr("value",data.children[i].pagetitle);
+		$("#parentid2").attr("value",data.children[i].parentid);
+		//$("#level2").attr("value",data.children[i].level);
+		$("#type2").attr("value",data.children[i].pagetype);
+	//	$("input[name='isdefault2']").attr("checked",data.children[i].ishomepage);
+	//	if(data.children[i].ishomepage==0)
+	//	{
+		$("#level2").each(function(){
+											if($(this).val() == data.children[i].level){
+												$(this).attr("checked", true);
+											}
+										});
+	$("#parentid2").each(function(){
+											if($(this).val() == data.children[i].parentid){
+												$(this).attr("checked", true);
+											}
+										});
+	
+		 $("input[name=isdefault2]").each(function(){
+											if($(this).val() == data.children[i].ishomepage){
+												$(this).attr("checked", true);
+											}
+										});
+
+//		}
+		
+		//tid = data.children[i].tenantid;
+		//bindtenant();
+		
+									   });
+	}
+	else
+	{
+		alert("当前导航信息不存在，请与管理员联系!");
+	}
+}
+
+
+function deletemodel(id)
+{
+	if(confirm("是否删除此模块!"))
+	{
+	var searchnameUrl = config.modelUrl+"modelinterface.php?type=deletenav&id="+id;
+	ajaxCommon(searchnameUrl, deletecomplete, "json");
+	}
+}
+
+function deletecomplete(data)
+{
+	if(data.flag==1)
+	{
+		alert('删除成功');
+		//$("#navigationinfo tr:not(:first)").remove();
+		//初始化列表信息
+		window.location.href="navigate.shtml";
+	}
+	else
+	{
+		alert('删除失败');
+	}
+}
+
+
+function bindmodel(id)
+{
+	var searchnameUrl = config.modelUrl+"modelinterface.php?type=getnavbytid&id="+id;
+	ajaxCommon(searchnameUrl, getnavigate, "json");
+}
+
+function getnavigate(data)
+{
+	
+	if(data!=null)
+	{
+		$("#parentid").empty();
+		$("#parentid2").empty();
+		//$('#parentid').append( new Option("请选择",0));
+			$("<option value=0>请选择</option>").appendTo("#parentid");
+			$("<option value=0>请选择</option>").appendTo("#parentid2");
+
+
+		$.each(data.children, function(i){
+		//$('#parentid').append( new Option(data.children[i].label,data.children[i].id) );
+			$("<option value="+data.children[i].id+">"+data.children[i].label+"</option>").appendTo("#parentid");
+			$("<option value="+data.children[i].id+">"+data.children[i].label+"</option>").appendTo("#parentid2");
+						   
+	});
+	}
+	else
+	{
+		$("#parentid").empty();
+		$("#parentid2").empty();
+		$("<option value=0>请选择</option>").appendTo("#parentid");
+		$("<option value=0>请选择</option>").appendTo("#parentid2");
+	}
+}
+
+function bindlevel(mode)
+{
+if(mode=1)
+{
+	if($("#parentid").val()!=0)
+	{
+		$('#level').attr("value",2);
+	}
+}
+else
+{
+{
+	if($("#parentid2").val()!=0)
+	{
+		$('#level2').attr("value",2);
+	}
+}
+}
+
+
+function bindtenant()
+{ 
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenant";
+	ajaxCommon(searchnameUrl, searchtenant, "json");
+}
+
+//绑定租户
+function searchtenant(data)
+{
+	$('#tenantid').empty();
+	$('#tenantid2').empty();
+	$("<option value=0>请选择</option>").appendTo("#tenantid");
+	$("<option value=0>全部</option>").appendTo("#tenantid2");
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#tenantid').append( new Option(data.children[i].tenantname,data.children[i].tenantid));
+		//$('#tenantid2').append( new Option(data.children[i].tenantname,data.children[i].tenantid));
+		$("<option value="+data.children[i].tenantid+">"+data.children[i].tenantname+"</option>").appendTo("#tenantid");
+		$("<option value="+data.children[i].tenantid+">"+data.children[i].tenantname+"</option>").appendTo("#tenantid2");
+									   
+	});
+		$("#tenantid").val(tid);
+		$("#tenantid2").val(tid);
+		
+	}
+}
+//绑定导航信息
+function bindnav(tenantid)
+{
+	searchRequest(pagesize, 1,tenantid);
+}
+
+
+function deletetenant(tid)
+{
+	var searchnameUrl =  config.modelUrl+"modelinterface.php?type=deletenavigate&id="+tid;
+	ajaxCommon(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("删除成功!");
+			searchRequest(pagesize, curpage2);
+		}
+		else
+		{
+			alert("删除失败!");
+		}
+	}
+}
+
+
+
+
+function checknav()
+{
+	var uname = $("#label2").val();
+	var URL = config.modelUrl+"modelinterface.php?type=checkexist&name="+uname+"&id="+tid+"&navid="+navid;
+			
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        success: function (data) {
+			if(data.flag==1)
+			{
+				alert("导航名称已经存在,请修改!");
+				$("#label2").focus();
+				return;
+			}
+			else
+			{
+					var URL=config.modelUrl+"modelinterface.php";
+						$.ajax({
+        					type: "POST",
+        					contentType: "application/json",
+        					dataType: "json",
+        					url: URL,
+        					data: JSON.stringify({label:$("#label2").val(),level:$("#level2").val(),parentid:$("#parentid2").val(),pagetype:$("#type2").val(),type:"updatenavigate",id:navid,pagetitle:$("#pagetitle2").val(),ishomepage:$('input[type="radio"][name="isdefault2"]:checked').val()}), 
+        					success: function (msg) {
+			//var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+							if(msg.flag==1)
+							{
+								alert("修改成功!");
+								closewindow('divaddspt');
+							}
+							else
+							{
+								alert("设置失败，请与管理员联系!");
+								return;
+							}
+        			},
+        			error: function (msg) {
+        			}
+    				});//end ajax
+			}
+		}//end sucess
+		   });//end ajax
+	
+}
+
+}
+
+
+</script>
+</head>
+<body>
+<div id="mybody">
+<div id="content">
+<div id="right"><span
+	style="color: gray">导航管理</span> <a href="javascript:void(0)"
+	onclick="openTaskDiv('divaddast')" style="float: right">新增导航</a>
+   <br/>
+  <br/> 请选择租户： 
+              <br/>
+              <br/>
+<table id="navigationinfo" name="navigationinfo" width="98%" border="0" cellspacing="0" cellpadding="0"
+	class="list">
+    <thead>
+	<tr id="mytest">
+    <th scope="col" style="width: 80px">选择</th>
+		<th scope="col" style="width: 80px">导航名称</th>
+		<th scope="col" style="width: 100px">级别</th>
+		<th scope="col" style="width: 100px">类别</th>
+        <th scope="col" style="width: 100px">创建时间</th>
+		<th scope="col" style="width: 80px">操作</th>
+	</tr>
+    </thead>
+	<tbody id="tbltb1">
+	</tbody>
+</table>
+<div id="Pagination" class="pagination"></div> 
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+<div id="divaddast" title="新增导航模块" class="openwindow">
+<form id="frmuser"><input type="hidden" name="frmuser"
+	value="1" />
+  </p>
+<table width="83%" height="133" class="formtable">
+	<tr>
+		<td width="191" class="tdleft">导航名称:</td>
+		<td width="389"><input type="text" name="label" id="label"  /></td>
+		<td width="178" class="tdtip"></td>
+	</tr>
+       <tr>
+	     <td align="right" valign="middle" scope="col" class="tdleft"><div align="right">页面名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">
+	           <input type="text" name="pagetitle" id="pagetitle"  />
+	         </div>
+	         </label>	       </td>
+       </tr>
+     <!-- <tr>
+	     <td align="right" valign="middle" scope="col" class="tdleft"><div align="right">所属租户：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left"><label>
+               <select name="tenantid" id="tenantid">
+               </select>
+             </label>
+	         </div>
+	       </label>	       </td>
+       </tr>
+	   -->
+	<tr>
+		<td class="tdleft">所属导航：</td>
+		<td><select name="parentid" id="parentid" onchange="bindlevel(1)">
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr>
+		<td class="tdleft">级别：</td>
+		<td><select name="level" id="level" >
+        <option value="1">一级</option>
+        <option value="2">二级</option>
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr>
+		<td class="tdleft">导航类型：</td>
+		<td><select name="type" id="type" ><option value="1">单模型</option>
+        <option value="2">多模型</option>
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+     <tr>
+		<td class="tdleft">设置为首页：</td>
+		<td><input type="radio" name="isdefault" value="1">是<input type="radio" name="isdefault" value="0" checked="checked">否</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="t3-1">
+		<td class="tdleft">&nbsp;</td>
+		<td>&nbsp;</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><input class="buttono"
+			type="submit" value="提 交" id="btnaddanalysis" />&nbsp;&nbsp;<input
+			class="buttono" type="button" id="btncloseanalysis" value="取 消" onclick="closewindow('divaddast')" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+<div id="divaddspt" title="修改导航" class="openwindow">
+<form id="frmedituser">
+  <table width="83%" height="133" class="formtable">
+	<tr>
+		<td width="191" class="tdleft">导航名称：</td>
+		<td width="389"><input type="text" name="label2" id="label2"  /></td>
+		<td width="178" class="tdtip"></td>
+	</tr>
+    <tr>
+	     <td align="right" valign="middle" scope="col" class="tdleft"><div align="right">页面名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left"><input type="text" name="pagetitle2" id="pagetitle2"  /></div>
+	       </label>
+	       </td>
+       </tr>
+	<tr>
+		<td class="tdleft">所属导航：</td>
+		<td><select name="parentid2" id="parentid2" onchange="bindlevel(2)">
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr>
+		<td class="tdleft">级别：</td>
+		<td><select name="level2" id="level2" >
+        <option value="1">一级</option>
+        <option value="2">二级</option>
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr>
+		<td class="tdleft">导航类型：</td>
+		<td><select name="type2" id="type2" ><option value="1">单模型</option>
+        <option value="2">多模型</option>
+              </select></td>
+		<td class="tdtip"></td>
+	</tr>
+ <tr>
+		<td class="tdleft">设置为首页：</td>
+		<td><input type="radio" name="isdefault2" value="1">是<input type="radio" name="isdefault2" value="0">否</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><input class="buttono"
+			type="submit" value="提 交" id="btnaddanalysis" />&nbsp;&nbsp;<input
+			class="buttono" type="button" id="btncloseanalysis" value="取 消" onclick="closewindow('divaddspt')" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+</div>
+</div>
+</div> 
+</body>
+</html>

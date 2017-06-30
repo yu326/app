@@ -1,0 +1,24 @@
+03/13/17 11:54:59,752 [13432] DEBUG monitor_task - MonitorTask.php - 参数2：testsvr30
+03/13/17 11:54:59,775 [13432] INFO monitor_task - D:\app\job\MonitorTask.php103the taskNum is:array (
+  'totalnum' => '10',
+  'normalnum' => '2',
+  'startnum' => '4',
+  'collapsenum' => '3',
+  'stopnum' => '1',
+)
+03/13/17 11:54:59,776 [13432] INFO monitor_task - D:\app\job\MonitorTask.php154the html is:'  总的任务个数:  10  <br/>等待任务个数: 2 <br/>正常任务个数: 4 <br/>崩溃任务个数: 3 <br/>停止任务个数: 1'
+03/13/17 11:54:59,897 [13432] INFO monitor_task - D:\app\job\MonitorTask.php107the res is:array (
+)
+03/13/17 11:54:59,898 [13432] INFO monitor_task - this is ending~~~
+03/13/17 12:33:09,013 [28600] DEBUG monitor_task - MonitorTask.php - 参数2：testsvr30
+03/13/17 12:33:09,087 [28600] INFO monitor_task - D:\app\job\MonitorTask.php103the taskNum is:array (
+  'totalnum' => '10',
+  'normalnum' => '2',
+  'startnum' => '4',
+  'collapsenum' => '3',
+  'stopnum' => '1',
+)
+03/13/17 12:33:09,089 [28600] INFO monitor_task - D:\app\job\MonitorTask.php154the html is:'  总的任务个数:  10  <br/>等待任务个数: 2 <br/>正常任务个数: 4(大于20个，需要关注) <br/>崩溃任务个数: 3（大于0个，需要关注） <br/>停止任务个数: 1（大于0个，需要关注）'
+03/13/17 12:33:09,238 [28600] INFO monitor_task - D:\app\job\MonitorTask.php107the res is:array (
+)
+03/13/17 12:33:09,239 [28600] INFO monitor_task - this is ending~~~

@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+var groupid=0;
+var grouptypr=1;
+$(function(){
+		changeTabTitle();
+		   
+		   	var spArr = window.location.toString().split("roleid=");
+			var tmparr = spArr[1].split("&");
+			var tmparr2 = tmparr[1].split("=");
+	groupid = tmparr[0];
+	grouptype = tmparr2[1];
+	
+	bindgroup(groupid);
+	
+		   $("#frmuser").validate(
+					   
+{
+	submitHandler:function(form)
+               {
+				   checkrole();
+               },
+	rules:{
+   label:"required",
+},
+    messages:{
+	label:"请输入组名称",
+}
+});
+});	
+
+
+
+function bindgroup(gid)
+{
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getgroupbyid&gid="+gid;
+	ajaxCommon(searchnameUrl, getgroup, "json");
+}
+
+function getgroup(data)
+{
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		
+		$("#label").attr("value",data.children[i].label);
+		$("#description").attr("value",data.children[i].description);
+		   
+		 });
+	}
+	else
+	{
+		alert("当前组信息不存在，请与管理员联系!");
+	}
+}
+
+
+
+
+function  checkrole()
+{
+	var tname = $("#label").val();
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getgroupbyname&name="+tname+"&gid="+groupid;
+	ajaxCommon(searchnameUrl, checkExits, "json");
+}
+
+function checkExits(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("组名称已存在,请更改");
+			$("#label").focus();
+		}
+		else
+		{
+	var label = $("#label").val();
+	var desc = $("#description").val();
+	var type = $("#txttype").val();
+	
+	var URL=config.modelUrl+"resource_model.php";
+			$.ajax({
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        data: JSON.stringify({label:label,type:type,description:desc,id:groupid,grouptype:grouptype}), 
+        success: function (msg) {
+		if(!msg.result)
+		{
+			alert(msg.msg);
+			window.history.back();
+		}
+		else
+		{      
+			if(msg.flag==1)
+			{
+				alert("修改成功!");
+				window.location.href="grouplist.shtml";
+			}
+			else
+			{
+				alert("修改失败!");
+			}
+		}
+				}//end sucess
+		   });//end ajax
+	
+	
+	
+		}
+	}
+}
+
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">资源管理</span> <a href="addgroup.shtml"
+	 style="float: right">新增资源组</a>
+     <a href="grouplist.shtml" style="float: right">组列表</a>
+  <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">组名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">
+	           &nbsp;&nbsp;
+	           <input type="text" name="label" id="label"  />
+	         </div>
+	       </label>
+	       </td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">说明信息：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+         &nbsp;&nbsp;
+	        <textarea name="description" cols="50" rows="5" id="description"></textarea>	       </label></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="updategroup" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+  <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

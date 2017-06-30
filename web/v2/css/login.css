@@ -1,0 +1,110 @@
+*{
+	padding:0px;
+	margin:0px;
+	}
+body{
+	font-size:14px;
+	background:url(../images/topbg.gif) top repeat-x;
+	background-color:#FFFFFF;
+	text-align:center;
+	color:#464a4b;
+	}
+#mybody{
+	width:860px;
+	margin:auto;
+	height:530px;
+	min-height:530px;
+    *height:630px
+	}
+#top{
+	margin-top:100px;
+	font-size:35px;
+	font-family:"微软雅黑";
+	text-align:left;
+	height:90px;
+	line-height:90px;
+	vertical-align:middle;	
+	}
+#top img{
+	float:left;
+	margin-right:10px;
+	margin-top:-5px;	
+	}
+#login{
+	width:860px;
+	margin-top:20px;
+	position:relative;
+
+
+	}
+#login_left{
+	margin-top:35px;
+	width:392px;
+	height:272px;
+	background:url(../images/login_bg.gif) no-repeat;
+	position:absolute;
+	z-index:1;
+	text-align:left;
+	left:0px;
+	}
+#login_left ul{
+	margin-left:40px;
+	margin-top:30px;
+	list-style:none;
+	}
+#login_left ul li{
+	height:52px;
+	width:360px;
+	font-weight:bold;
+	line-height:50px;
+	}
+#login_left li a{
+	color:#4a4947;
+	font-weight:normal;
+	margin-right:30px;
+	margin-top:40px;		
+	}
+#login_left li a:hover{
+	color:#1e5a91;
+	}
+#login_left .but{
+	width:115px;
+	height:42px;
+	background:url(../images/button.gif) no-repeat;
+	cursor:pointer;
+	border:0;
+	margin-left:3px;
+	}
+#login_left .but:hover{
+	width:115px;
+	height:42px;
+	background:url(../images/button_1.gif) no-repeat;
+	cursor:pointer;
+	border:0;
+	margin-left:3px;
+	}
+#login_left input{
+	border:1px solid #cbd2da;
+	background-color:#fff;
+	height:30px;
+	}
+#login_right{
+	width:517px;
+	height:375px;
+	background:url(../images/pic.gif) no-repeat;
+	position:absolute;
+	left:338px;
+	z-index:0;
+	}
+#foot{
+	width:100%;
+	background:url(../images/bottom.gif) ;
+	height:43px;
+	color:#fff;
+	font-size:12px;
+	font-family:Arial, Helvetica, sans-serif;
+	line-height:43px;
+	vertical-align:middle;
+   
+	
+	}

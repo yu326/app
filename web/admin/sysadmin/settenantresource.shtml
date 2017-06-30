@@ -1,0 +1,334 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+ <script type="text/javascript">
+  checkuserusage();
+var roleid=0;
+$(function(){
+		changeTabTitle();
+		     	var spArr = window.location.toString().split("tid=");
+	tid = spArr[1];
+	if(typeof(roleid)=='undefined')
+	{
+		roleid=0;
+	}
+			   bindrole();
+		   
+		   bindgroup();
+		   bindresource(0);
+
+		   $("#frmuser").validate(
+					   
+{
+	submitHandler:function(form)
+               {
+				   sentresource();
+               },
+	rules:{
+   //addresource:"required",
+},
+    messages:{
+	//label:"",
+}
+});
+});	
+
+
+function bindrole()
+{ 
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytenant&tid="+tid;
+	ajaxCommon(searchnameUrl, searchrole, "json");
+}
+
+
+function searchrole(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#roleid').append( new Option(data.children[i].label,data.children[i].roleid) );
+									   
+	});
+	}
+	if(roleid!=0)
+	{
+		$("#roleid").attr("value",roleid);
+	}
+	bindroleresource($('#roleid').val());
+	
+}
+
+
+function bindroleresource(rid)
+{ 
+	var searchnameUrl = config.modelUrl+"resourcemapping_model.php?type=getmappingbyroleid&roleid="+rid;
+	ajaxCommon(searchnameUrl, searchroleresource, "json");
+}
+
+
+function searchroleresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#addresource').append( new Option(data.children[i].label,data.children[i].roleid) );
+									   
+	});
+	}
+	
+}
+
+
+function bindgroup()
+{ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getgroup";
+	ajaxCommon(searchnameUrl, searchgroup, "json");
+}
+
+
+function searchgroup(data)
+{
+	$('#groupid').append( new Option("系统资源",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#groupid').append( new Option(data.children[i].label,data.children[i].groupid) );
+									   
+	});
+		$("#groupid").attr("value",$('#groupid').val());
+	}
+}
+
+function bindresource(rid)
+{ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getresourcebytype&gid="+rid;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+
+
+function searchresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$("#resourceid").empty();
+		$.each(data.children, function(i){
+		$('#resourceid').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		});
+	}
+	else
+	{
+		$("#resourceid").empty();
+		$('#resourceid').append( new Option('暂无记录！',-1) );
+	}
+	
+}
+
+
+
+function sentresource()
+{
+	checkrole();
+	
+
+}
+
+function  checkrole()
+{
+	var tname = $("#label").val();
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebyname&name="+tname+"&roleid=0";
+	ajaxCommon(searchnameUrl, checkExits, "json");
+}
+
+function checkExits(data)
+{
+	var rid="";
+	if(data!=null)
+	{
+		
+			 $("#addresource option").each(function() {  
+														if(rid=="")
+				{
+					rid=$(this).val()+",";
+				}
+				else
+				{					
+						rid+=$(this).val()+",";
+				}
+        });        
+if(rid!="")
+{
+	rid = rid.substring(0,rid.length-1);
+}
+if(rid!=-1)
+{
+
+if(rid=="")
+{
+	if(confirm("是否样此角色的可用资源设置为空,此操将删除相关资源的规则信息信息且无法恢复!"))
+	{
+    $.post(config.modelUrl+"role_model.php", {resourceid:rid,type:"addroleresource",permission:1,roleid:$("#roleid").val(),roletype:1},     
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);    
+	if(stdata.flag==1)
+		{
+			if(confirm("设置成功，是否继续设置!"))
+			{
+				//$("#btncancel").click();
+				window.location.href="setuprole.shtml";
+			}
+			else
+			{
+				window.location.href="rolelist.shtml";
+			}
+		}
+		else
+		{
+			alert("设置失败!");
+		}
+    });
+	}//end 将角色权限设置为空
+}//end rid==""
+else
+{
+	 $.post(config.modelUrl+"role_model.php", {resourceid:rid,type:"addroleresource",permission:1,roleid:$("#roleid").val()},     
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);    
+	if(stdata.flag==1)
+		{
+			if(confirm("设置成功，是否继续设置!"))
+			{
+				//$("#btncancel").click();
+				window.location.href="setuprole.shtml";
+			}
+			else
+			{
+				window.location.href="rolelist.shtml";
+			}
+		}
+		else
+		{
+			alert("设置失败!");
+		}
+    });
+}
+}//end rid=-1 
+		}
+
+}
+function setresource(fromid,toid)
+{
+
+			$("#"+fromid+" option:selected").each(function() {  
+                //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+                $(this).appendTo($("#"+toid+":not(:has(option[value="+$(this).val()+"]))"));  
+                //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+                if($("#"+fromid+" option[value="+$(this).val()+"]").length > 0) {  
+                    $("#"+fromid).get(0)  
+                    .removeChild($("#"+fromid+" option[value="+$(this).val()+"]").get(0));  
+                }  
+            });  
+
+}
+
+
+function getresource()
+{
+	bindresource($("#groupid").val());	
+}
+
+
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">角色权限设置</span> <a href="addrole.shtml" style="float: right">新增角色</a>
+    <a href="roellist.shtml" style="float: right">角色列表</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">角色名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">
+             &nbsp;&nbsp;
+             <label>
+               <select name="roleid" id="roleid" onchange="bindroleresource($(this).val())">
+               </select>
+             </label>
+	         </div>
+	       </label>
+	       </td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">资 源 组：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+         &nbsp;&nbsp;
+         <select name="groupid" id="groupid" onchange="getresource()">
+         </select>
+	     </label></td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配资源：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="64%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td align="center" width="42%"><select name="resourceid" style="height:200px" size="10" class="mselect" multiple="multiple" id="resourceid">
+	           </select></td>
+	         <td align="center" width="11%"><input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('resourceid', 'addresource')" /><input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('addresource','resourceid')" /></td>
+	         <td align="center" width="47%"><select name="addresource" size="10" style="height:200px" class="mselect" multiple="multiple" id="addresource">
+	           </select></td>
+	         </tr>
+	       </table></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

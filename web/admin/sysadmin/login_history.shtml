@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--登录行为</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+    display: inline-block;
+    margin-left: 10px;
+    text-align: right;
+    vertical-align: middle;
+    width: 72px;
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip {
+	color:red;
+}
+.selwordsbox {
+	border: 1px solid #CCC;
+	padding: 1.5px 0 1.5px 1.5px;
+	margin: 3px 0 0 2px;
+	display: inline-block;
+}
+.shortinput{
+    width:95px;
+}
+</style>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	//显示域名的列表
+	var hostpagesize = 5; //每页显示条数
+	var hostcurpage2; //当前页码
+	var hostpagenum = 10; //显示的页码数
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	$(function () {
+		changeTabTitle();
+		$("#login_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#login_reset").bind("click", function(){
+			$("#login_search_div [id^='login_'][type!=button]").each(function(i, item){
+				$(item).val("");
+			});
+		});
+
+		$("#datalogininfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+	function searchRequest(pagesize, curpage) {
+		$("#datalogininfo tr:not(:first)").remove();
+		var param = "";
+		//租户名称
+		var ltt = $("#login_tenantname").val();
+		if(ltt){
+			param += "&login_tenantname=" + commonFun.trim(ltt) + "";
+		}
+		//用户名
+		var luname = $("#login_username").val(); 
+		if(luname){
+			param += "&login_username="+commonFun.trim(luname)+"";
+		}
+		//账号类型
+		var lut = $("#login_usertype").val();
+		if(lut){
+			param += "&login_usertype=" + lut + "";
+		}
+		//登录结果
+		var llr = $("#login_loginresult").val();
+		if(llr){
+			param += "&login_loginresult=" + llr + "";
+		}
+		//IP
+		var lrip = $("#login_remoteip").val();
+		if(lrip){
+			param += "&login_remoteip=" + commonFun.trim(lrip) + "";
+		}
+		//OS
+		var lros = $("#login_remoteos").val();
+		if(lros){
+			param += "&login_remoteos=" + commonFun.trim(lros) + "";
+		}
+		//browser
+		var lub = $("#login_userbrowser").val();
+		if(lub){
+			param += "&login_userbrowser=" + commonFun.trim(lub) + "";
+		}
+		//logintime
+		var ltimestart = $("#login_logintimestart").val();
+		if(ltimestart){
+			param += "&login_logintimestart=" + getTimeSec(ltimestart) + "";
+		}
+		var ltimeend = $("#login_logintimeend").val();
+		if(ltimeend){
+			param += "&login_logintimeend=" + getTimeSec(ltimeend)+ "";
+		}
+
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "loginhistory_model.php?type=selectlogininfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#datalogininfo").append("<tr><td colspan='10'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				var dusername = "";
+				if(ditem.username){
+					dusername = ditem.username;
+				}
+				var dtenantname = "";
+				if(ditem.tenantname){
+					dtenantname = ditem.tenantname;
+				}
+				var dusertype = "";
+				if(ditem.usertype){
+					switch(parseInt(ditem.usertype, 10)){
+						case -1:
+							dusertype = "管理员";
+							break;
+						case 1:
+							dusertype = "普通用户";
+							break;
+						case 2:
+							dusertype = "只读用户";
+							break;
+						default:
+							break;
+					}
+				}
+				var dloginresult = "";
+				if(ditem.loginresult){
+					switch(parseInt(ditem.loginresult)){
+						case 1:
+							dloginresult = "成功";
+							break;
+						case 2:
+							dloginresult = "用户名错误";
+							break;
+						case 3:
+							dloginresult = "密码错误";
+							break;
+						case 4:
+							dloginresult = "过期用户";
+							break;
+						case 5:
+							dloginresult = "参数错误"; //第三方
+							break;
+						case 6:
+							dloginresult = "获取token失败";
+							break;
+						default:
+							break;
+					}
+				}
+				var dlogintime = "";
+				if(ditem.logintime){
+					dlogintime = timeToStr(ditem.logintime);
+				}
+				var duserbrowser = "";
+				if(ditem.userbrowser){
+					duserbrowser = ditem.userbrowser;
+				}
+				var dremoteos = "";
+				if(ditem.remoteos){
+					dremoteos = ditem.remoteos;
+				}
+				fhtml = "<tr><td>"+dtenantname+"</td><td>"+dusername+"</td><td>"+dusertype+"</td><td>"+dlogintime+"</td><td>"+dloginresult+"</td><td>"+ditem.remoteip+"</td><td>"+dremoteos+"</td><td>"+duserbrowser+"</td></tr>";
+				$("#datalogininfo").append(fhtml);
+			});
+		} else {
+			var str = $("<tr><td colspan='10'>暂无记录!</td></tr>");
+			$("#datalogininfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+    <!--#include file="top.shtml"-->
+    <div id="content">
+        <!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置： <a href="index.shtml">首页</a>&gt; <span style="color: gray">登录行为</span> 
+			<div id="login_search_div"> 
+				<label for="login_tenantname">租户名称：</label><input id="login_tenantname" type="text" class="shortinput" />
+				<label for="login_username">用户名：</label><input id="login_username" type="text" class="shortinput" />
+				<label for="login_usertype">账号类型：</label><select id="login_usertype">
+					<option value="">请选择</option>
+					<option value="1">普通用户</option>
+					<option value="2">只读用户</option>
+					<option value="-1">管理员</option>
+				</select>
+				<label for="login_loginresult">登录结果：</label><select id="login_loginresult">
+					<option value="">请选择</option>
+					<option value="1">成功</option>
+					<option value="2">用户名错误</option>
+					<option value="3">密码错误</option>
+					<option value="4">过期用户</option>
+					<!--
+					<option value="5">参数错误</option>
+					<option value="6">获取token失败</option>
+					-->
+				</select>
+				<br/>
+				<label for="login_remoteip">IP：</label><input id="login_remoteip" type="text" class="shortinput" />
+				<label for="login_remoteos">操作系统：</label><input id="login_remoteos" type="text" class="shortinput" />
+				<label for="login_userbrowser">浏览器类型：</label><input id="login_userbrowser" type="text" class="shortinput" />
+				<br/>
+				<label for="login_logintime">登录时间：</label><input id="login_logintimestart" name="login_logintimestart" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+			至
+			<input id="login_logintimeend" name="login_logintimeend" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+                <input type="button" name="login_search" value="查询" id="login_search" />
+                <input type="button" name="login_reset" value="清空" id="login_reset" />
+				<span>使用*进行模糊查询</span>
+            </div>
+            <table id="datalogininfo" name="datalogininfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <tr>
+                    <th width="10%" scope="col">租户名称</th>
+                    <th width="10%" scope="col">用户名</th>
+                    <th width="10%" scope="col">账号类型</th>
+                    <th width="11%" scope="col">登录时间</th>
+                    <th width="11%" scope="col">登录结果</th>
+                    <th width="11%" scope="col">IP</th>
+                    <th width="11%" scope="col">操作系统</th>
+                    <th width="11%" scope="col">浏览器类型</th>
+                </tr>
+            </table>
+            <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+        </div>
+    </div>
+    <!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

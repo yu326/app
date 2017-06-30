@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--产品管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+#pagestyle a{ cursor:pointer;}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+var pid=0;
+var tid=0;
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+$(function(){
+		changeTabTitle();
+		 $("#divaddast").dialog({
+		    autoOpen: false,
+		    modal:true,
+		    height:400,
+		    width:600
+        });
+		$("#divaddspt").dialog({
+            autoOpen: false,
+            modal:true,
+            height:400,
+            width:600
+        });
+		$("#frmuser").validate(
+		{
+		submitHandler:function(form)
+               {
+				   checkproduct(pid);
+               },
+		rules:{
+   				productname:"required",
+				price:{required:true, digits:true}
+				},
+   
+    	messages:{
+					productname:"请输入产品名称",
+					price:"请输入价格(整数)"
+				}
+	});
+	
+	$("#frmedituser").validate(
+	{
+		submitHandler:function(form)
+		{
+		checkproduct(pid);
+		},
+		rules:{
+		productname2:"required",
+		price2:{required: true, digits:true}
+		},
+		messages:{
+		productname2:"请输入产品名称",
+		price2:"请输入价格(整数)"
+		}
+	});
+	searchRequest(10,1);
+});
+
+
+
+function searchRequest(pagesize,curpage)
+{ 
+	$("#productinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"productcontroller.php?type=getall"+"&currpage="+curpage2+"&pagesize="+pagesize;
+	ajaxCommon(searchnameUrl, searchproduct, "json");
+}
+
+function searchproduct(data){
+		if(!data.result)
+		{
+			alert(data.msg);
+			window.history.back();
+		}
+		else
+		{   
+			if(data!=null)
+			{
+				//显示分页
+				totalCount = data.totalcount
+				if(totalCount>0)
+				{
+					var str = "";
+					$.each(data.children, function(i){
+						var haschild;
+						var setscope;
+			
+						str +="<tr><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].productid+"'></input></td><td>"+data.children[i].label+"</a></td><td>"+data.children[i].description+"</td><td>"+data.children[i].price+"</td><td>"+data.children[i].updatetime+"</td><td><a href='javascript:editproduct("+data.children[i].productid+")'>修改</a>&nbsp;&nbsp;<a href='javascript:setresource("+data.children[i].productid+")'>分配资源</a></td></tr>";
+					});
+					str +="<tr><td></td><td colspan='5' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>"; 
+					$("#productinfo").append(str);
+			}
+			else
+			{
+				var str=$("<tr><td colspan='6'>暂无记录!</td></tr>"); 
+				$("#productinfo").append(str);
+			}
+	}
+	
+		$("#pagestyle").empty();
+		if(totalCount>pagesize){
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+}	
+	
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if(delid=='')
+		{
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+     }); 
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么!"))
+		 {
+			 deleteproduct(delid);
+		 }
+	 }
+}//end function
+
+function checkproduct(id)
+{
+	if(id==0)
+	{
+		var prdname = $("#productname").val();
+		var tid = $("#price").val();
+		var searchnameUrl = config.modelUrl+"productcontroller.php?type=checkproduct&name="+prdname+"&id="+id;
+		ajaxCommon(searchnameUrl, checkExits, "json");
+	}
+	else
+	{
+		var prdname = $("#productname2").val();
+		var searchnameUrl = config.modelUrl+"productcontroller.php?type=checkproductbyid&name="+prdname+"&id="+id;
+		ajaxCommon(searchnameUrl, checkExitsEdit, "json");
+	}
+}
+
+
+function checkExits(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("产品名称已存在,请更改");
+			$("#productname").focus();
+		}
+		else
+		{
+			var pname=$("#productname").val();
+			var price = $("#price").val();
+			var desc = $("#description").val();
+			
+    $.post(config.modelUrl+"productcontroller.php", {label:pname,price:price,description:desc,type:"addproduct"},     //提交数据到php页面
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);    //将返回数据添加到html列表首条
+		if(!stdata.flag)
+		{
+			alert(msg);
+			window.history.back();
+		}
+		else
+		{
+			if(stdata.flag==1)
+			{
+				if(confirm("添加成功，是否继续添加!"))
+				{
+				//$("#btncancel").click();
+				$("#productname").attr("value","");
+				$("#price").attr("value","");
+				$("#description").attr("value","");
+				}
+				else
+				{
+				$("#productname").attr("value","");
+				$("#price").attr("value","");
+				$("#description").attr("value","");
+				searchRequest(10,1);
+				$("#divaddast").dialog("close");
+				//window.location.href="userlist.shtml";
+				
+				}
+			}
+		}
+    });
+
+		}
+	}
+}
+
+function checkExitsEdit(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("产品名称已存在,请更改");
+			$("#productname2").focus();
+		}
+		else
+		{
+			var pname=$("#productname2").val();
+			var price = $("#price2").val();
+			var desc = $("#description2").val();
+    $.post(config.modelUrl+"productcontroller.php", {label:pname,price:price,description:desc,type:"updateproduct",productid:pid},     //提交数据到php页面
+    function(msg){
+        var msg =jQuery.parseJSON(msg);    
+		if(!msg.flag)
+		{
+			alert(data.msg);
+			window.history.back();
+		}
+		else
+		{
+			if(msg.flag==1)
+			{
+				alert("修改成功!");
+				closediv('divaddspt');
+				searchRequest(10,1);
+			}
+			else
+			{
+				alert("修改失败");
+			}
+		}
+    });
+
+		}
+	}
+}
+
+function openTaskDiv(divid){
+	if(divid=='divaddast')
+	{
+		pid=0;
+	}
+	$("#"+divid).dialog("open");
+}	
+	
+
+function editproduct(id)
+{
+	pid=id;
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=getproductbyid&id="+id;
+	ajaxCommon(searchnameUrl, getproduct, "json");
+}
+
+
+function deleteproduct(id)
+{
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=deleteproduct&id="+id;
+	ajaxCommon(searchnameUrl, deletecomplete, "json");
+}
+
+function deletecomplete(data)
+{
+	if(!data.result)
+	{
+		alert(data.msg);
+		window.history.back();
+	}
+	else
+	{
+		if(data.flag==1)
+		{
+			alert('删除成功');
+			searchRequest(10,1);
+		}
+		else
+		{
+			alert('删除失败');
+		}
+	}
+}
+
+function getproduct(data)
+{
+	if(data.totalcount>0)
+	{
+		$.each(data.children, function(i){
+		
+		$("#productname2").attr("value",data.children[i].label);
+		$("#price2").attr("value",data.children[i].price);
+		$("#description2").attr("value",data.children[i].description);
+		//tid = data.children[i].tenantid;
+		//bindtenant();
+		openTaskDiv('divaddspt');
+									   });
+	}
+	else
+	{
+		alert("当前用户不存在，请与管理员联系!");
+	}
+}
+
+
+//分配资源
+function setresource(pid)
+{
+	window.location.href="setproduct.shtml?pid="+pid;
+}
+
+function closediv(divid)
+{
+	$("#"+divid).dialog("close");
+}
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">产品管理</span> <a href="javascript:void(0)" onclick="openTaskDiv('divaddast')" style="float: right">新增产品</a>
+  <p />
+<table id="productinfo" name="productinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	<tr>
+		<th width="4%" scope="col">选择</th>
+		<th scope="col" style="width: 80px">产品名称</th>
+		<th scope="col" style="width: 100px">产品描述</th>
+		<th scope="col" style="width: 100px">产品价格</th>
+        <th scope="col" style="width: 100px">创建时间</th>
+		<th scope="col" style="width: 80px">操作</th>
+	</tr>
+</table>
+<div id="pagestyle" style="margin:5px;" align="center"></div>
+<div id="divaddast" title="新增产品" class="openwindow">
+<form id="frmuser"><input type="hidden" name="frmuser" value="1" />
+<table class="formtable">
+	<tr>
+		<td width="100" class="tdleft">产品名称：</td>
+		<td width="398"><input type="text" name="productname" id="productname"  /></td>
+		<td width="260" class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">产品价格：</td>
+		<td><input type="text" name="price" id="price" /></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="t3-1">
+		<td class="tdleft">摘要：</td>
+		<td><textarea name="description" cols="5" rows="7" id="description"></textarea></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><input class="buttono"
+			type="submit" value="提 交" id="btnaddanalysis" />&nbsp;&nbsp; <input
+			class="buttono" type="button" id="btncloseanalysis" onclick="closediv('divaddast')"  value="取 消" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+<div id="divaddspt" title="修改产品" class="openwindow">
+<form id="frmedituser"><input type="hidden" name="tasktype" value="2" />
+  <table class="formtable">
+    <tr>
+      <td class="tdleft">产品名称：</td>
+      <td><input type="text" name="productname2" id="productname2"  /></td>
+      <td class="tdtip"></td>
+    </tr>
+    <tr>
+      <td class="tdleft">产品价格：</td>
+      <td><input type="text" name="price2" id="price2" /></td>
+      <td class="tdtip"></td>
+    </tr>
+    <tr id="t3-4">
+      <td class="tdleft">摘要：</td>
+      <td><textarea name="description2" cols="5" rows="7" id="description2"></textarea></td>
+      <td class="tdtip"></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center"><input class="buttono" type="submit" value="提 交" id="btnaddanalysis2" /> &nbsp;&nbsp;
+        <input class="buttono" type="button" id="btncloseanalysis2" onclick="closediv('divaddspt')" value="取 消" /></td>
+      <td class="tdtip"></td>
+    </tr>
+  </table>
+<br />
+<br />
+</form>
+</div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

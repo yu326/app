@@ -1,0 +1,628 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+	label {
+		vertical-align: middle
+	}
+	input[type=checkbox] {
+		vertical-align: middle;
+	}
+	.formtable .tdtip {
+		color:red;
+	}
+	.selwordsbox {
+		border: 1px solid #CCC;
+		padding: 1.5px 0 1.5px 1.5px;
+		margin: 3px 0 0 2px;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var _this=this;
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	//var pageCount;//存储总页数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	var areaCountry = [];
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	//删除按钮
+	var deletecodearr = [];
+	var deletebtn = "<input type='button' value='删除' name='deleteitem' style='background-color:#2E6E9E;color:#FFFFFF;' />";
+	var deleteselectedbtn = "<input type='button' value='取消' name='deleteitemselected' style='background-color:#EA3D3D;color:#FFFFFF;' />";
+	this.setSelectedCountPosition = function(){
+		$("#selectdiv").css({
+			'display':'inline-block',
+			'position':'absolute',
+			'width':"20px",
+			'z-index': 1005,
+			'left': $("#selectedcount").offset().left,
+			'top': $("#selectedcount").offset().top - 40
+		});
+		$("#selectedcount").attr("currstate", "unfolded");
+	};
+	this.hideSelectedCount = function(){
+		$("#selectdiv").hide();
+		$("#selectedcount").attr("currstate", "folded");
+	};
+	this.deleteSubmitBtn = function(selector){
+		var checkedlen = deletecodearr.length;
+		if(checkedlen > 0){
+			var deletesubmitbtn = "<input type='button' id='confirmdelete' name='confirmdelete' value='确认删除' />&nbsp;<input type='button' id='selectedcount' name='selectedcount' value='已选择"+checkedlen+"条' currstate='folded' />";
+			$("#"+selector+"").empty().append(deletesubmitbtn);
+		}
+		else{
+			$("#"+selector+"").empty()
+		}
+	};
+
+	$(function () {
+		changeTabTitle();
+		if ($("#addareadiv").length == 1) {
+			$("#addareadiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 540,
+				height: 300,
+				close: function () {
+					$("input[name=addarea_type_radio][value=country]").attr("checked", true);
+					$("#adddict_area_cond1_text").val("");
+					$("#adddict_area_cond2_text").val("");
+					$("#adddict_area_cond3_text").val("");
+					$("#adddict_area_cond4_text").val("");
+					$("#addarea_code_text").val("");
+					$("#dict_area_code").val("");
+					$("#dict_area_cond1").val("");
+					$("#dict_area_cond2").val("");
+					$("#dict_area_cond3").val("");
+					$("#dict_area_cond4").val("");
+
+					$("#ro_cond1_tip").text("");
+					$("#ro_cond2_tip").text("");
+					$("#ro_cond3_tip").text("");
+					$("#ro_cond4_tip").text("");
+					$("#ro_area_code_tip").text("");
+					$("#existdict_area").text("");
+					$("#areainfo").find("tr").css({'background-color':'#FFFFFF'});
+				}
+			});
+		}
+		//清空警告
+		$.each(["name", "another_name", "short_name", "area_code"], function (k, item) {
+			$("#addarea_" + item + "_text").bind("change", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+		//新增地区
+		$("#addarea").bind("click", function () {
+			addDictionaryWordHtml();
+		});
+		//查询,根据条件搜索
+		$("#area_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#area_reset").bind("click", function(){
+			$("#area_search_div [id^='dict_area_'][type!=button]").each(function(i, item){
+				$(item).val("");
+			});
+		});
+		//$("#dict_areainfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+//发送请求数据
+	function searchRequest(pagesize, curpage) {
+		$("#dict_areainfo").empty();
+		$("#areainfo").empty();
+		$("#areainfo_tips").empty();
+		var param = "";
+		var ac = $("#dict_area_code").val();
+		if (ac) {
+			param += "&dict_area_code=" + ac + "";
+		}
+		var fpc = $("#dict_area_cond1").val();
+		if (fpc) {
+			param += "&dict_area_cond1=" + encodeURIComponent(fpc) + "";
+		}
+		var fc = $("#dict_area_cond2").val();
+		if (fc) {
+			param += "&dict_area_cond2=" + encodeURIComponent(fc) + "";
+		}
+		var dpos = $("#dict_area_cond3").val();
+		if (dpos) {
+			param += "&dict_area_cond3=" + encodeURIComponent(dpos) + "";
+		}
+		var dc4 = $("#dict_area_cond4").val();
+		if (dc4) {
+			param += "&dict_area_cond4=" + encodeURIComponent(dc4) + "";
+		}
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "dict_area_model.php?type=selectdict_areainfo&page=" + curpage2 + "&pagesize=" + pagesize + param;
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#dict_areainfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		if(data.flag == 1){
+			totalCount = data.totalcount;
+			if (totalCount > 0) {
+				$("#dict_areainfo").empty();
+				var fhtml = "";
+				currPageData = data.datalist; 
+				var th = '<tr> <th width="4%" scope="col">选择</th> <th width="13%" scope="col">行政区代码</th> <th width="21%" scope="col">条件1</th> <th width="21%" scope="col">条件2</th><th width="21%" scope="col">条件3</th> <th width="10%" scope="col">条件4</th> <th width="10%" scope="col">第三方标识</th> </tr>'; 
+				$("#dict_areainfo").append(th);
+				$.each(data.datalist, function (di, ditem) {
+						var dcond1 = ditem.cond1 == null ? "" : ditem.cond1;
+						var dcond2 = ditem.cond2 == null ? "" : ditem.cond2;
+						var dcond3 = ditem.cond3 == null ? "" : ditem.cond3;
+						var dcond4 = ditem.cond4 == null ? "" : ditem.cond4;
+						//<input type='checkbox' name='checklist' id='checkfeture" +ditem.id+ "' value='" +ditem.id+ "'>
+						fhtml = "<tr><td><span id='delete_"+ditem.id+"' >"+deletebtn+"</span></input></td><td>" +ditem.area_code+"</td><td>" +dcond1+ "</td><td>" +dcond2+ "</td><td>" +dcond3+ "</td><td>" +dcond4+ "</td><td>" +ditem['3rd_part']+ "</td></tr>";
+						$("#dict_areainfo").append(fhtml);
+				});
+				fhtml="<tr><td colspan='7' align='left'><div style='text-align:left;' id='eventalertdeletediv'></div></td><tr>";
+				$("#dict_areainfo").append(fhtml);
+				if (totalCount > pagesize) {
+					var pagehtml = '<tr><td colspan="7"><div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div></td></tr>';
+					$("#dict_areainfo").append(pagehtml);
+					pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+				}
+			} else {
+				var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+				$("#dict_areainfo").append(str);
+			}
+			//绑定删除按钮
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			$("#dict_areainfo").find("input[name=deleteitem]").die("click");
+			$("#dict_areainfo").find("input[name=deleteitem]").live("click", function(){
+					var pid = $(this).parent("span").attr("id");
+					//var parent_id=$(this).parent("span").attr("parent_id");
+					var pidarr = pid.split("_");
+					var code = pidarr[1];
+
+					deletecodearr = arrayAppend(deletecodearr, code);
+					$("#"+pid+"").empty().append(deleteselectedbtn);
+					_this.deleteSubmitBtn("eventalertdeletediv");
+
+					});
+			$("#dict_areainfo").find("input[name=deleteitemselected]").die("click");
+			$("#dict_areainfo").find("input[name=deleteitemselected]").live("click", function(){
+					var pid = $(this).parent("span").attr("id");
+					var pidarr = pid.split("_");
+					var code = pidarr[1];
+					deletecodearr = arrayDelete(deletecodearr, code);
+					$("#"+pid+"").empty().append(deletebtn);
+					_this.deleteSubmitBtn("eventalertdeletediv");
+				});
+			$("#confirmdelete").die("click");
+			$("#confirmdelete").live("click", function(){
+					if(confirm("确定删除"+deletecodearr.length+"条数据?")){
+					deletetenant(deletecodearr);
+					//重置按钮
+					deletecodearr.length = 0;
+					//searchRequest(pagesize, 1);
+					}
+					else{
+					return false;
+					}
+
+					});
+			$("#selectedcount").die("click");
+			$("#selectedcount").live("click", function(){
+					var selectshortcutdiv = "<div id='selectdiv'><input type='button' name='selectall' id='selectall' value='全选' style='margin:0;'/><input type='button' name='selectnone' id='selectnone' value='清空' style='margin:0;'/></div>";
+					if($("#selectdiv").length == 0){
+					$("body").append(selectshortcutdiv);
+					}
+					var currstate = $("#selectedcount").attr("currstate");
+					if(currstate == 'folded'){
+					_this.setSelectedCountPosition();
+					}
+					else{
+					_this.hideSelectedCount();
+					}
+					$("#selectdiv").bind("mouseleave", function(){
+						_this.hideSelectedCount();
+						});
+					$("#selectall").unbind("click");
+					$("#selectall").bind("click", function(){
+						$("#dict_areainfo").find("input[name=deleteitem]").each(function(i, item){
+							var pid = $(item).parent("span").attr("id");
+							var pidarr = pid.split("_");
+							var code = pidarr[1];
+							deletecodearr = arrayAppend(deletecodearr, code);
+							$(item).parent().empty().append(deleteselectedbtn);
+						});
+						_this.deleteSubmitBtn("eventalertdeletediv");
+						_this.setSelectedCountPosition();
+					});
+					$("#selectnone").unbind("click");
+					$("#selectnone").bind("click", function(){
+							$("#dict_areainfo").find("input[name=deleteitemselected]").each(function(i, item){
+								$(item).parent().empty().append(deletebtn);
+								});
+							//清空点击时,清空全局数组
+							deletecodearr.length = 0;
+							_this.deleteSubmitBtn("eventalertdeletediv");
+							$("#selectdiv").remove();
+							});
+			});	
+			//end delete_button
+			//行政区表
+			if(data.areacount != undefined){
+				areacount = data.areacount;
+				if(areacount > 0) {
+					$("#areainfo").empty();
+					$("#areainfo_tips").text("以下数据是行政区表表中的结果,请选择匹配的行,点击添加到地区字典表.");
+					var fhtml = "";
+					var th = '<tr> <th width="13%" scope="col">行政区代码</th> <th width="11%" scope="col">国家</th> <th width="7%" scope="col">省</th> <th width="21%" scope="col">市</th> <th width="10%" scope="col">县</th> <th width="10%" scope="col">名称</th> <th width="10%" scope="col">别名</th> <th width="10%" scope="col">简称</th> </tr>';
+					$("#areainfo").append(th);
+					$.each(data.arealist, function (di, ditem) {
+							var dprovince = ditem.province == null ? "" : ditem.province;
+							var dcity = ditem.city == null ? "" : ditem.city;
+							var ddistrict = ditem.district == null ? "" : ditem.district;
+							var dname = ditem.name == null ? "" : ditem.name;
+							var danother_name = ditem.another_name == null ? "" : ditem.another_name;
+							var dshort_name = ditem.short_name == null ? "" : ditem.short_name;
+							fhtml = "<tr id='area_code"+ditem.area_code+"'><td>" + ditem.area_code+ "</td><td>" + ditem.country+ "</td><td>" + dprovince+ "</td><td>" + dcity + "</td><td>" + ddistrict + "</td><td>" + dname + "</td><td>" + danother_name + "</td><td>" + dshort_name + "</td></tr>";
+							$("#areainfo").append(fhtml);
+							$("#area_code"+ditem.area_code+"").bind("click", function(){
+								$("#areainfo").find("tr").css({'background-color':'#FFFFFF'});
+								$(this).css({'background-color':'#C5D6F3'});
+								addDictionaryWordHtml(ditem);
+								});
+							});
+				} else {
+					var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+					$("#areainfo").append(str);
+				}
+			}
+		}
+	}
+
+	function selectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", !this.checked);
+		});
+	}
+
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem)
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if (confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletetenant(delid);
+			}
+		}
+	}
+
+	function deletetenant(tid) {
+		var dataobj = {
+			type: "deletevalueword",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "dict_area_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						//areaCountry = []; //新增国家时, 需要清空, 重新赋值
+						//getAreaCountry();
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//新增地区html初始化
+	function addDictionaryWordHtml(ditem) {
+		$("#addareadiv").attr("addopttype", "add");
+		addDicWord(ditem);
+	}
+
+	function checkTextValidate(name, prefix){
+		name = commonFun.trim(name);
+		if(name.length > 50) {
+			$("#ro_"+prefix+"_tip").text("最多50个字符!")
+			return false;
+		} else {
+			var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+			if (reg.test(name)) {
+				$("#ro_"+prefix+"_tip").text("不能含有特殊字符!");
+				return false;
+			}
+		}
+		return true;
+	}
+	function submitDic(){
+		var ty = $("#addareadiv").attr("addopttype");
+		var addarea_code = $("#addarea_code_text").val();
+		if(addarea_code == ""){
+			$("#ro_area_code_tip").text("行政区代码不能为空!");
+			return false;
+		}
+		else{
+			checkTextValidate(addarea_code, "area_code");
+		}
+		//需要提交的数据
+		var senddataobj = {
+		   area_code: addarea_code,
+		   type: "checkvalueexist"
+		}
+		var adddict_area_cond1 = $("#adddict_area_cond1_text").val();
+		if(adddict_area_cond1 != ""){
+			if(checkTextValidate(adddict_area_cond1, "cond1")){
+				senddataobj.dict_area_cond1 = adddict_area_cond1;
+			}
+		}
+		else{
+			$("#ro_cond1_tip").text("请添加条件1!");
+			return false;
+		}
+		var adddict_area_cond2 = $("#adddict_area_cond2_text").val();
+		if(adddict_area_cond2 != ""){
+			if(checkTextValidate(adddict_area_cond2, "cond2")){
+				senddataobj.dict_area_cond2 = adddict_area_cond2;
+			}
+		}
+		var adddict_area_cond3 = $("#adddict_area_cond3_text").val();
+		if(adddict_area_cond3 != ""){
+			if(checkTextValidate(adddict_area_cond3, "cond3")){
+				senddataobj.dict_area_cond3 = adddict_area_cond3;
+			}
+		}
+		var adddict_area_cond4 = $("#adddict_area_cond4_text").val();
+		if(adddict_area_cond4 != ""){
+			if(checkTextValidate(adddict_area_cond4, "cond4")){
+				senddataobj.dict_area_cond4 = adddict_area_cond4;
+			}
+		}
+		var stype = $(".stype:checked").val();
+		senddataobj.stype = stype;
+			
+		
+		var searchnameUrl = config.modelUrl + "dict_area_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addareadiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addareadiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						var existArr = [];
+						$.each(data.datalist, function(ddi, dditem){
+							var str = "";
+							if(dditem.area_code){
+								str += "地区:"+dditem.area_code;
+							}
+							if(dditem.cond1){
+								str += " "+dditem.cond1;
+							}
+							if(dditem.cond2){
+								str += " "+dditem.cond2;
+							}
+							if(dditem.cond3){
+								str += " "+dditem.cond3;
+							}
+							if(dditem.cond4){
+								str += " "+dditem.cond4;
+							}
+							existArr.push(str); 
+						});
+						$("#existdict_area").html(existArr.join("<br/>")+" 已存在, 请更改!");
+						return false;
+					} else {
+						senddataobj.type = "addarea"; 
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "dict_area_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addareadiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addareadiv");
+							},
+							success: function (msg) {
+								if(msg.flag == 1) {
+									$("#addareadiv").dialog("close");
+									searchRequest(pagesize);
+								} 
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord(ditem) {
+		$("#addareadiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addareadiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+
+			if(ditem){
+				$("#addarea_code_text").val(ditem.area_code);
+			}
+			$("#adddict_area_cond1_text").focus();
+			var c1 = $("#dict_area_cond1").val();
+			$("#adddict_area_cond1_text").val(c1.replace(/\*/g, ''));
+			var c2 = $("#dict_area_cond2").val();
+			$("#adddict_area_cond2_text").val(c2.replace(/\*/g, ''));
+			var c3 = $("#dict_area_cond3").val();
+			$("#adddict_area_cond3_text").val(c3.replace(/\*/g, ''));
+			var c4 = $("#dict_area_cond4").val();
+			$("#adddict_area_cond4_text").val(c4.replace(/\*/g, ''));
+		} else {
+			dialogtitle = "修改";
+			var area_id = $("#addareadiv").attr("area_id");
+		}
+		$("#addareadiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addareadiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+	<!--#include file="top.shtml"-->
+	<div id="content">
+		<!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+        <a href="index.shtml">首页</a>&gt; <span style="color: gray">地区字典管理</span> 
+		<!--
+			<a href="javascript:void(0)" id="addarea" style="float: right">新增词</a>
+		-->
+		<div>根据地区按条件顺序填写查询(例如:重庆 江津市, 条件1填 重庆 条件2填 江津市 ),只有查出对应行政区代码才可添加,无结果时请联系管理员.</div>
+			<div id="area_search_div">
+				条件1：<input type="text" id="dict_area_cond1" name="dict_area_cond1" />
+				条件2：<input type="text" id="dict_area_cond2" name="dict_area_cond2" /><br/>
+				条件3：<input type="text" id="dict_area_cond3" name="dict_area_cond3" />
+				条件4：<input type="text" id="dict_area_cond4" name="dict_area_cond4" /><br/>
+				行政区代码：<input type="text" id="dict_area_code" name="dict_area_code" />
+				<input type="button" name="area_search" value="查询" id="area_search" />
+				<input type="button" name="area_reset" value="清空" id="area_reset" />
+				<span>使用的模糊查询</span>
+			</div>
+			<div id="dict_areainfo_tips" style="padding-top:10px;">地区字典表:</div>
+			<table id="dict_areainfo" name="dict_areainfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+			</table>
+			<div id="areainfo_tips" style="padding-top:10px;"></div>
+			<table id="areainfo" name="areainfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list"></table>
+		</div>
+	</div>
+	<div id="addareadiv" style="display:none;" addopttype="add" area_id="" >
+		<table class="formtable">
+			<tr>
+				<td class="tdleft">行政区代码：</td>
+				<td id="addarea_code_td" colspan = '2'>
+					<input type="text" name="addarea_code_text" id="addarea_code_text" readonly="readonly"/>
+				</td>
+				<td class="tdtip" id="ro_area_code_tip"></td>
+			</tr>
+			<tr id="adddict_area_cond1_tr">
+				<td class="tdleft">条件1：</td>
+				<td colspan = '2'>
+					<input type="text" id="adddict_area_cond1_text" />
+				</td>
+				<td class="tdtip" id="ro_cond1_tip"></td>
+			</tr>
+			<tr id="adddict_area_cond2_tr">
+				<td class="tdleft">条件2：</td>
+				<td colspan = '2'>
+					<input type="text" id="adddict_area_cond2_text" />
+				</td>
+				<td class="tdtip" id="ro_cond2_tip"></td>
+			</tr>
+			<tr id="adddict_area_cond3_tr">
+				<td class="tdleft">条件3：</td>
+				<td colspan = '2'>
+					<input type="text" id="adddict_area_cond3_text" />
+				</td>
+				<td class="tdtip" id="ro_cond3_tip"></td>
+			</tr>
+			<tr id="adddict_area_cond4_tr">
+				<td class="tdleft">条件4：</td>
+				<td colspan = '2'>
+					<input type="text" id="adddict_area_cond4_text" />
+				</td>
+				<td class="tdtip" id="ro_cond4_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">类型</td>
+				<td>
+					<input type='radio' name="type" value="-1" class="stype" checked="checked"/>通用型
+					<input type="radio" name="type" value="1" class="stype" />微博API数字型
+				</td>
+			</tr>
+			<tr>
+				<td colspan='4'><div id="existdict_area" style="color:red;width:470px;"></div></td>
+			</tr>
+		</table>
+	</div>
+	<!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

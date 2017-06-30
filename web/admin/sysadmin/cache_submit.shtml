@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--管理工具</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<link rel="stylesheet" href="css/jquery_datatables.css" type="text/css" />
+<style>
+	
+label {
+	vertical-align: middle;
+}
+
+input[type=checkbox] {
+	vertical-align: middle; 
+}
+</style>
+
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/parts/multiTab.js"></script>
+<script type="text/javascript" src="js/parts/doubleRichbox.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+
+
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">提交</span>
+<p /> 
+<div id="Pagination" class="pagination"></div>
+
+<input type="text" name="name" id = "content1">
+<button value="commit" type="" id="cachesubmit">提交</button>
+<button value="commit" type="" id="cacheswitch">切换</button>
+
+
+
+<!-- <input type="commit"  title="" id="cachesubmit" " />
+<input type="button" value="提交" title="" id="cachesubmit" style="cursor:pointer;" optvalue="clearcache" />&nbsp;&nbsp; -->
+<img src="images/loading.gif" id="imgloading" style="display:none" border="0" /><span id="sperrormsg" style="color:red;display:none"></span>
+<br/>
+</div>
+</div>
+</div>
+
+</body>
+<script type="text/javascript">
+
+		$("#cachesubmit").bind("click",function(){
+		var searchnameUrl = config.modelUrl + "cachemanager.php?type=commit";
+		var content = $('#content1').val();
+		console.log($('#content1'))
+		
+		$.ajax({
+			type: "get",
+			url: searchnameUrl,
+			dataType:'json',
+			success:function(data){
+				if (data != null) {
+            if (data.result) {
+               alert (data.msg);
+            }else{
+            	alert(data.error);
+            }
+ 
+        }
+			}
+		})
+})
+
+
+		$("#cacheswitch").bind("click",function(){
+		var searchnameUrl = config.modelUrl + "cachemanager.php?type=switchCache";
+		var content = $('#content1').val();
+		console.log($('#content1'))
+		
+		$.ajax({
+			type: "get",
+			url: searchnameUrl,
+			dataType:'json',
+			success:function(data){
+				if (data != null) {
+            if (data.result) {
+               alert (data.msg);
+            }else{
+            	alert(data.error);
+            }
+ 
+        }
+			}
+		})
+})
+
+
+	
+
+</script>
+</html>

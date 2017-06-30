@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<base>
+</base>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link href="css/login.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script language="javascript">
+$(function(){
+	var navobj = getNavObj();
+	document.title = navobj.systitle+"--后台管理";
+	//webdesc
+	$("#webdesc").text(navobj.systitle+"系统后台管理");
+    $("#login_btn").bind("click", function(){
+		userlogin();
+        });
+    /*
+	$("#frmlogin").submit(function(){
+		return false;
+	});
+    */
+	$("#username").bind("focus", function(){
+		$("#"+$(this).attr("name")+"validate").css("display", "none");
+	});
+	$("#password").bind("focus", function(){
+		$("#"+$(this).attr("name")+"validate").css("display", "none");
+	});
+	$("#mark").bind("focus", function(){
+		$("#"+$(this).attr("name")+"validate").css("display", "none");
+	});
+});
+function userlogin()
+{
+	var username = $("#username").val();
+	var pwd = MD5($("#password").val());
+	var mark= $("#mark").val();
+
+	var flag = true;
+	if(username == ""){
+		$("#usernamevalidate").css("display", "inline");
+		flag = false;
+	}
+	if($("#password").val() == ""){
+		$("#passwordvalidate").css("display", "inline");
+		flag = false;
+	}
+	if(mark == ""){
+		$("#markvalidate").css("display", "inline");
+		flag = false;
+	}
+	if(flag){
+		$.post("model/checkuser.php", {username:username,type:"syslogin",password:pwd,mark:mark},     
+		function(r){
+			if(r.result){
+				window.location.href="index.shtml";
+			}
+			else{
+				$("#imgvalidate").attr("src","model/validate.php?"+Math.random());
+				if(r.errortype == "userpwderror"){
+					$("#passwordvalidate").css("display", "inline");
+					$("#passwordvalidate .style3").text(r.msg);
+				}
+				else{
+					$("#markvalidate").css("display", "inline");
+					$("#markvalidate .style3").text(r.msg);
+				}
+			}
+		},"json");
+	}
+}
+function reloadvalidate(){
+	$("#imgvalidate").attr("src","model/validate.php?"+Math.random());
+}
+
+</script>
+<style type="text/css">
+<!--
+.bannerfont {
+	font-family: "隶书";
+}
+.style4 {
+	font-size: 16px;
+	font-weight: bold;
+}
+-->
+</style>
+</head>
+<body>
+<div id="mybody">
+    <div id="top"> <img id="logimg" src="images/errorlogo.png" align="absmiddle"><span class="bannerfont" ><span style="vertical-align:bottom;font-size:30px;font-family:宋体;font-weight:700;" id="webdesc">社交媒体分析系统后台管理</span></span></div>
+    <div id="content">
+        <div id="log">
+            <div id="dl">
+                <!--
+                <form id="frmlogin">
+                -->
+                    <table width="350" border="0" cellspacing="0" cellpadding="0" class="inputlog">
+                        <tr>
+                            <td colspan="2"><img src="images/login/logintitle.gif" width="350" height="60"></td>
+                        </tr>
+                        <tr>
+                            <td width="95" align="right"><strong>用户名：</strong></td>
+                            <td width="255" height="30" align="left"><input name="username" id="username" type="text" size="30" /></td>
+                        </tr>
+                        <tr>
+                            <td align="right">&nbsp;</td>
+                            <td height="23" align="left" id="usernamevalidate" style="display:none;" ><img src="images/login/error.gif" width="15" height="15" align="absmiddle"> <span class="style3">请输入用户名</span></td>
+                        </tr>
+                        <tr>
+                            <td align="right"><strong>密&nbsp;&nbsp;&nbsp;&nbsp;码：</strong></td>
+                            <td height="30" align="left"><input id="password" name="password" type="password" size="30" /></td>
+                        </tr>
+                        <tr>
+                            <td align="right">&nbsp;</td>
+                            <td height="23" align="left" id="passwordvalidate" style="display:none;"><img src="images/login/error.gif" width="15" height="15" align="absmiddle"> <span class="style3">请输入密码</span></td>
+                        </tr>
+                        <tr>
+                            <td align="right"><strong>验证码：</strong></td>
+                            <td height="30" align="left" id="dmark"><input id="mark" name="mark" type="text" size="10" />
+                                &nbsp;&nbsp;<img id="imgvalidate" src="model/validate.php" align="middle" /> &nbsp;&nbsp;<a href="javascript:void(0)" onClick="reloadvalidate()">看不清</a></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td height="23" align="left" id="markvalidate" style="display:none;"><img src="images/login/error.gif" width="15" height="15" align="absmiddle"> <span class="style3">请输入验证码</span></td>
+                        </tr>
+                        <tr align="center">
+                            <td height="36" colspan="2"><input type="button" name="Submit" value="登  录" class="but" id="login_btn"/>
+                                <img src="images/login/em.gif" width="40" height="16"><img src="images/login/em.gif" width="30" height="16">
+                                <input type="reset" name="reset" value="取  消" class="but" /></td>
+                        </tr>
+                        <tr align="center">
+                            <td height="40" colspan="2"><img src="images/login/lock.gif" width="14" height="16" align="absmiddle"> <a href="#">找回密码</a><img src="images/login/em.gif" width="30" height="16"><img src="images/login/zc.gif" width="14" height="15" align="absmiddle"> <a href="#">用户注册</a><img src="images/login/em.gif" width="30" height="16"><img src="images/login/help.gif" width="16" height="16" align="absmiddle"> <a href="#">系统帮助</a></td>
+                        </tr>
+                    </table>
+                    <!--
+                </form>
+                -->
+            </div>
+        </div>
+        <div id="sm">
+            <p><img src="images/login/logo.gif" class="img1"><span class="style4">博晓通</span>的目标是帮助您发现隐藏在社会化媒体数据后的真相。</p>
+            <p> 为此，我们对与您有关的关键词、营销活动、用户感受和热点事件等内容进行跟踪、分析和报告。
+                通过社会化媒体数据挖掘技术和服务平台，博晓通为营销人士、公关人士、企业和政府负责人，以及代理服务机构提供：</p>
+            <p><strong> 1、营销效果评价<img src="images/login/em.gif" width="30" height="16"> 2、在线声誉管理<img src="images/login/em.gif" width="30" height="16"> 3、竞争对手分析<img src="images/login/em.gif" width="30" height="16"> 4、行业观察<img src="images/login/em.gif" width="30" height="16"> 5、公众思潮研究</strong></p>
+            <p> 想了解更多，请浏览博晓通官网产品功能介绍和行业解决方案，或者联系我们的咨询人员，欢迎关注： <img src="images/login/wb.gif" width="23" height="18" align="absmiddle"> 新浪微博 <img src="images/login/blog.gif" width="22" height="16" align="absmiddle"> 官方博客 </p>
+        </div>
+    </div>
+    <div id="bottom"> </div>
+</div>
+</body>
+</html>

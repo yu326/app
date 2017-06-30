@@ -1,0 +1,57 @@
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">输出选项</a></h3>
+<div>
+    <div class="search" style="display:none"><span class="rightalign">输出类型：</span>
+        <span id="weibo_config_ouputtype_query_span"><input type="radio" id="weibo_config_ouputtype_query" name="weibo_config_ouputtype" class="outborder" checked="checked" value=1 />查询</span>
+        <span id="weibo_config_ouputtype_facet_span"><input type="radio" id="weibo_config_ouputtype_facet" name="weibo_config_ouputtype" class="outborder" value=2 />分组统计</span>
+        <span id="weibo_config_ouputtype_spread_span"><input type="radio" id="weibo_config_ouputtype_spread" name="weibo_config_ouputtype" class="outborder" value=3 />传播分析</span>
+    </div>
+
+    <div id="type_query" style="display:none">
+			<h3 class="childgrouptitle">排序</h3>
+			<div class="childgroupdiv">
+				<div class="search">
+					<span class="rightalign">排序字段：</span>
+					<span id="weibo_config_orderby"><span id="fieldstoorderby"></span></span>
+				</div>
+				<div class="search">
+					<span class="rightalign">排序方式：</span>
+					<span id="weibo_config_order">
+						<input type="radio" id="weibo_config_order_asc" name="weibo_config_order" value="asc" class="outborder"  />升序
+						<input type="radio" id="weibo_config_order_desc" name="weibo_config_order" class="outborder" value="desc" checked="checked"/>降序
+					</span>
+				</div>
+			</div>
+    </div>
+    <div id="type_facet" style="display:none">
+        <fieldset>
+            <legend>分组统计</legend>
+            <div class="search"><span class="rightalign">统计字段：</span><span id="fieldstofacet"></span></div>
+            <div class="search" style="display:none"><span class="rightalign">统计类型：</span><input type="checkbox" id="weibo_config_rangefacet" />区间统计</div>
+            <div id="weibo_config_facet_field" style="width:100%">
+                <div class="search"><span class="rightalign">包含：</span><span id="weibo_config_filter_include_span"><input type="text" id="weibo_config_filter_include" name="weibo_config_filter_include" /><input type="button" id="weibo_config_filter_include_add" name="weibo_config_filterword_add" value="添加" /></span></div>
+                <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedincludeword"></span></div>
+                <div class="search"><span class="rightalign">去除：</span><span id="weibo_config_filter_exclude_span"><input type="text" id="weibo_config_filter_exclude" name="weibo_config_filter_exclude" /><input type="button" id="weibo_config_filter_exclude_add" name="weibo_config_filter_exclude_add" value="添加" /></span></div>
+                <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedexcludeword"></span></div>
+
+                <div class="search" id="weibo_config_facet_counttype"><span class="rightalign">类型：</span><span id="weibo_config_counttype_span"><input type="checkbox" name="weibo_config_counttype" value="201" class="outborder" />讨论<input type="checkbox" name="weibo_config_counttype" value="202" class="outborder"/>转发<input type="checkbox" name="weibo_config_counttype" value="203" class="outborder"/>评论 </span></div>
+            </div>
+            <div id="weibo_config_facet_range" style="display:none">
+                <span class="rightalign">区间长度：</span>
+                <input type="text" id="weibo_config_facet_gap_text">
+                <select id="weibo_config_facet_gap_measure">
+                    <option value="hour">小时</option>
+                    <option value="day">天</option>
+                    <option value="month" selected="selected">月</option>
+                </select>
+            </div>
+        </fieldset>   
+    </div>
+	<div class="divhr"></div>
+	<h3 class="childgrouptitle">数据过滤<span style="float:right;"><label for="weibo_config_datalimit_modifiy">实时过滤</label> <input type="checkbox" value="true" name="weibo_config_datalimit_modifiy" id="weibo_config_datalimit_modifiy" class="outborder"/></span></h3>
+	<div class="childgroupdiv" id="weibo_config_output_datafilter"  checkedoutputdata="start_end">
+		<div class="search" id="pageable"><span class="rightalign"></span>从第<span id="weibo_config_output_start_num_span"><input type="text" id="weibo_config_output_start_num" name="weibo_config_output_start_num" class="shortinput" /></span>条开始,每页显示<span id="weibo_config_output_perpage_num_span"><input type="text" id="weibo_config_output_perpage_num" name="weibo_config_output_perpage_num" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+		<div class="search"><span class="rightalign"></span>第<span id="weibo_config_limit_span"><input type="text" id="weibo_config_limit" name="weibo_config_limit" class="shortinput" /></span>条到第<span id="weibo_config_orderword_span"><input type="text" id="weibo_config_orderword" name="weibo_config_orderword" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+	</div>
+</div>
+</div>

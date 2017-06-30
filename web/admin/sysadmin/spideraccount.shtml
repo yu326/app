@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--爬虫帐号管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip {
+	color:red;
+}
+.selwordsbox {
+	border: 1px solid #CCC;
+	padding: 1.5px 0 1.5px 1.5px;
+	margin: 3px 0 0 2px;
+	display: inline-block;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	//显示域名的列表
+	var hostpagesize = 5; //每页显示条数
+	var hostcurpage2; //当前页码
+	var hostpagenum = 10; //显示的页码数
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	$(function () {
+		changeTabTitle();
+		if($("#addspideraccountdiv").length == 1) {
+			$("#addspideraccountdiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 394,
+				height: 222,
+				close: function () {
+					$("#addaccount_username_text").val("");
+					$("#addaccount_password_text").val("");
+
+					$("#ro_sourceid_tip").text("");
+					$("#ro_username_tip").text("");
+					$("#ro_password_tip").text("");
+				}
+			});
+		}
+		$.each(["sourceid", "username", "password"], function(i, item){
+			$("#addaccount_"+item+"_text").bind("focus", function(){
+				$("#ro_"+item+"_tip").text("");
+			});
+		});
+        if(config.allAccountSource.length == 0){
+            //同步ajax方法
+		    getAccountSource(function(data){
+				if(data){
+	                config.allAccountSource = data;
+				}
+			});
+        }
+       	initSourceSelect(config.allAccountSource);
+
+		$("#addspideraccount").bind("click", function(){
+			addspideraccountWordHtml();
+		});
+		$("#account_search").bind("click", function(){
+			searchRequest(pagesize);
+		});
+		$("#spideraccountinfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+	function initSourceSelect(allsource){
+		$("select[name=sourceid]").empty();
+		$("#account_sourceid").append('<option value="">选择源</option>');
+	    $.each(allsource,function(i,v){ //过滤条件和添加窗口同时添加source
+			$("select[name=sourceid]").append('<option value="'+v.id+'">'+v.name+'</option>');
+	    });           
+	}
+	function searchRequest(pagesize, curpage) {
+		$("#spideraccountinfo tr:not(:first)").remove();
+		var param = "";
+		var fpc = $("#account_sourceid").val();
+		if(fpc){
+			param += "&account_sourceid=" + fpc + "";
+		}
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "spideraccount_model.php?type=selectspideraccountinfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#spideraccountinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+					var sourcename = ditem.sourceid;
+					$.each(config.allAccountSource, function(si, sitem){
+						if(sitem.id == ditem.sourceid){
+							sourcename = sitem.name;
+							return false;
+						}
+					});
+				fhtml = "<tr><td><input type='checkbox' name='checklist' id='checksource" + ditem.id+ "' value='" + ditem.id+ "'></input></td><td>" +sourcename+ "</td><td>" +ditem.username+ "</td><td><a href='javascript:void(0);' id='account_"+di+"'>修改</a></td></tr>";
+				$("#spideraccountinfo").append(fhtml);
+				$("#account_"+di+"").bind("click", function (){
+					addspideraccountWordHtml(ditem);
+				});
+			});
+			fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selecthostAll' id='selecthostAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselecthostAll' id='unselecthostAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#spideraccountinfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#spideraccountinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", !this.checked);
+		});
+	}
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem);
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if(confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletesource(delid);
+			}
+		}
+	}
+
+	function deletesource(tid) {
+		var dataobj = {
+			type: "deletespideraccount",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "spideraccount_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//新增特征词html初始化
+	function addspideraccountWordHtml(ditem) {
+		if(ditem != undefined){
+			$("#addspideraccountdiv").attr("addopttype", "update");
+			$("#addspideraccountdiv").attr("account_id", ditem.id)
+		}else{
+			$("#addspideraccountdiv").attr("addopttype", "add");
+		}
+		//帐号来源
+		if(ditem != undefined && ditem.sourceid != undefined){
+			$("#addaccount_sourceid_select").val(ditem.sourceid);
+		}
+		//用户名
+		if(ditem != undefined && ditem.username != undefined){
+			var pk = ditem.username;
+			$("#addaccount_username_text").val(pk);
+		}
+		//数据库密码
+		if(ditem != undefined && ditem.password != undefined){
+			var pk = ditem.password;
+			$("#addaccount_password_text").val(pk);
+		}
+		//弹开新增窗口
+		addDicWord();
+	}
+	function addDicWord() {
+		$("#addspideraccountdiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addspideraccountdiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+		}
+		$("#addspideraccountdiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addspideraccountdiv");
+	}
+
+	function submitDic(){
+		var ty = $("#addspideraccountdiv").attr("addopttype");
+		if (ty != "add") {
+			var account_id = $("#addspideraccountdiv").attr("account_id");
+		}
+
+		//爬虫来源
+		var addaccount_sourceid = $("#addaccount_sourceid_select").val();
+		if(addaccount_sourceid == ""){
+			$("#ro_sourceid_tip").text("请选择爬虫来源!");
+			return false;
+		}
+		//数据库用户名
+		var addaccount_username = $("#addaccount_username_text").val();
+		addaccount_username = addaccount_username == undefined ? "" : commonFun.trim(addaccount_username);
+		if(addaccount_username == ""){
+			$("#ro_username_tip").text("请输入用户名!");
+			return false;
+		}
+		//数据库密码
+		var addaccount_password = $("#addaccount_password_text").val();
+		addaccount_password = addaccount_password == undefined ? "" : commonFun.trim(addaccount_password);
+
+
+		var senddataobj = {
+			account_id:account_id,
+			account_sourceid: addaccount_sourceid,
+			account_username: addaccount_username,
+			account_password: addaccount_password,
+			type: "checkvalueexist"
+		}
+
+		var searchnameUrl = config.modelUrl + "spideraccount_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addspideraccountdiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addspideraccountdiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if(data.flag == 1) {
+						var tip = "";
+						tip = " 已存在, 请更改!";
+						if(data.datalist.username != undefined){
+							var existArr = [];
+							$.each(data.datalist.username, function(ddi, dditem){
+								var pk = dditem.username;
+								existArr.push(pk); 
+							});
+							$("#ro_username_tip").text(existArr.join(", ")+tip);
+						}
+						return false;
+					} else {
+						senddataobj.type = "addspideraccount";
+						if (ty == "update") {
+							senddataobj.type = "updatespideraccount";
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "spideraccount_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addspideraccountdiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addspideraccountdiv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#addspideraccountdiv").dialog("close");
+									} else {
+										if(msg.msg != undefined && msg.msg !=""){
+											alert(msg.msg);
+										}
+										searchRequest(pagesize);
+										$("#addspideraccountdiv").dialog("close");
+									}
+								} else {
+									if (account_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert(msg.msg);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+    <!--#include file="top.shtml"-->
+    <div id="content">
+        <!--#include file="3a_left.shtml"-->
+        <div id="right">当前位置： <a href="index.shtml">首页</a>&gt; <span style="color: gray">爬虫帐号管理</span> <a href="javascript:void(0)" id="addspideraccount" style="float: right">新增爬虫帐号</a>
+            <div> 帐号来源：
+				<select id="account_sourceid" name="sourceid">
+					<option></option>
+				</select>
+                <input type="button" name="account_search" value="查询" id="account_search" />
+            </div>
+            <table id="spideraccountinfo" name="spideraccountinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <tr>
+                    <th width="4%" scope="col">选择</th>
+                    <th width="10%" scope="col">帐号来源</th>
+                    <th width="11%" scope="col">用户名</th>
+                    <th width="10%" scope="col">操作</th>
+                </tr>
+            </table>
+            <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+        </div>
+    </div>
+    <div id="addspideraccountdiv" style="display:none;" addopttype="add" account_id="" >
+        <table class="formtable">
+            <tr>
+                <td class="tdleft">帐号来源：</td>
+				<td>
+					<select id="addaccount_sourceid_select" name="sourceid">
+						<option value="1">新浪微博</option>
+						<option value="2">腾讯微博</option>
+					</select>
+				</td>
+                <td class="tdtip" id="ro_sourceid_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">用户名：</td>
+                <td><input id="addaccount_username_text" name="addaccount_username" type="text" /></td>
+                <td class="tdtip" id="ro_username_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">密码：</td>
+                <td><input type="password" id="addaccount_password_text" name="addaccount_password_text" /></td>
+                <td class="tdtip" id="ro_password_tip"></td>
+            </tr>
+        </table>
+    </div>
+    <!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

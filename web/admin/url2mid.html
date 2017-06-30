@@ -1,0 +1,269 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript" src="sysadmin/js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="sysadmin/js/json2.js"></script>			
+<script type="text/javascript">
+	/*
+* 新浪微博mid与url互转实用工具
+*/
+var WeiboUtility = {};
+ 
+//62进制字典
+WeiboUtility.str62keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/**
+* 10进制值转换为62进制
+* @param {String} int10 10进制值
+* @return {String} 62进制值
+*/
+WeiboUtility.int10to62 = function(int10) {
+    var s62 = '';
+    var r = 0;
+    while (int10 != 0) {
+        r = int10 % 62;
+        s62 = this.str62keys.charAt(r) + s62;
+        int10 = Math.floor(int10 / 62);
+    }
+    return s62;
+};
+ 
+/**
+* mid转换为URL字符
+* @param {String} mid 微博mid，如 "2011 1041021 6293360" 35 8282304 0223267
+* @return {String} 微博URL字符，如 "wr4mOFqpbO" zyKByW55(X)  zyKBy0W55(V)
+*/
+WeiboUtility.mid2url = function(mid) {
+    if (typeof (mid) != 'string') return false; //mid数值较大，必须为字符串！
+    var url = '';
+    for (var i = mid.length - 7; i > -7; i = i - 7) //从最后往前以7字节为一组读取mid
+    {
+        var offset1 = i < 0 ? 0 : i;
+        var offset2 = i + 7;
+        var num = mid.substring(offset1, offset2);
+		var tmpnum = this.int10to62(num);
+		if(num.length==7){
+			while(tmpnum.length < 4){
+				tmpnum = "0"+tmpnum;
+			}
+		}
+        url = tmpnum + url;
+    }
+ 
+    return url;
+};
+ 
+/**
+* 62进制值转换为10进制
+* @param {String} str62 62进制值
+* @return {String} 10进制值
+*/
+WeiboUtility.str62to10 = function(str62) {
+    var i10 = 0;
+    for (var i = 0; i < str62.length; i++) {
+        var n = str62.length - i - 1;
+        var s = str62.substr(i,1);  // str62[i]; 字符串用数组方式获取，IE下不支持，显示为“undefined”
+ 
+        i10 += this.str62keys.indexOf(s) * Math.pow(62, n);
+    }
+    return i10;
+};
+ 
+/**
+* URL字符转换为mid
+* @param {String} url 微博URL字符，如 "wr4mOFqpbO"
+* @return {String} 微博mid，如 "201110410216293360"
+*/
+WeiboUtility.url2mid = function(url) {
+    var mid = '';
+ 
+    for (var i = url.length - 4; i > -4; i = i - 4) //从最后往前以4字节为一组读取URL字符
+    {
+        var offset1 = i < 0 ? 0 : i;
+        var offset2 = i + 4;
+        var str = url.substring(offset1, offset2);
+ 
+        str = this.str62to10(str).toString(10);
+        //alert(str+"  "+offset1+"  "+str.toString(10).length+"    "+typeof(str));
+        if (offset1 > 0) //若不是第一组，则不足7位补0
+        {
+            while (str.length < 7) {
+                str = '0' + str;
+            }
+        }
+ 
+        mid = str + mid;
+    }
+    return mid;
+};
+    //将微博的url转换成微博mid
+function weiboUrl2mid(url, sourceid){
+	if(url == undefined || url == ""){
+		return "";
+	}
+	switch(parseInt(sourceid,10)){
+		case 1: //新浪
+			if(url.substr(-1,1) == '/'){
+				url = url.substr(0,substr.length - 1);//去除最后一个斜杠
+			}
+			 var lasti = url.lastIndexOf('/');
+			 if(lasti > -1){
+				 var urlid = url.substring(lasti+1);
+				 //alert(urlid+"  "+urlid.length);
+				 return WeiboUtility.url2mid(urlid);
+			 }
+			 else{
+				 return "";
+			 }
+		case 2: //腾讯
+			return "";
+		default:
+			return "";
+	}
+}
+/*
+function deepClone(source) {
+	if (source === null) {
+		return null;
+	}
+	if (source === undefined) {
+		return undefined;
+	}
+	if (typeof (source) != 'object') {
+		return source;
+	}
+	if (source.constructor == Array) {
+		var ret = [];
+		for ( var i = 0; i < source.length; i++) {
+			ret[i] = arguments.callee(source[i]);
+		}
+	} else {
+		var ret = {};
+		for ( var d in source) {
+			ret[d] = arguments.callee(source[d]);
+		}
+	}
+	return ret;
+}
+*/
+function deepClone(source) {
+	if (source === null) {
+		return null;
+	}
+	if (source === undefined) {
+		return undefined;
+	}
+	if (typeof (source) != 'object') {
+		return source;
+	}
+	if (source.constructor == Array) {
+		var ret = [];
+		for ( var i = 0; i < source.length; i++) {
+			ret[i] = arguments.callee(source[i]);
+		}
+	} else {
+		var ret = {};
+		for ( var d in source) {
+			if (source[d] === null) {
+				ret[d] = null;
+				continue;
+			}
+			if (source[d] === undefined) {
+				ret[d] = undefined;
+				continue;
+			}
+			if (typeof (source[d]) != 'object') {
+				ret[d] = source[d];
+				continue;
+			}
+			if (source[d].constructor == Array) {
+				ret[d] = [];
+				for ( var j = 0; j < source[d].length; j++) {
+					ret[d][j] = arguments.callee(source[d][j]);
+				}
+				continue;
+			}
+			if (source[d] === source) {
+				ret[d] = ret;
+			}
+			else {
+				ret[d] = {};
+				for ( var p in source[d]) {
+					if (source[d][p] === source)
+					{
+						ret[d][p] = ret;
+						continue;
+					}
+					ret[d][p] = arguments.callee(source[d][p]);
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+$(function(){
+		$("#btnurl2mid").bind("click",function(){
+			var url = $("#txturl").val();
+
+			if(url){
+			var mid = 	weiboUrl2mid(url,1);
+
+			$("#spanmid").text(mid);
+			}
+		});
+
+		$("#btnmid2url").bind("click",function(){
+			var uid = $("#txtuid").val();
+			var mid = $("#txtid").val();
+
+			if(mid && uid){
+			var mid2 = 	WeiboUtility.mid2url(mid);
+			var url = "http://weibo.com/"+uid+"/"+mid2;
+			$("#spanurl").text(url);
+			}
+		});
+
+		var dataarr = [];
+		var dataobj = {};
+		dataobj.children = [];
+		var t = {};
+		t.userid = "111";
+		t.depth = "3";
+		var tmpobj = {};
+		tmpobj.userid = "111";
+		tmpobj.depth = "3";
+		tmpobj.parent = {};
+		tmpobj.parent.weiboid = '123';
+		tmpobj.parent.depth = '123';
+		dataobj.children.push(tmpobj);
+		dataobj.parent = {};
+		dataobj.parent.weiboid = "123";
+		dataobj.parent.depth = "1";
+		dataobj.parent.children = [];
+		dataobj.parent.children.push(tmpobj);
+		dataarr.push(dataobj);
+
+		var a = deepClone(dataarr);
+});
+</script>
+</head>
+
+<body>
+	url2mid:<br/>
+	url:<input type='text' style='width:400px;' id = 'txturl'>
+	<input type ='button' value='url2mid' id='btnurl2mid'>
+	<br/>
+	<span id='spanmid'></span>
+	<br/>
+	<br/>
+	mid2url:<br/>
+	uid:<input type='text' style='width:400px;' id = 'txtuid'>
+	<br/>
+	mid:<input type='text' style='width:400px;' id = 'txtid'>
+	<br/>
+	<input type ='button' value='mid2url' id='btnmid2url'>
+	<br/>
+	<span id='spanurl'></span>
+</body>
+</html>

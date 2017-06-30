@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/base_common.js"></script>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/config.js"></script>
+    <script type="text/javascript" src="js/json2.js"></script>
+    <script type="text/javascript">
+        function importiframe_postMessageToParent(obj) {
+            var objstr;
+            if (typeof obj == "object") {
+                objstr = JSON.stringify(obj);
+            }
+            else {
+                objstr = obj;
+            }
+//            alert("importiframe post " + objstr + " to parent");
+            window.parent.postMessage(objstr, "*");
+        }
+        //植入微博URL
+        function importiframe_import(type, dataobj) {
+            var pd = JSON.stringify(dataobj.body);
+            var token = dataobj.token;
+            var page = "";
+            switch (type) {
+                case "remote":
+                case "remoteweibo":
+                case "remotearticledetail":
+                case "remotearticlelist":
+                case "remotecommtask":
+                    page = "addweibo.php";
+                    break;
+                case "remoteuser":
+                case "remoteuserdetail":
+                    page = "adduser.php";
+                    break;
+                default:
+                    break;
+            }
+            var task = dataobj.task ? ("&task=" + JSON.stringify(dataobj.task)) : "";
+            //记录日志
+//            alert("包含任务数据 task:[" + task + "].");
+//            alert("准备向远程服务器:[" + config.phpPath + page + "?type=" + type + "] 发送数据! task:[" + task + "] type:post  data:[" + pd + "].");
+
+            $.ajax({url: config.phpPath + page + "?type=" + type + "&token=" + token + task, contentType: "application/json", type: "post", data: pd, dataType: "json",
+                success: function (data) {
+                    var returnmsg = {};
+                    returnmsg.sourcename = window.name;
+                    returnmsg.type = "success";
+                    var r = {};
+                    if (data) {
+                        returnmsg.body = data;
+                        importiframe_postMessageToParent(returnmsg);
+                    }
+                    else {
+                        r.errorcode = -1;
+                        r.error = "返回值错误";
+                        returnmsg.body = r;
+                        importiframe_postMessageToParent(returnmsg);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+//                    alert("importiframe 请求异常! " + JSON.stringify(jqXHR));
+//                    alert("importiframe 请求异常!" + JSON.stringify(textStatus));
+//                    alert("importiframe 请求异常!" + JSON.stringify(errorThrown));
+                    var r = {errorcode: -1, error: "提交数据发生异常"};
+                    var returnmsg = {};
+                    returnmsg.sourcename = window.name;
+                    returnmsg.type = "error";
+                    returnmsg.body = r;
+                    importiframe_postMessageToParent(returnmsg);
+                }
+            });
+        }
+
+        var importiframe_onmessage = function (e) {
+//            alert(" send data page onmessage");
+            try {
+                var obj = JSON.parse(e.data);
+//                alert("子窗口收到了父窗口的消息:[" + e.data + "] type:[" + (typeof  obj) + "]");
+
+                if (typeof obj == "object" && obj.type) {
+                    switch (obj.type) {
+                        case "importurl":
+                            importiframe_import("remote", obj);
+                            break;
+                        case "importarticlelist":
+                            importiframe_import("remotearticlelist", obj);
+                            break;
+                        case "importarticledetail":
+                            importiframe_import("remotearticledetail", obj);
+                            break;
+                        case "importuserdetail":
+                            importiframe_import("remoteuserdetail", obj);
+                            break;
+                        case "importweibo":
+                            importiframe_import("remoteweibo", obj);
+                            break;
+                        case "importuser":
+                            importiframe_import("remoteuser", obj);
+                            break;
+                        case "commontast":
+//                            alert("obj.type:[" + obj.type + "].");
+                            importiframe_import("remotecommtask", obj);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } catch (ex) {
+//                alert("向服务器提交数据异常:[" + ex.message + "].");
+            }
+        };
+        $(function () {
+            //监听postMessage消息事件
+            if (typeof window.addEventListener != 'undefined') {
+                window.addEventListener('message', importiframe_onmessage, false);
+            } else if (typeof window.attachEvent != 'undefined') {
+                window.attachEvent('onmessage', importiframe_onmessage);
+            }
+            if (!window.name) {
+                window.name = "importtool_iframe";
+            }
+//            alert("子页面的window.name:[" + window.name + "].");
+            importiframe_postMessageToParent({sourcename: window.name, type: "onready"});
+        });
+
+    </script>
+</head>
+<body>
+</body>
+</html>

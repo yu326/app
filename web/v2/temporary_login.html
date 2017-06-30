@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<link>
+    <meta charset="UTF-8">
+    <title>临时登录</title>
+    <script  type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            var username = "zibo";
+            var pwd = "405dc1fc5e426b78540e7e89af79978c";
+
+            var url = "http://zibo.3i.inter3i.com:8090/";
+            $.post(url+"model/checkuser.php",{username:username,type:"login",password:pwd,mark:null},function(r){
+                r = JSON.parse(r)
+                if (r.result) {
+                    window.location.href = url+"index.html";
+                }else{
+                    alert("操作异常");
+                }
+            })
+        })
+    </script>
+
+</head>
+
+<body>
+
+
+</body>
+</html>

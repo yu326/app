@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="height:100%">
+<head>
+<base href=""></base>
+<script type="text/javascript">
+var head = document.getElementsByTagName( "head" )[0];
+var _base_ = document.getElementsByTagName( "base" )[0];
+var b_url = "";
+var sh=false;
+ var pathhost = "www.inter3i.com";
+ if(window.location.host != pathhost){
+        sh = true;
+        _base_.setAttribute("href","");
+ }
+if(!sh){
+	var reg = /^\/(\w+)($|\/+.*)/i;
+	var t = window.location.pathname.match(reg);
+	if(t != null && t[1]){
+	    b_url= location.protocol+"//"+location.host+"/"+t[1]+"/";
+	    _base_.setAttribute("href",b_url);
+	}
+	else{
+	    location.href = "error.html";
+	}
+}
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>博晓通</title>
+<link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.16.custom.css" />
+<link rel="stylesheet" type="text/css" href="css/index.css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="js/jquery.tablednd.0.6.min.js"></script>
+<script type="text/javascript" src="js/highcharts.js"></script>
+<script type="text/javascript" src="js/raphael-min.js"></script>
+<script type="text/javascript" src="js/sigma.min.js"></script>
+<script type="text/javascript" src="js/controller.min.js"></script>
+<script type="text/javascript" src="js/controllerpart.min.js"></script>
+<script type="text/javascript" src="js/controllershow.min.js"></script>
+<script type="text/javascript" src="js/excanvas.js"></script>
+<script type="text/javascript" src="js/jqcloud-1.0.1.js"></script>
+
+<script type="text/javascript">
+
+var instances = new Array();
+var elements = new Array();
+var currPagetype;
+var currNavid;
+var currFilepath;
+var currEditStatus = false;
+var currInstance = null;
+var currOverlayInstance = null;
+var currChannelID = 0;
+var currTypeID;
+var linkageobj = null;
+var overlayobj = null;
+var allmodels;
+var companylogo = "";
+if (!window.Global)
+{
+    window.Global = new Object();
+}
+if(!Global.user){
+	Global.user = {};
+}
+function docready(){
+	$.getScript("js/inter3i.min.js",function(){
+		initConfig();
+		getDrilldownAuth();
+	    var minh = ($('body')[0].clientHeight - $("#top").outerHeight(true) - $("#title").outerHeight(true));
+	    $("#middle").height(minh);
+	    Global.StartClientWidth = $('body')[0].clientWidth;
+	    setMenuHeight();
+	    $(window).bind('resize', debounce(function(){
+	        if(window.resizing){
+	            return false;
+	        }
+	        if(Global.StartClientWidth == $('body')[0].clientWidth){
+	            return false;
+	        }
+	        else{
+	            Global.StartClientWidth = $('body')[0].clientWidth;
+	        }
+	        $('div[instanceid][elementid][showid]').each(function(i,item){
+	            var showobj = $(item).data("showobj");
+	            if(showobj!=undefined){
+	                setShowHeigh(showobj);
+	                if(showobj.onResize != undefined){
+	                    showobj.onResize();
+	                }
+	            }
+	        });
+	    }, 500));
+
+	        var structInfo = new Object();
+	        structInfo.top = "#top";
+	        structInfo.left = "#menu";
+	        structInfo.modelselect = "#modelselect";
+	        structInfo.right = "#modelcondition";
+	        ajaxRequest(config.allModels, function(data){
+	            allmodels = data;
+	        }, 'json'); 
+	        createTop(structInfo); //top.js
+	        $("#editdiv").dialog({
+	            width:880,
+	            height:600,
+	            autoOpen:false,
+	            modal:true,
+				resizable:false,
+	            close:function(){
+	                $(this).dialog("option","buttons",{});
+					$("#tabdiv").tabs("destroy");
+	            }
+	        });
+			//先加载租户对应foot, 发送ajax请求, 请求失败时,使用默认的foot
+			// 请求HTML
+			var now = new Date(); 
+			var year = now.getFullYear();
+			if(config.selfstyle){
+				$.ajax({type: "GET", url: "tenant/"+Global.tenantid+"/foot.html", async:false,  // 同步请求
+						dataType: "html", 
+						success: function(data){
+							$("body").append(data);
+						},
+						error:function(){
+							var footer = '<div id="foot">©2011 - '+year+' 博晓通 &nbsp;&nbsp;&nbsp;&nbsp;<a style="color:white" href="http://www.miibeian.gov.cn" target="_blank">京ICP备12047578号</a></div>';
+							$("body").append(footer);
+						}
+				});
+			}
+			else{
+				var footer = '<div id="foot">©2011 - '+year+' 博晓通 &nbsp;&nbsp;&nbsp;&nbsp;<a style="color:white" href="http://www.miibeian.gov.cn" target="_blank">京ICP备12047578号</a></div>';
+				$("body").append(footer);
+			}
+	        //$("#foot").show();		
+
+    });
+}
+$(document).bind("ready",function(){
+    $.ajax({url:"model/checkuser.php",dataType:"json",type:"POST",data:{type:"checkweburl"},async:true,
+        success:function(d){
+            if(d != undefined && d != null){
+                document.title = d.webname;
+				Global.webname = d.webname;
+				Global.tenantid = d.tenantid;
+                righturl = d.result;
+                if(righturl){
+                    window.currTypeID = 3;
+                    $.ajax({url:"model/checkuser.php",dataType:"json",data:{type:"existsession"},type:"post",success:function(r){
+                        if(!r.result){
+							if(r.errortype && r.errortype == 4){
+								alert(r.msg);
+							}
+                            location.href = b_url+"login.html";
+                        }
+                        else{
+							Global.user.usertype = r.usertype;
+                            docready();   
+                        }
+                    },
+                    error:function(r){
+                        alert("请重新登录");
+                        location.href = b_url+"login.html";
+                    }});
+                }
+                else{
+                    location.href = "error.html";
+                }
+            }
+        },
+        error:function(){
+            location.href = "error.html";
+        }
+    });
+
+});
+</script>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33831791-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body style="height:100%">
+<div id="mybody">
+	<div id="top" controlid = "menu"></div>  <!--top-->
+	<div  id="title"><span id="topnav"><span id="level1"></span>－<span id="level2"></span></span>
+	</div>
+	<table id="middle" style="min-height:480px;">
+		<tr>
+			<td style="width:210px;vertical-align:top;"> 
+				<div id="menu" controlid = "modelcondition"  style="width:210px;"></div> 
+			</td>
+			<td style="vertical-align:top;">
+				<div id="content" style="width:100%;height:100%;">
+					<div id="modelselect" controlid="modelcondition" style="width:100%"></div>
+					<div id="modelcondition" style="width:100%"></div>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<!--
+	<div id="middle">
+		<div id="menu" controlid = "modelcondition"  style="width:100%"></div> 
+		<div id="content">
+			<div id="modelselect" controlid="modelcondition" style="width:100%"></div>
+			<div id="modelcondition" style="width:100%"></div>
+		</div>
+  </div>
+  -->
+</div>
+<!--editlayer-->
+<div id="editlayer" class='topnav' align="right" style= "display:none;"></div>
+<div id="editdownload" class='topnav' align="right" style= "display:none;">
+<a id="editdownload_cancel" style="color:#ffffff" href="javascript:void(0)">取消</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a id="editdownload_download" style="color:#ffffff" href="javascript:void(0)">下载</a>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+<div id="editelementlayer" style= "display:none;z-index:1001"  align="right" >
+    <span style='display:none'><a id="editdefaultsize" href="javascript:void(0)">恢复尺寸</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span style='display:none'><a id="editparentgroup" href="javascript:void(0)">编辑上级组</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="editchildshow"  href="javascript:void(0)">编辑组内</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><input type="checkbox" id="chkmovetogroup" /><label style="cursor:pointer;" for="chkmovetogroup">移入分组</label>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="editshowtitle"  href="javascript:void(0)">新增标题</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="editremark"  href="javascript:void(0)">编辑备注</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="deleteremark"  href="javascript:void(0)">删除备注</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="copyelementbtn"  href="javascript:void(0)">复制</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="editelementbtn"  href="javascript:void(0)">编辑</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span style="display:none"><a id="exportwidgetbtn"  href="javascript:void(0)">嵌入其他站点</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="delinstancebtn"  href="javascript:void(0)">删除全部</a>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+    <span><a id="delelementbtn"  href="javascript:void(0)">删除</a></span>
+</div>
+<div id="editdiv" style="width:834px;height:683px;display:none">
+<div id="tabdiv" style="padding:2px 0;"><ul style="background:#ffffff;border:0;border-bottom:1px solid #A6C9E2;border-radius:0;" id="editmodelselectdiv" controlid="editelementdiv"></ul><div id="editelementdiv"></div></div>
+</div>
+<div id="linkagediv" style="display:none;width:834px;height:683px;overflow-y:scroll;">
+    <div style="width:100%;height:10%;"><input type="button" value="添加列 " onclick="javascript:window.linkageobj.addColumn()">
+    &nbsp;&nbsp; 
+    </div>
+     <table id="tbtb" style="width:900px;height:90%">
+         <tr id="trtr">
+         </tr>
+     </table>
+</div>
+</body>
+</html>

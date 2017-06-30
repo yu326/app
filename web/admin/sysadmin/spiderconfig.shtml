@@ -1,0 +1,617 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--爬虫配置管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip {
+	color:red;
+}
+.selwordsbox {
+	border: 1px solid #CCC;
+	padding: 1.5px 0 1.5px 1.5px;
+	margin: 3px 0 0 2px;
+	display: inline-block;
+}
+.ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px 0; vertical-align:top; *vertical-align:middle}
+</style>
+<link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css" type="text/css">
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="js/jquery.ztree.core-3.5.js"></script>
+<script type="text/javascript" src="js/jquery.ztree.excheck-3.5.js"></script>
+<script type="text/javascript" src="js/jquery.ztree.exedit-3.5.js"></script>
+
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/parts/myParamDef.js"></script>
+<script type="text/javascript">
+	var pagesize = 5; //每页显示条数
+	var totalCount; //总记录数
+	var curpage2; //当前页码
+	$(function () {
+		changeTabTitle();
+		checkSession();
+		if($("#fullcontentdiv").length == 1){
+			$("#fullcontentdiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 560,
+				height: 470,
+				close:function(){
+					$("#spi_fullcontent_text").text("");
+				}
+			});
+		}
+
+		if($("#addspiderconfigdiv").length == 1) {
+			$("#addspiderconfigdiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 775,
+				height: 535,
+				close: function () {
+					$("#addspi_content_text").val("");
+					$("#addspi_urlregex_text").val("");
+					$("#addspi_detailurlregex_text").val("");
+					//$("#addspi_urlconfigrule_text").val("");
+					$("#addspi_urlconfigrule_def").val("");
+					$("#addspi_name_text").val("");
+					$("#ro_content_tip").text("");
+					$("#ro_urlregex_tip").text("");
+					$("#ro_detailurlregex_tip").text("");
+					$("#ro_urlconfigrule_tip").text("");
+					$("#ro_name_tip").text("");
+				}
+			});
+		}
+		$.each(["name", "content", "url", "urlregex", "detailurlregex", "urlconfigrule"], function (k, item) {
+			$("#addspi_" + item + "_text").bind("blur", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+		$("#addspiderconfig").bind("click", function () {
+			addspiderconfigWordHtml();
+		});
+		$("#spi_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		if(config.allTaskPageStyleType.length == 0){
+			getAllTaskPageStyleType(function(data){
+					if(data){
+					config.allTaskPageStyleType = data;
+					}
+					});
+		}
+		var tpthtml = "";
+		$.each(config.allTaskPageStyleType, function(ti, titem){
+				tpthtml += "<option value='"+titem.id+"'>"+titem.name+"</option>";
+		});
+		$("#spi_taskpagestyletype").append(tpthtml);
+		$("#addspi_templatetype_select").empty().append(tpthtml);
+
+		/*
+	    $.each(config.allSource,function(i,v){
+	        $("#addspi_sourceid_select").append('<option value="'+v.id+'">'+v.name+'</option>');
+	    });           
+		//适用任务
+		$.each([4,5,10,11], function(ti, titem){
+	        $("#addspi_task_select").append('<option value="'+titem+'">'+config.allTask[titem]+'</option>');
+		})
+		*/
+		/*
+		//初始化config url下拉菜单
+		$.each(config.spiderConfigUrl, function(si, sitem){
+			$("#addspi_url_select").append("<option value='"+sitem.value+"'>"+sitem.name+"</option>");
+		});
+		//url change
+		$("#addspi_url_select").bind("change", function(){
+			var urlval = $(this).val();
+			$("#addspi_url_text").val(urlval);
+		});
+		$("#addspi_task_select").bind("change", function(){
+			var taskid = $("#addspi_task_select").val();
+			if(config.spiderConfigUrl[sourceid] != undefined && config.spiderConfigUrl[sourceid][taskid] != undefined){
+				$("#addspi_url_text").val(config.spiderConfigUrl[sourceid][taskid]);
+			}
+			else{
+				$("#addspi_url_text").val("");
+			}
+		});
+		//url赋值
+		$("#addspi_task_select").change();
+		*/
+		$("#spiderconfiginfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+	function fullContentHtml(ditem, field){
+		if(ditem != undefined){
+			$("#fullcontentdiv").dialog("open");
+			$("#fullcontentdiv").dialog({
+					title:ditem.name+"的内容"
+			});
+			var tmp = ditem.content;
+			if(field != undefined){
+				tmp = ditem[field];
+			}
+			$("#spi_fullcontent_text").text(tmp);
+		}
+	}
+
+	function searchRequest(pagesize, curpage) {
+		$("#spiderconfiginfo tr:not(:first)").remove();
+		var fpc = $("#spi_name").val();
+		var fstyle = $("#spi_taskpagestyletype").val();
+		var param = "";
+		if (fpc != -1) {
+			param += "&spi_name=" + fpc + "";
+		}
+		if(fstyle){
+			param += "&spi_taskpagestyletype="+fstyle+"";
+		}
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "spiderconfig_model.php?type=selectspiderconfiginfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#spiderconfiginfo").append("<tr><td colspan='8'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			$.each(data.datalist, function (di, ditem) {
+					var dcontent = "";
+					if(ditem.content != undefined){
+					dcontent = ditem.content.substr(0, 10)+"...";
+					}
+					var urlregex = "";
+					if(ditem.urlregex != undefined){
+					urlregex = ditem.urlregex.substr(0, 10)+"...";
+					}
+					var detailurlregex = "";
+					if(ditem.detailurlregex != undefined){
+					detailurlregex = ditem.detailurlregex.substr(0, 10)+"...";
+					}
+					var urlconfigrule = "";
+					if(ditem.urlconfigrule != undefined){
+					urlconfigrule = ditem.urlconfigrule.substr(0, 10)+"...";
+					}
+					var templatename = "";
+					$.each(config.allTaskPageStyleType, function(ti, titem){
+						if(titem.id == parseInt(ditem.templatetype, 10)){
+						templatename = titem.name;
+						return false;
+						}
+						});
+					fhtml = "<tr><td><input type='checkbox' name='checklist' id='checksource" + ditem.id+ "' value='" + ditem.id+ "'></input></td><td>" +ditem.name+ "</td><td><a href='javascript:void(0);' id='spi_content_"+di+"'>"+dcontent+"</a></td><td><a href='javascript:void(0);' id='spi_urlconfigrule_"+di+"'>"+urlconfigrule+"</a></td><td>"+templatename+"</td><td><a href='javascript:void(0);' id='spi_urlregex_"+di+"' title='"+ditem.urlregex+"'>"+urlregex+"</a><td><a href='javascript:void(0);' id='spi_detailurlregex_"+di+"' title='"+ditem.detailurlregex+"'>"+detailurlregex+"</a><td><a href='javascript:void(0);' id='spi_"+di+"'>修改</a></td></tr>";
+					$("#spiderconfiginfo").append(fhtml);
+					$("#spi_"+di+"").bind("click", function(){
+							addspiderconfigWordHtml(ditem); //判断是复制还是修改, 复制类似于新增
+							});
+					$("#spi_content_"+di+"").bind("click", function(){
+							fullContentHtml(ditem);
+							});
+					$("#spi_urlconfigrule_"+di+"").bind("click", function(){
+							fullContentHtml(ditem, "urlconfigrule");
+							});
+
+			});
+			deletehtml = "<tr><td></td><td colspan='7' align='left'>&nbsp;&nbsp;<input type='button' name='selecthostAll' id='selecthostAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselecthostAll' id='unselecthostAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#spiderconfiginfo").append(deletehtml);
+		} else {
+			var str = $("<tr><td colspan='8'>暂无记录!</td></tr>");
+			$("#spiderconfiginfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", !this.checked);
+		});
+	}
+	//爬虫配置的删除
+	function delselect() {
+		var delids = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			delids.push(val);
+		});
+		if (delids.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if(confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletespiderconfig(delids);
+			}
+		}
+	}
+
+	function deletespiderconfig(delids) {
+		var dataobj = {
+			type: "deletespiderconfig",
+			deldata: delids
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "spiderconfig_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//新增初始化
+	function addspiderconfigWordHtml(ditem, iscopy) {
+		if(ditem != undefined && !iscopy) {
+			$("#addspiderconfigdiv").attr("addopttype", "update");
+			$("#addspiderconfigdiv").attr("spi_id", ditem.id)
+		} else {
+			$("#addspiderconfigdiv").attr("addopttype", "add");
+		}
+		//爬虫配置内容
+		if(ditem != undefined) {
+			$("#addspi_content_text").val(ditem.content);
+		}
+		//分析抓取url正则表达式
+		if(ditem != undefined && ditem.urlregex != undefined){
+			$("#addspi_urlregex_text").val(ditem.urlregex);
+		}
+		//详情url正则表达式
+		if(ditem != undefined && ditem.detailurlregex!= undefined){
+			$("#addspi_detailurlregex_text").val(ditem.detailurlregex);
+		}
+		//url配置文件
+		if(ditem != undefined && ditem.urlconfigrule!= undefined){
+			//$("#addspi_urlconfigrule_text").val(ditem.urlconfigrule);
+            var urlObj = jQuery.parseJSON(ditem.urlconfigrule);
+            if(urlObj){
+                $("#addspi_urlconfigrule_def").val(urlObj.taskurl);
+            }
+			$("#addspi_urlconfigrule_def").attr("code", ditem.urlconfigrule);
+		}
+		if(ditem != undefined && ditem.templatetype != undefined){
+			$("#addspi_templatetype_select").val(ditem.templatetype);
+		}
+		//修改时初始化名称
+		if(ditem != undefined && ditem.name!= undefined) {
+			var pk = ditem.name;
+			$("#addspi_name_text").val(pk);
+		}
+		//弹开新增窗口
+		addDicWord();
+	}
+	function submitDic(){
+		var ty = $("#addspiderconfigdiv").attr("addopttype");
+		if (ty != "add") {
+			var spi_id = $("#addspiderconfigdiv").attr("spi_id");
+		}
+		//爬虫配置名称
+		var addspi_name = $("#addspi_name_text").val();
+		addspi_name = addspi_name == undefined ? "" : commonFun.trim(addspi_name);
+		if(addspi_name == ""){
+			$("#ro_name_tip").text("请输入名称!");
+			$("#addspi_name_text").focus();
+			return false;
+		}
+		//爬虫配置内容
+		var addspi_content = $("#addspi_content_text").val();
+		if(addspi_content == ""){
+			$("#ro_content_tip").text("请输入内容!");
+			$("#addspi_content_text").focus();
+			return false;
+		}
+		var addspi_templatetype = $("#addspi_templatetype_select").val();
+		//分析抓取url正则表达式
+		var addspi_urlregex = $("#addspi_urlregex_text").val();
+		var addspi_detailurlregex = $("#addspi_detailurlregex_text").val();
+
+		//var addspi_urlconfigrule = $("#addspi_urlconfigrule_text").val();
+		var addspi_urlconfigrule = $("#addspi_urlconfigrule_def").attr("code");
+
+		//适用任务
+		//var addspi_task = $("#addspi_task_select").val();
+		var senddataobj = {
+			spi_content: addspi_content,
+			spi_name: addspi_name,
+			spi_templatetype : addspi_templatetype,
+			spi_urlregex: addspi_urlregex,
+			spi_detailurlregex: addspi_detailurlregex,
+			spi_urlconfigrule: addspi_urlconfigrule,
+			type: "checkvalueexist"
+		}
+		var searchnameUrl = config.modelUrl + "spiderconfig_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addspiderconfigdiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addspiderconfigdiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1 && ty == "add") {
+						if(data.datalist.name != undefined){
+							var existArr = [];
+							$.each(data.datalist.name, function(ddi, dditem){
+								var pk = dditem.name;
+								existArr.push(pk); 
+							});
+							$("#ro_name_tip").text("名称不能相同!");
+						}
+						return false;
+					} else {
+						senddataobj.type = "addspiderconfig";
+						if (ty == "update") {
+							senddataobj.type = "updatespiderconfig";
+							senddataobj.spi_id = spi_id;
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "spiderconfig_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addspiderconfigdiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addspiderconfigdiv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#addspiderconfigdiv").dialog("close");
+									} else {
+										if(msg.msg != undefined && msg.msg !=""){
+											alert(msg.msg);
+										}
+										searchRequest(pagesize);
+										$("#addspiderconfigdiv").dialog("close");
+									}
+								} else {
+									if (spi_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert(msg.msg);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord() {
+		$("#addspiderconfigdiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addspiderconfigdiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+		}
+		$("#addspiderconfigdiv").dialog({
+			title: dialogtitle
+		});
+        $("#clearspi_urlconfigrule_btn").unbind("click");
+        $("#clearspi_urlconfigrule_btn").bind("click", function(){
+                $("#addspi_urlconfigrule_def").val("");
+                $("#addspi_urlconfigrule_def").removeAttr("code");
+                });
+        $("#addspi_urlconfigrule_btn").unbind("click");
+        $("#addspi_urlconfigrule_btn").bind("click", function(){
+            myParamDef.init(function(data){
+                var taskurl = $("#addspi_urlconfigrule_def").val();
+                var newurl = taskurl + "$<"+data.name+" \"%s\">";
+                var taskStr = $("#addspi_urlconfigrule_def").attr("code");
+                var taskobj = taskStr ? jQuery.parseJSON(taskStr) : null;
+                if(taskobj === null){
+                    var taskobj = {};
+                }
+                taskobj.taskurl = newurl;
+                taskobj[data.name] = {};
+                taskobj[data.name].label= data.label;
+                var dct = data.col_type;
+                var datatype = "";
+                switch(parseInt(dct, 10)){
+                    case SE_TYPE_STRING:
+                        datatype = "string";
+                        break;
+                    case SE_TYPE_INT32:
+                        datatype = "int";
+                        break;
+                    case SE_TYPE_OBJECT:
+                        datatype = "object";
+                        break;
+                    case SE_TYPE_ARRAY:
+                        datatype = "string";
+                        taskobj[data.name].multivalue = true;
+                        break;
+                    default:
+                        break;
+                }
+                taskobj[data.name].datatype = datatype;
+                $("#addspi_urlconfigrule_def").attr("code", JSON.stringify(taskobj));
+                $("#addspi_urlconfigrule_def").val(newurl);
+            });
+        });
+		submitbtnDisplay("#addspiderconfigdiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+    <!--#include file="top.shtml"-->
+    <div id="content">
+        <!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置： <a href="index.shtml">首页</a>&gt; <span style="color: gray">爬虫配置管理</span>
+		<a href="javascript:void(0)" id="addspiderconfig" style="float: right">新增</a>
+            <div> 
+				爬虫配置名称： <input type="text" name="spi_name" id="spi_name" />
+				模板类型： <select name="spi_taskpagestyletype" id="spi_taskpagestyletype">
+					<option value='-1'>请选择</option>
+				</select>
+                <input type="button" name="spi_search" value="查询" id="spi_search" />
+            </div>
+            <table id="spiderconfiginfo" name="spiderconfiginfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <tr>
+                    <th width="4%" scope="col">选择</th>
+                    <th width="15%" scope="col">名称</th>
+                    <th width="30%" scope="col">内容</th>
+                    <th scope="col">url生成配置</th>
+                    <th scope="col">模板类型</th>
+                    <th scope="col">分析抓取url正则表达式</th>
+                    <th scope="col">详情url正则表达式</th>
+                    <th width="8%" scope="col">操作</th>
+                </tr>
+            </table>
+            <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+        </div>
+    </div>
+    <div id="addspiderconfigdiv" style="display:none;" addopttype="add" spi_id="" >
+        <table class="formtable">
+            <tr>
+                <td class="tdleft">名称：</td>
+				<td ><input type="text" id="addspi_name_text" name="addspi_name_text" /></td>
+                <td class="tdtip" id="ro_name_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">内容：</td>
+				<td id="addspi_content_td">
+					<textarea rows="12" style="width:475px;" wrap="off" style="overflow:scroll;"  id="addspi_content_text" name="addspi_content_text"></textarea>
+				</td>
+                <td class="tdtip" id="ro_content_tip"></td>
+            </tr>
+            <!--
+            <tr>
+                <td class="tdleft">url生成配置：</td>
+				<td id="addspi_urlconfigrule_td">
+					<textarea rows="2" style="width:475px;" wrap="off" style="overflow:scroll;"  id="addspi_urlconfigrule_text" name="addspi_urlconfigrule_text"></textarea>
+				</td>
+                <td class="tdtip" id="ro_urlconfigrule_tip"></td>
+            </tr>
+            -->
+            <tr>
+                <td class="tdleft">url生成配置：</td>
+				<td>
+                    <input type="text" style="width:475px;" id="addspi_urlconfigrule_def" />
+                    <input type="button" id="addspi_urlconfigrule_btn" value="添加变量" />
+                    <input type="button" id="clearspi_urlconfigrule_btn" value="清除" />
+				</td>
+                <td class="tdtip"></td>
+            </tr>
+			<tr>
+				<td class="tdleft">模板类型：</td>
+				<td>
+					<select id="addspi_templatetype_select">
+						<option value="1">列表模板</option>
+						<option value="2">正文模板</option>
+						<option value="3">用户模板</option>
+						<option value="4">全部内容模板(列表,正文,用户)</option>
+					</select>
+				</td>
+                <td class="tdtip" id="ro_templatetype_tip"></td>
+			</tr>
+            <tr>
+                <td class="tdleft">分析抓取url正则表达式：</td>
+				<td id="addspi_urlregex_td">
+					<textarea rows="2" style="width:475px;" wrap="off" style="overflow:scroll;"  id="addspi_urlregex_text" name="addspi_urlregex_text"></textarea>
+				</td>
+                <td class="tdtip" id="ro_urlregex_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">详情url正则表达式：</td>
+				<td id="addspi_detailurlregex_td">
+					<textarea rows="2" style="width:475px;" wrap="off" style="overflow:scroll;"  id="addspi_detailurlregex_text" name="addspi_detailurlregex_text"></textarea>
+				</td>
+                <td class="tdtip" id="ro_detailurlregex_tip"></td>
+            </tr>
+        </table>
+    </div>
+	<div id="fullcontentdiv">
+	<!---
+		<pre style="white-space:pre" id="spi_fullcontent_text"></pre>
+		-->
+		<div style="white-space:pre; *white-space:normal" id="spi_fullcontent_text"></div>
+		<!--
+		<textarea rows="23" style="width:540px;overflow:scroll;" wrap="off" id="spi_fullcontent_text" name="spi_fullcontent_text"></textarea>
+		-->
+	</div>
+    <!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+var tid=0;
+//checkadmintype(1,1);
+$(function(){
+		changeTabTitle();
+		   
+	var spArr = window.location.toString().split("tenantid=");
+	if(spArr!=""&&spArr!=null)
+	{
+		tid = spArr[1];
+	}
+	bindtenant(tid);
+	bindproduct(tid);
+	
+	/*$("#frmuser").validate(
+{
+	submitHandler:function(form)
+               {
+				   checkrole();
+               },
+	rules:{
+   tenantname:"required",
+   email:
+   {email:true},
+   weburl:"required"
+},
+    messages:{
+	tenantname:"请输入用户名",
+	email:"请输入正确的email地址",
+	weburl:"请输入二级域名"
+}
+});*/
+	$('#timelimit').bind("click", function() {
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+	});
+	$("#btnok").bind("click", checkrole);
+	$("input[name=allowaccessdata]").bind("click",function(){
+		var chkv = $("input[name=allowaccessdata]:checked").val();
+		if(parseInt(chkv,10)){
+			$("#accessdatalimit").removeAttr("disabled");
+		}
+		else{
+			$("#accessdatalimit").attr("disabled","disabled");
+		}
+	});
+	if($("input[name=allowaccessdata]:checked").val() == '1'){
+		$("#accessdatalimit").removeAttr("disabled");
+	}
+});	
+
+
+
+function bindtenant(tid)
+{
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenantbyid&tid="+tid;
+	ajaxCommon(searchnameUrl, gettenant, "json");
+}
+
+function gettenant(data)
+{
+	if(data!=null)
+	{
+		$.each(data.children, function(i, item){
+			$("#tenantname").attr("value",item.tenantname);
+			$("#tel").attr("value",item.tel);
+			$("#contact").attr("value",item.contact);
+			$("#address").attr("value",item.address);
+			$("#email").attr("value",item.email);
+			$("#weburl").attr("value",item.weburl);
+			$("#prepayment").attr("value",item.prepayment);
+			if(item.timelimit){
+				$("#timelimit").attr("value",formatTime('yyyy-MM-dd hh:mm:ss', item.timelimit));
+			}
+			$("#description").attr("value",item.description);
+			$("#localtype").val(item.localtype);
+			$("#webname").attr("value",item.webname);
+			$("#allowlinkage"+item.allowlinkage).attr("checked", true);
+			$("#allowoverlay"+item.allowoverlay).attr("checked", true);
+			$("#allowdrilldown"+item.allowdrilldown).attr("checked", true);
+			$("#allowdownload"+item.allowdownload).attr("checked", true);  
+			$("#allowupdatesnapshot"+item.allowupdatesnapshot).attr("checked", true);  
+			$("#alloweventalert"+item.alloweventalert).attr("checked", true);  
+			$("#allowwidget"+item.allowwidget).attr("checked", true);
+			$("#allowaccessdata"+item.allowaccessdata).attr("checked", true);
+			$("#accessdatalimit").val(item.accessdatalimit);
+			$("#selfstyle"+item.selfstyle).attr("checked", true);
+			$("#allowvirtualdata"+item.allowvirtualdata).attr("checked", true);
+		});
+	}
+	else
+	{
+		alert("当前租户不存在，请与管理员联系!");
+	}
+}
+
+
+
+
+function  checkrole()
+{
+	var tname = $("#tenantname").val();
+	if(tname == undefined || tname == "" || commonFun.trim(tname) == ""){
+		$("#tenantname_error").text("请输入租户名称");
+		$("#tenantname").focus();
+		return false;
+	}
+	tname = commonFun.trim(tname);
+	var prepayment = $("#prepayment").val();
+	var re = /^\d+$/;
+	if(prepayment == undefined || prepayment == "" || commonFun.trim(prepayment) == "" || !re.test(prepayment)){
+		$("#prepayment_error").text("请输入预付款(整数)");
+		$("#prepayment").focus();
+		return false;
+	}
+	var timelimit = $("#timelimit").val();
+	if(timelimit == undefined || timelimit == "" || commonFun.trim(timelimit) == ""){
+		$("#timelimit_error").text("请输入到期时间");
+		$("#timelimit").focus();
+		return false;
+	}
+	var email = $("#email").val();
+	var emailre = /^[a-zA-Z0-9_+.-]+\@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]{1,4}$/;
+	if(email == undefined || email == "" || commonFun.trim(email) == "" || !emailre.test(email)){
+		$("#email_error").text("请输入正确的email地址");
+		$("#email").focus();
+		return false;
+	}
+	var weburl = $("#weburl").val();
+	var weburlre = /^[a-zA-Z0-9_-]+$/;
+	/*if(weburl == undefined || weburl == "" || commonFun.trim(weburl) == ""){
+		$("#weburl_error").text("请输入二级域名");
+		$("#weburl").focus();
+		return false;
+	}*/
+	weburl = commonFun.trim(weburl);
+	if(!weburlre.test(weburl)){
+		$("#weburl_error").text("二级域名只能包含数字、字母、下划线或横线");
+		$("#weburl").focus();
+		return false;
+	}
+	var accessdatalimit = $("#accessdatalimit").val();
+	if($("#accessdatalimit:enabled").length > 0){
+		var re_adl = /^[1-9][0-9]*$/;
+		if(accessdatalimit == undefined || !re_adl.test(accessdatalimit)){
+			$("#accessdatalimit_error").text("请输入正整数");
+			$("#accessdatalimit").focus();
+			return false;
+		}
+	}
+	var des = $("#description").val();
+	if(des != undefined && des != ""){
+		des = commonFun.trim(des);
+		if(des.length > 125){
+			$("#description_error").text("您最多可以输入125个字");
+			$("#description").focus();
+			return false;
+		}
+	}
+	$("span[id$=_error]").text("");
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenantbyname&tenantname="+tname+"&weburl="+weburl+"&tid="+tid;
+	ajaxCommon(searchnameUrl, checkExits, "json");
+}
+
+function checkExits(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			$("#tenantname_error").text("租户名称已存在,请更改");
+			$("#tenantname").focus();
+		}
+		else
+		{
+	var tname=$("#tenantname").val();
+	var tel = $("#tel").val();
+	var email = $("#email").val();
+	var address = $("#address").val();
+	var contact = $("#contact").val();
+	var weburl =$("#weburl").val();
+	var desc = $("#description").val();
+	var pay =$("#prepayment").val();
+	var pid=$("#productid").val();
+	var webname=$("#webname").val();
+	var localtype=$("#localtype").val();
+	var allowdrilldown = $("input[name=allowdrilldown]:checked").val();
+	var allowlinkage= $("input[name=allowlinkage]:checked").val();
+	var allowoverlay= $("input[name=allowoverlay]:checked").val();
+	var allowdownload= $("input[name=allowdownload]:checked").val();
+	var allowupdatesnapshot= $("input[name=allowupdatesnapshot]:checked").val();
+	var alloweventalert= $("input[name=alloweventalert]:checked").val();
+	var allowwidget = $("input[name=allowwidget]:checked").val();
+	var allowaccessdata = $("input[name=allowaccessdata]:checked").val();
+	var accessdatalimit = $("#accessdatalimit").val();
+	var selfstyle = $("input[name=selfstyle]:checked").val();
+	var allowvirtualdata = $("input[name=allowvirtualdata]:checked").val();
+	var timelimit = getTimeSec($("#timelimit").val());
+    $.post(config.modelUrl+"tenant_user_model.php", 
+    	    {tenantname:tname,tel:tel,email:email,address:address,contact:contact,weburl:weburl,type:"updatetenant",
+	         description:desc,id:tid,prepayment:pay,timelimit:timelimit,productid:pid,webname:webname,localtype:localtype,
+	         allowwidget:allowwidget, allowaccessdata:allowaccessdata, accessdatalimit:accessdatalimit,
+	         allowdrilldown:allowdrilldown,allowlinkage:allowlinkage,allowoverlay:allowoverlay,selfstyle:selfstyle,allowvirtualdata:allowvirtualdata,allowdownload:allowdownload,allowupdatesnapshot:allowupdatesnapshot,alloweventalert:alloweventalert},     
+			 function(msg){
+				 var stdata=jQuery.parseJSON(msg);    
+				 if(stdata.result)
+				 {
+					 alert(stdata.msg);
+					 window.location.href="tenantlist.shtml";
+				 }
+				 else
+				 {
+					 alert(stdata.msg);
+				 }
+			 });
+		}
+	}
+}
+
+//绑定产品信息
+function bindproduct(id)
+{
+		var searchnameUrl = config.modelUrl+"productcontroller.php?type=getproductbytenant&id="+tid;
+	ajaxCommon(searchnameUrl, getproductbytenant, "json");
+}
+function getproductbytenant(data)
+{
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+//$('#productid').append( new Option(data.children[i].label,data.children[i].productid) );
+$("<option value="+data.children[i].productid+">"+data.children[i].label+"</option>").appendTo("#productid");
+		   
+		 });
+	}
+	else
+	{
+		$("<option value=-1>未选择产品</option>").appendTo("#productid");
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+	<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">租户管理</span> 
+		<span style="float: right"><a href="addtenant.shtml">新增租户</a> <a href="tenantlist.shtml">租户列表</a></span>
+     <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</td>
+    </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	         <div align="left">&nbsp;&nbsp;<input type="text" name="tenantname" id="tenantname" maxlength="50"  />
+	         &nbsp;<span style="color:red" id="tenantname_error"></span>
+	         </div>
+	       </td>
+       </tr>
+        <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">购买产品：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<select name="productid" id="productid">
+              </select>
+            </div>
+	     </td>
+       </tr>
+        <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">租户类型：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<select name="localtype" id="localtype">
+                         <option value="1">数据平台租户</option>
+              <option value="2">普通租户</option>
+              </select>
+            </div>
+	     </td>
+       </tr>
+         <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">预付金额：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<input type="text" name="prepayment" id="prepayment"  maxlength="11" />
+	       &nbsp;<span style="color:red" id="prepayment_error"></span>
+	       </div>
+	     </td>
+       </tr>
+       <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">到期时间：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="timelimit" id="timelimit" />
+            &nbsp;<span style="color:red" id="timelimit_error"></span>
+            </div>
+	     </td>
+       </tr>
+       
+       <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">系统名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="webname" id="webname" maxlength="125" />
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">联系电话：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="tel" id="tel" maxlength="25" />
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">联系地址：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">&nbsp;&nbsp;<input type="text" name="address" id="address" maxlength="125" />
+	       </div>
+	     </label></td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">联系人：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="contact" id="contact" maxlength="25" />
+	       </div>
+	     </td>
+       </tr>
+          <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">电子邮件：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="email" id="email" maxlength="125" />
+	         &nbsp;<span style="color:red" id="email_error"></span>
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">二级域名：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="weburl" id="weburl" maxlength="255" />
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许钻取：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown0" value="0" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许联动：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许叠加：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay0" value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许下载：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">定时更新快照：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowupdatesnapshot1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowupdatesnapshot0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">事件预警：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许嵌入站点：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许使用自有样式：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="selfstyle" id="selfstyle1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="selfstyle" id="selfstyle0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许使用虚拟数据源：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许访问数据接口：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">接口数据量限制：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="accessdatalimit" id="accessdatalimit" disabled="disabled"  maxlength="11" />
+	         &nbsp;<span style="color:red" id="accessdatalimit_error"></span>
+            </div>
+	     </td>
+       </tr>
+       
+        <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">说明信息：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;
+	         <textarea name="description" cols="50" rows="5" id="description"></textarea>
+	         &nbsp;<span style="color:red" id="description_error"></span>
+            </div>
+	     </td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addtenant" />
+	       <input type="button" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="button" name="btncancel" id="btncancel" onclick="window.location.href='tenantlist.shtml';return false" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+  <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+<div id="divaddast" title="新增租户" class="openwindow"></div>
+<div id="divaddspt" title="修改租户信息" class="openwindow"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

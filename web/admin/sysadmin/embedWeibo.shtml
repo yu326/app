@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--植入微博</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="js/parts/multiTab.js"></script>
+<script type="text/javascript" src="js/parts/doubleRichbox.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+var cancle = false;
+var allcount = 0;
+	function initSpiderConfigSelect(allspiderconfig, taskid){
+	//控件初始化
+			planArray.length=0;
+			$("#dictionaryPlanText2").text("默认方案");
+			var plan1=[];
+			planArray.push(plan1);
+			var s1=JSON.stringify(planArray);
+			$("#dictionaryPlan2").val(s1);
+		$("select[name=config]").empty();
+	    $.each(allspiderconfig,function(i,v){
+			if(v.task == taskid){
+				$("select[name=config]").append('<option value="'+v.id+'" >'+v.name+'</option>');
+			}
+	    });           
+	}
+
+	$(function(){
+		changeTabTitle();
+	
+		$("#embedstatus").dialog({
+			title: "正在导入",
+			autoOpen: false,
+			resizable:false,
+            modal:true,
+            height:300,
+            width:400,
+            open:function(){
+              cancle = false;
+              $("#s_current").text('');
+              $("#s_allcount").text('');
+              $("#s_error").text('');
+              $("#notext_info").html('');
+            }
+		});
+		checkSession();
+        getSource(function(data){
+            if(data){
+                $.each(data,function(i,v){
+                    $("select[name=source]").append('<option value="'+v.id+'">'+v.name+'</option>');
+                });           
+            }
+        });
+		//爬虫配置下拉菜单
+		if(config.allSpiderConfig.length == 0){
+			getSpiderConfig(function(data){
+				if(data){
+					config.allSpiderConfig = data;
+				}
+			});
+		}
+		initSpiderConfigSelect(config.allSpiderConfig, 5); //处理转发任务id
+		$("#local, #remote").bind("click", function(){
+			var locchk = $("#local").prop("checked");
+			var remchk = $("#remote").prop("checked");
+			if(!locchk && !remchk){
+				alert("请至少选择一项!");
+				$(this).attr("checked", true);
+			}
+		});
+		$("#taskadd").attr("checked", false);
+		$("tr[id^='e1']").hide();
+		$("#taskadd").bind("click", function(){
+			if($("#taskadd").prop("checked")){
+				$("tr[id^='e1']").show();
+			}
+			else{
+				$("tr[id^='e1']").hide();
+			}
+		});
+        $("#btnaddweibo").click(function(){
+            //alert($("#formadduser").serialize());
+            var taskadd = $("#taskadd").prop("checked") ? 1 : 0;
+            var postdata = {};
+            postdata.taskadd = taskadd;
+			if(taskadd == 1){
+				postdata.local = $("#local").prop("checked") ? 1: 0;
+				postdata.remote = $("#remote").prop("checked") ? 1: 0;
+				postdata.config = $("#config").val();
+				postdata.duration = $("#duration").val();
+				postdata.dictionary_plan = $("#dictionaryPlan2").val();
+				if(postdata.duration != ""){
+					var reg = new RegExp(/^\d*$/g);
+					if(!reg.test(postdata.duration)){
+						alert("请填写数字!");
+						return false;
+					}
+					else{
+						if(postdata.duration < 1){
+							alert("至少为1秒!");
+							return false;
+						}
+					}
+				}
+				else{
+					alert("请选择超时时间!");
+					return false;
+				}
+				postdata.conflictdelay = $("#conflictdelay").val();
+				postdata.forceupdate = $("input[name=forceupdate]:checked").val();
+				postdata.isrepostseed = $("input[name=isrepostseed]:checked").val();
+			}
+            postdata.source = $("#source").val();
+            if(postdata.source == undefined || postdata.source == ''){
+                alert('请选择数据源');
+                return false;
+            }
+            postdata.weiboidtype = $("input[name=weiboidtype]:checked").val();
+            postdata.isseed = $("#isseed").prop("checked");
+            if($("#rdinput").prop("checked")){
+                var ids = $("#weiboid").val();
+                if(ids == undefined || ids == ''){
+                    alert('请输入微博地址或ID');
+                    return false;
+                }
+                var idArr = ids.split('\n');
+                $("#embedstatus").dialog("open");
+                $("#embedstatus").dialog("option","title","正在导入");
+                $("#embedstatus").dialog("option","buttons",{"取消":function(){
+                    if(confirm('导入尚未完成，确定取消吗？')){
+                    	cancle = true;
+                    }
+                }});
+                $("#s_allcount").text(idArr.length);
+                allcount = idArr.length;
+            	postWeiboid(postdata,idArr);
+            }
+            else{
+            	$("#loading").ajaxStart(function(){
+        			$(this).show();
+        		}).ajaxComplete(function(){
+        			$(this).hide();
+        		});
+        		postdata.isfile = true;
+            	$.ajaxFileUpload
+        		(
+        			{
+        				url:config.phpPath+'addweibo.php', 
+        				secureuri:false,
+        				fileElementId:'filetoupload',
+        				dataType: 'json',
+        				data:postdata,
+        				success: function (data, status)
+        				{
+        					if(typeof(data.result) != 'undefined')
+        					{
+        						if(data.msg != '')
+        						{
+        							alert(data.msg);
+        						}
+        					}
+        				},
+        				error: function (data, status, e)
+        				{
+        					alert(e);
+        				}
+        			}
+        		)
+            }
+        });
+
+        $("#importtype").bind("click",function(){
+            if($("#rdinput").prop("checked")){
+                $("#weiboid").show();
+                $("#filetoupload").val("");
+                $("#filetoupload").hide();
+            }
+            else{
+                $("#weiboid").hide();
+                $("#filetoupload").show();
+            }
+        });
+	});
+	function postWeiboid(postdata,idArr){
+		if(idArr.length == 0){
+			$("#s_error").text('');
+            $("#embedstatus").dialog("option","title","已完成");
+            $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            return false;
+		}
+		if(cancle){
+        	$("#embedstatus").dialog("option","title","已取消");
+            $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            return false;
+        }
+    	postdata.weiboid = commonFun.trim(idArr.shift());
+    	if(postdata.weiboid == ''){
+    		postWeiboid(postdata,idArr);
+    		return true;
+    	}
+        /*if(postdata.weiboidtype == 'url'){
+        	postdata.weiboid = weiboUrl2mid(postdata.weiboid,postdata.source);
+        }*/
+        var curridx = allcount - idArr.length;//$("#s_allcount").text() - idArr.length;
+    	$("#s_current").text(curridx);
+    	postdata.currindex = curridx;
+    	postdata.allcount = allcount;
+		postdata.dictionary_plan = $("#dictionaryPlan2").val();
+		$.ajax({url:config.phpPath+'addweibo.php',data:postdata, type:"post", success:function(r){
+            if(r.result){
+            	postWeiboid(postdata,idArr);
+            }
+            else{
+                if(r.nores){
+                	idArr.unshift(postdata.weiboid);
+                	addImportTask(postdata.source, idArr, postdata.weiboidtype,postdata.taskadd, postdata.isseed);
+                }
+                else{
+                    if(r.notext){
+                        if($("#notext_info").html() == ""){
+                        	$("#notext_info").append("<br/><span style='color:red;'>不存在的微博(<span id='notext_count'>0</span>条)：</span><br/>");
+                        }
+                    	$("#notext_info").append(postdata.weiboid+"<br/>");
+                    	var c = parseInt($("#notext_count").text(),10);
+						c++;
+						$("#notext_count").text(c);
+                    	postWeiboid(postdata,idArr);
+                    }
+                    else{
+                		showerror(r.msg);
+                    }
+                }
+            }
+        },dataType:"json", async:true, error:function(){
+           	showerror("提交请求发生异常");
+        }});
+	}
+	function showerror(msg){
+		msg = msg == undefined ? "" : msg;
+		$("#s_error").text(msg);
+		$("#embedstatus").dialog("option","title","出错了");
+        $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+	}
+	function addImportTask(sourceid, urls, weibotype, taskadd, isseed){
+		var pd = {sourceid:sourceid, urls:urls, weibotype:weibotype, taskadd:taskadd, isseed:isseed, allcount:allcount
+		,dictionary_plan:$("#dictionaryPlan2").val()};
+		$.ajax({url:config.phpPath+'addweibo.php?type=addimporttask',data:pd, type:"post", success:function(r){
+            if(r.result){
+            	$("#s_error").text(r.msg);
+                $("#embedstatus").dialog("option","title","已完成");
+                $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            }
+            else{
+                showerror(r.msg);
+            }
+        },dataType:"json", async:true, error:function(){
+           	showerror("提交植入任务请求时，发生异常");
+            	 
+        }});
+	}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">植入微博</span>
+<p />
+<div id="divaddast" class="openwindow">
+<form id="formaddweibo">
+<table class="formtable">
+    <tr>
+        <td class="tdleft">选择源：</td>
+        <td><select id="source" name="source">
+        </select></td>
+        <td class="tdtip">选择需要植入微博的源</td>
+    </tr>
+	<tr>
+		<td class="tdleft">
+		<span style="display:none">
+		    <input type="radio" name="importtype" id="rdinput" checked="checked" /><label for='rdinput'>手动输入</label>
+		    <input type="radio" name="importtype" id="rdfile" /><label for='rdfile'>选择Excel文件</label>
+		    </span>
+		</td>
+		<td id="tdimport">
+			<span style="color:red">*</span>&nbsp;&nbsp;<input type="radio" name="weiboidtype" id = "weiboidtypeid" value="id"/><label for="weiboidtypeid">ID</label>
+            <input type="radio" name="weiboidtype" id = "weiboidtypeurl" value="url"  checked="checked"  /><label for="weiboidtypeurl">地址</label>
+			<textarea rows="20" style="width:445px;" id="weiboid"></textarea>
+		    <input type="file" name="filetoupload" id="filetoupload" style="display:none" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<!--  添加分词方案 -->
+	<tr >
+		<td class="tdleft">分词方案：</td>
+		<td>
+		<input type="button" value="设置" onclick="popPlan2('newTask');" id="s-dictionaryPlan2" /></td>
+		
+		<input type="hidden" name="dictionaryPlan" id="dictionaryPlan2" value="" />
+		</td>
+		<td class="tdtip">系统对每个方案的分词结果去重后保存,未配置则用默认词典。</td>
+	</tr>
+	<tr >
+		<td class="tdleft">已添加：</td>
+		<td>
+		<span class="selwordsbox" id="dictionaryPlanText2">默认方案</span></td>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+        <td class="tdleft">种子微博：</td>
+        <td><input type="checkbox" name="isseed" id = "isseed" value="1" /><label for="isseed">种子微博</label>
+        </td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">任务：</td>
+        <td><input type="checkbox" name="taskadd" id = "taskadd" value="1" /><label for="taskadd">立即抓取微博的转发</label>
+        </td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr id="e1-1">
+		<td class="tdleft">应用类型：</td>
+		<td>
+			<input type="checkbox" name="local" id="local" checked="checked" /><label for="local">本地任务</label>
+			<input type="checkbox" name="remote" id="remote" checked="checked" /><label for="remote">远程任务</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="e1-2">
+		<td class="tdleft">抓取配置：</td>
+		<td>
+			<select id="config" name="config">
+			</select>
+		</td>
+		<td class="tdtip">抓取配置的名称</td>
+	</tr>
+	<tr id="e1-4">
+		<td class="tdleft">任务超时：</td>
+		<td>
+			<input id="duration" name="duration" type="text" value="3600" style="width:150px;" />秒		
+		</td>
+		<td class="tdtip">完成任务的预期时间</td>
+	</tr>
+	<tr id="e1-5">
+		<td class="tdleft">冲突延迟：</td>
+		<td>
+			<input id="conflictdelay" name="conflictdelay" type="text" />秒		
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="e1-6">
+		<td class="tdleft">强制抓取：</td>
+		<td>
+			<input id="forceupdate1" name="forceupdate" type="radio" value="1"/>是	
+			<input id="forceupdate0" name="forceupdate" type="radio" value="0" checked="checked" />否
+		</td>
+		<td class="tdtip">强制重新抓取以获取变化</td>
+	</tr>
+	<tr id="e1-7">
+        <td class="tdleft">转发是否种子：</td>
+		<td>
+			<input id="isrepostseed1" name="isrepostseed" type="radio" value="1" checked="checked" />是	
+			<input id="isrepostseed0" name="isrepostseed" type="radio" value="0" />否
+        </td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+		<td align="center">&nbsp;&nbsp; </td>
+		<td><input class="buttono"
+            type="button" value="提 交" id="btnaddweibo" /><img id="loading" border="0" src="images/loading.gif" style="display:none" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+<div id="embedstatus" style="display:none">
+进度：<span id="s_current"></span> / <span id="s_allcount"></span><br/>
+<span style="color:red" id="s_error"></span><br/>
+<span id="notext_info"></span>
+</div>
+</div>
+</div>
+</div>
+<div id="divwait"></div>
+<!--#include file="multiTab.shtml"-->
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

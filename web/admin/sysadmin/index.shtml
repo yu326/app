@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+	$.ajax({url:"model/checkuser.php",dataType:"json",type:"POST",data:{type:"existsession"},async:false,
+            success:function(d){
+				if(!d.result){
+					location.href = config.sitePath+"login.shtml";
+				}
+            },
+            error:function(){
+				location.href = config.sitePath+"login.shtml";
+            }
+	});
+$(function(){
+	changeTabTitle();
+	$("#right").text("欢迎进入"+config.systemTitle+"系统管理后台");
+});
+</script>
+</head>
+<body >
+<div id="mybody">
+<!--#include file="top.shtml"-->
+<div id="content">
+    <!--#include file="3a_left.shtml"-->
+    <div id="right">
+         欢迎进入博晓通系统管理后台
+    </div>
+</div>
+<!--#include file="foot.shtml"-->
+</body>
+</html>

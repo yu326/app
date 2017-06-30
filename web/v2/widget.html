@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<base href=""></base>
+<script type="text/javascript">
+var head = document.getElementsByTagName( "head" )[0];
+var _base_ = document.getElementsByTagName( "base" )[0];
+var b_url = "";
+var sh=false;
+ var pathhost = "www.inter3i.com";
+ if(window.location.host != pathhost){
+        sh = true;
+        _base_.setAttribute("href","");
+ }
+if(!sh){
+	var reg = /^\/(\w+)($|\/+.*)/i;
+	var t = window.location.pathname.match(reg);
+	if(t != null && t[1]){
+	    b_url= location.protocol+"//"+location.host+"/"+t[1]+"/";
+	    _base_.setAttribute("href",b_url);
+	}
+	else{
+	    location.href = "widget_error.html?error="+encodeURIComponent('地址错误');
+	}
+}
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>博晓通</title>
+<link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.16.custom.css" />
+<link rel="stylesheet" type="text/css" href="css/index.css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/highcharts.js"></script>
+<script type="text/javascript" src="js/raphael-min.js"></script>
+<script type="text/javascript" src="js/sigma.min.js"></script>
+<script type="text/javascript" src="js/controller.min.js"></script>
+<script type="text/javascript" src="js/controllerpart.min.js"></script>
+<script type="text/javascript" src="js/controllershow.min.js"></script>
+<script type="text/javascript" src="js/excanvas.js"></script>
+<script type="text/javascript" src="js/jqcloud-1.0.1.js"></script>
+
+<style>
+body{
+	background-image: none;
+	font-size: 12px;
+	color: #565553; font-family:Arial, Helvetica, sans-serif
+}
+</style>
+<script type="text/javascript">
+
+var instances = new Array();
+var elements = new Array();
+var currPagetype;
+var currNavid;
+var currFilepath;
+var currEditStatus = false;
+var currInstance = null;
+var currChannelID = 0;
+var currTypeID;
+var linkageobj = null;
+var allmodels;
+var companylogo = "";
+if (!window.Global)
+{
+    window.Global = new Object();
+}
+if(!Global.user){
+	Global.user = {};
+}
+function showError(error){
+	var pdiv = $('#modelcondition');
+	pdiv.html("<span>"+error+"</span>");
+	var errspan = pdiv.children("span");
+	var left = (pdiv.width() - errspan.width()) / 2;
+	var top = (pdiv.height() - errspan.height()) / 2;
+	errspan.css({"margin-left":left+"px", "margin-top":top+"px","float":"left"}).parent().show();
+}
+
+/**
+ * 获取控件的css属性的int类型的值
+ */
+function getRealWidth(ele, stylename){
+	var cssvalue = $(ele).css(stylename);
+	if(cssvalue.indexOf('px') > 0){
+		return parseInt(cssvalue.replace('px', ''), 10);
+	}
+	else if(cssvalue.indexOf('%') > 0){
+		return $(ele).parent().width() * cssvalue.replace('%','') * 0.01;
+	}
+	else{
+		return cssvalue;
+	}
+}
+
+function getNavHtml(navid, instanceid, elementid, showid){
+	showWaitImg('#modelcondition');
+	$.ajax({url:config.getNavHtmlUrl, data:{navid:navid}, success:function(data){
+		if(typeof data != "undefined" && data != ""){
+			$('#modelcondition').html(data);
+			$('div[instanceid][elementid!='+elementid+']').remove();
+			$('div[instanceid][showid!='+showid+']').remove();
+			var showdiv = $('div[instanceid='+instanceid+'][elementid='+elementid+']'); 
+			if(showdiv.length == 0){
+				showError('未找到HTML');
+				return false;
+			}
+			showdiv.attr("class","nr");
+			var border = getRealWidth(showdiv,'border-width');
+			var margintop = getRealWidth(showdiv,'margin-top');
+			var marginright = getRealWidth(showdiv,'margin-right');
+			var marginbottom = getRealWidth(showdiv,'margin-bottom');
+			var marginleft = getRealWidth(showdiv,'margin-left');
+			var paddingtop = getRealWidth(showdiv,'padding-top');
+			var paddingright = getRealWidth(showdiv,'padding-right');
+			var paddingbottom = getRealWidth(showdiv,'padding-bottom');
+			var paddingleft = getRealWidth(showdiv,'padding-left');
+			var height = showdiv.parent().height() - 2*border - margintop - marginbottom - paddingtop - paddingbottom;
+			var width = showdiv.parent().width() -  2*border - marginleft - marginright - paddingleft - paddingright;
+			showdiv.attr("aspectratio","-2");//指定视图按绝对宽高处理，防止宽度自动变为百分比
+			showdiv.css({width:width+"px", height:height+"px"});
+			var gptitle = getShowTitleCom(showdiv);
+			var oldtitle = $(showdiv).attr('title');
+			if((gptitle == undefined || gptitle=="") && (oldtitle != undefined && oldtitle!="")){
+				gptitle = oldtitle;
+				setShowTitleCom(showdiv, gptitle);
+			}
+
+			if(oldtitle != undefined){
+				$(showdiv).removeAttr("title");
+			}
+
+			var gpdockfields = $(showdiv).attr("dockfields");
+			if((gptitle != undefined && gptitle != "") || (gpdockfields != undefined && gpdockfields != "" && gpdockfields!="weibotype" && gpdockfields!="facettype") ){
+				if(gptitle == undefined){
+					gptitle = "";
+				}
+				if($(showdiv).children().length == 0){
+					$(showdiv).append("<h1>"+gptitle+"</h1>"); //为show添加h1标题
+				}
+				else{
+					$(showdiv).children(':first').before("<h1>"+gptitle+"</h1>");
+				}
+			}
+			$('#modelcondition').show();
+			$.ajax({url:config.elementsUrl(instanceid,0),dataType:"json",type: "GET",
+				success:function(r){
+					if(r && r.elements){
+						var inc = new Instance(navid,instanceid,r.elements[0].instancetype);
+						inc.pinRelation = r.pinrelation;
+						window.instances.push(inc);
+						$.each(r.elements,function(j,item){
+							var inputpin = item.inputpin ? item.inputpin : null;
+							var outputpin = item.outputpin ? item.outputpin : null;
+							var ele = new Element(item.instanceid,item.instancetype,item.elementid,item.type,item.modelid,item.title,item.datajson,inputpin,outputpin);
+								if(item.snapshot != undefined && item.snapshot != null){
+									ele.setSnapshot(item.snapshot, item.updatetime);
+								}
+								if(r.elements[0].instancetype == 3){
+									if(item.subInstanceType != undefined){
+										ele.subInstanceType = item.subInstanceType;
+									}
+									if(item.overlayindex != undefined){
+										ele.overlayindex = item.overlayindex;
+									}
+									if(item.modelname != undefined){
+										ele.modelname = item.modelname;
+									}
+									if(item.referencedata != undefined){
+										ele.referencedata = item.referencedata;
+									}
+									if(item.secondaryyaxis != undefined){
+										ele.secondaryyaxis = item.secondaryyaxis;
+									}
+									if(item.referencedataratio != undefined){
+										ele.referencedataratio = item.referencedataratio;
+									}
+									if(item.showid != undefined){
+										ele.showid = item.showid;
+									}
+									if(item.xcombined != undefined){
+										inc.xcombined = item.xcombined;
+									}
+									if(item.xzreverse != undefined){
+										inc.xzreverse = item.xzreverse;
+									}
+									if(item.columnstacking != undefined){
+										inc.columnstacking = item.columnstacking;
+									}
+								}
+								inc.elements.push(ele);
+								if(r.elements[0].instancetype == 3){
+									if(ele.elementID != r.elements[r.elements.length-1].elementid){
+										return true; //叠加模型不是最后一个
+									}
+								}
+								else{
+									if(ele.elementType != 2){//非render
+										return true;//continue
+									}
+								}
+								var eletargetid = "div[elementid="+item.elementid.toString()+"][instanceid="+item.instanceid+"]";
+								if($(eletargetid).length ==0){
+									ele.allshow.push({newobj:true, id:-parseInt(item.elementid,10)*10, showid:"filterchart", scopetype:"all", scopeobj: ""});
+								}
+								else{
+									$(eletargetid).each(function(ei,eitem){
+										var id = $(eitem).attr('id');
+										if(id == undefined || id == null || id == ''){
+											id = item.elementid.toString()+''+ei.toString();
+											id = - parseInt(id, 10);
+											$(eitem).attr('id', 'show_'+id);
+										}
+										else{
+											id = parseInt(id.replace('show_', ''),10);
+										}
+										var scopetype = $(eitem).attr('scopetype');
+										var scopeobj = $(eitem).attr('scope');
+										var showid = $(eitem).attr('showid');
+										if(scopetype == undefined || scopetype == null || scopetype == ''){
+											scopetype = "all";
+										}
+										if(showid == "userfollowers" || showid == "weiborepost"||showid=="weixinrepost"){
+											scopetype = "number";
+										}
+										if(scopeobj == undefined || scopeobj == null || scopeobj == ''){
+											scopeobj = "";
+										}
+										if(showid == "userfollowers" || showid == "weiborepost"||showid=="weixinrepost"){
+											scopeobj = "0";
+										}
+										ele.allshow.push({newobj:true, id:id, showid:$(eitem).attr('showid'), scopetype:scopetype, scopeobj: scopeobj});
+									});
+								}
+								ele.show('',false);//第二个参数表示请求数据时，不需要json
+							});
+						}
+					else if(r.error){
+						showError(r.error);
+					}
+				}});
+		}
+		else{
+			showError("未找到HTML");
+		}
+	},error: function(){
+		showError("请求发生异常");
+	}});
+}
+
+function docready(){
+	$.getScript("js/inter3i.min.js",function(){
+	    var urlp = GetUrlParams(location.search);//url参数
+	    if(urlp == null || typeof(urlp.token) == "undefined" || typeof(urlp.elementid) == "undefined"  
+		    || typeof(urlp.instanceid) == "undefined"){
+	        showError("地址错误");
+	        return false;
+	    }
+		//修改ajax方法，增加token参数
+		if(typeof($) != "undefined" && typeof($.ajax) != "undefined"){
+			$.ajax = function(params){
+				if(typeof(params.url) != "undefined"){
+					var ajaxparams = GetUrlParams(params.url);
+					if(ajaxparams == null){
+						params.url += "?token="+urlp.token;
+					}
+					else{
+						params.url += "&token="+urlp.token;
+					}
+				}
+				Global.oldajaxfun(params);//在common.js中定义的原始ajax
+			};
+		}
+		initConfig();
+	    getDrilldownAuth();
+	    if(!config.allowwidget){
+			showError("无权限");
+			return false;
+	    }
+		
+		config.allowdrilldown = false; //小窗口,drilldown时视图不能显示完全
+		config.allowdownload = false; //excel,不允许下载
+		config.repostShowAllowSearch = false;//传播轨迹视图，不允许使用搜索功能
+		config.repostShowAllowPlay = false;//传播轨迹视图，不允许使用"播放“功能
+		config.onsiteFilterPositionLeft = 0;//配置onsitefilter弹出框距离左侧最小距离
+ 		/*
+ 		config.showConfig = new Object();//show的配置
+		config.showConfig.allowEdit = false;
+		config.showConfig.allowDelete = false;
+		config.showConfig.allowGroup = false;
+		config.showConfig.allowEditTitle = false;
+		config.showConfig.allowEditRemark = false;
+		config.showConfig.allowCopy = false;
+		*/
+	    Global.StartClientWidth = $('body')[0].clientWidth;
+	    $(window).bind('resize', debounce(function(){
+	        if(window.resizing){
+	            return false;
+	        }
+	        if(Global.StartClientWidth == $('body')[0].clientWidth){
+	            return false;
+	        }
+	        else{
+	            Global.StartClientWidth = $('body')[0].clientWidth;
+	        }
+	        $('div[instanceid][elementid][showid]').each(function(i,item){
+	            var showobj = $(item).data("showobj");
+	            if(showobj!=undefined){
+	                setShowHeigh(showobj);
+	                if(showobj.onResize != undefined){
+	                    showobj.onResize();
+	                }
+	            }
+	        });
+	    }, 500));
+	    $.ajax({url:config.allModels, dataType:"json", async:false,success:function(data){
+		    	allmodels = data;
+			    getNavHtml(urlp.navid, urlp.instanceid, urlp.elementid, urlp.showid);
+		    },error:function(){
+		    	showError("获取模型发生异常");
+				return false;
+			}});
+    });
+}
+$(document).bind("ready",function(){
+	docready();
+});
+
+</script>
+</head>
+<body style="height:100%">
+<div id="modelcondition" style="width:100%;height:100%;display:none">
+</div>
+</body>
+</html>

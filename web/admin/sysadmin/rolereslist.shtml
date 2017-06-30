@@ -1,0 +1,519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+  <script type="text/javascript">
+   checkuserusage();
+  var oldres = new Array();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+var deladmin=0;
+
+var userid=0;
+var roletype=1;
+var rsid=0;
+var roleid=0;
+
+$(function(){
+		changeTabTitle();
+		   //$("#userinfo tr:not(:first)").remove();
+		   $(document).ready(function(){ 
+		$("#cfgmodel").dialog({
+		    autoOpen: false,
+		    modal:true,
+		    height:500,
+		    width:500});
+	}); 
+		   /*
+		   
+		   $("#frmscope").validate(
+		{
+		submitHandler:function(form)
+               {
+				   addscope(resid,roleid);
+               }
+	});
+		   */
+		   
+	
+	var spArr = window.location.toString().split("roleid=");
+	if(spArr!=null&&spArr!="")
+	{
+		var tmparr;
+		var typearr;
+		tmparr=spArr[1].split("&");
+		typearr = tmparr[1].split("=");
+		roleid = tmparr[0];
+		roletype = typearr[1];
+	}
+		  bindrole();
+		//searchRequest(pagesize,1,1); //支持分页后，替换上两行
+	
+});
+
+function savescope()
+	{
+		addscope(rsid,roleid);
+	}
+
+function searchRequest(pagesize, curpage,type)
+{ 
+$("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"resource_model.php?type=getresourcebyrole&rid="+$("#rolelist").val()+"&roletype="+roletype;
+	ajaxCommon(searchnameUrl, getuser, "json");
+}
+
+function getuser(data){
+	if(data!=null)
+	{
+	if(!data.result)
+{
+	alert(data.msg);
+	window.history.back();
+}
+else
+{
+		//显示分页
+		totalCount = data.totalcount
+	if(totalCount>0)
+	{
+		$.each(data.children, function(i){
+		var haschild;
+		var setscope;
+		if(data.children[i].haschild==1)
+		{
+			haschild="有";
+			setscope="<a href='javascript:openTaskDiv(\"cfgmodel\","+data.children[i].resourceid+","+data.children[i].roleid+")'>设置范围</a>";
+		}
+		else
+		{
+			haschild="无";
+			setscope="设置范围"
+		}
+
+		
+									    var str=$("<tr><td>"+data.children[i].modelname+"</a></td><td>"+data.children[i].rolename+"</td><td>"+haschild+"</td><td>"+data.children[i].description+"</td><td>"+data.children[i].updatetime+"</td><td>"+setscope+"</td></tr>");
+		
+		
+		$("#userinfo").append(str);
+				
+		})
+		}
+		else
+		{
+var str=$("<tr><td colspan='6'>暂无记录!</td></tr>"); 
+		$("#userinfo").append(str);
+		}
+	
+	
+	$("#pagestyle").empty();
+	if(totalCount>pagesize){
+		pageDisplay(totalCount, searchRequest, "pagestyle", pagesize,curpage2);
+	}
+	}
+	}
+}
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if($(this).attr("id")!="admin" && $(this).attr("id")!="tenantadmin")
+		{
+		if(delid=='')
+		{
+			
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+		}
+		else
+		{
+			deladmin=1;
+		}
+     }); 
+	 if(deladmin==1)
+	 {
+		 alert("删除数据中包含超级管理员账户，您没有删除此账户的权限!");
+		 deladmin=0;
+		 return;
+	 }
+	 else
+	 {
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后将无法恢复!"))
+		 {
+			 deletetenant(delid);
+		 }
+	 }
+	 }
+}
+
+function deletetenant(uid)
+{
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=deleteuser&uid="+uid;
+	ajaxCommon(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("删除成功!");
+			searchRequest(pagesize, curpage2,$("#usertype").val());
+		}
+		else
+		{
+			alert("删除失败!");
+		}
+	}
+}
+
+
+//加载不同类型用户
+function binduser(usertype)
+{
+	searchRequest(pagesize,1,usertype,0); //支持分页后，替换上两行
+}
+
+function bindrole()
+{
+	$("#rolelist").empty();
+	var URL=config.modelUrl+"role_model.php?type=getrole&roletype=1";
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+		success: function (msg) {
+			if(msg!=null)
+			{
+				if(msg.children!=null&&msg.children.length>0)
+				{
+					for(var i=0;i<msg.children.length;i++)
+					{
+						$("<option value="+msg.children[i].roleid+">"+msg.children[i].label+"</option>").appendTo("#rolelist");
+					}
+					$("#rolelist").val(roleid);
+				}
+				
+				searchRequest(pagesize,1,1); //支持分页后，替换上两行
+			}
+			else
+			{
+				alert("用户未分配角色!");
+				return;
+			}
+			    
+		}//end sucess
+		   });//end ajax
+
+}
+
+function bindres(roleid)
+{
+searchRequest(pagesize,1,1)
+	/*
+	var URL=config.modelUrl+"resource_model.php?type=getresourceburole&rid="+roleid+"&userid="+userid+"&roletype="+roletype;
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+		success: function (msg) {
+			if(msg!=null)
+			{
+				if(msg.children!=null&&msg.children.length>0)
+				{
+					for(var i=0;i<msg.children.length;i++)
+					{
+						$("<option value="+msg.children[i].roleid+">"+msg.children[i].label+"</option>").appendTo("#rolelist");
+					}
+				}
+			}
+			else
+			{
+				alert("用户未分配角色!");
+				return;
+			}
+			    
+		}//end sucess
+		   });//end ajax
+*/
+	
+}
+
+function openTaskDiv(divid,resid,troleid)
+{$("#"+divid).dialog("open");
+	rsid=resid;
+	roleid = troleid;
+	var URL=config.modelUrl+"role_model.php?type=getrolescope&tid="+troleid+"&modelid="+resid;
+	
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+		success: function (msg) {
+			if(msg!=null)
+			{
+				if(msg.children!=null&&msg.children.length>0)
+				{
+					for(var i=0;i<msg.children.length;i++)
+					{
+						oldres.push(msg.children[i].childid);	
+					}
+				}
+			}
+			    
+		}//end sucess
+		   });//end ajax
+	
+	var strhtml="";
+	$("#tenantlist").empty();
+	URL=config.modelUrl+"role_model.php?type=getscopeinfo&modelid="+resid;
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+		success: function (msg) {
+			if(msg!=null)
+			{
+				if(msg.children!=null&&msg.children.length>0)
+				{
+					for(var i=0;i<msg.children.length;i++)
+					{
+					strhtml+="<label style='width:100px;display:inline-block;'><input type='checkbox' name='scopelist' value='"+msg.children[i].tenantid+"'>"+msg.children[i].tenantname+"</label>";
+					}
+				}
+				$("#tenantlist").append(strhtml);
+				//如果id相同则选中
+				selectedt();
+			}
+			else
+			{
+				alert("用户未分配角色!");
+				return;
+			}
+			    
+		}//end sucess
+		   });//end ajax
+	//window.setTimeout(selectedt,2000);	
+}	
+
+
+function addscope(resid,roleid)
+{
+	var scopeid="";
+	
+	var arrChk=$("input[name='scopelist']:checked");
+     $(arrChk).each(function(){ 
+							 /*
+		if(oldres.length>0)
+		{
+			checkscope($(this).val());
+		}
+		
+		*/
+		if(scopeid=='')
+		{
+        	scopeid = this.value+",";
+		}
+		else
+		{
+			scopeid += this.value+",";
+		}
+     }); 
+	
+	if(scopeid!="")
+	{
+		scopeid = scopeid.substring(0,scopeid.length-1);
+	}
+	
+	var URL=config.modelUrl+"role_model.php";
+			$.ajax({
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        data: JSON.stringify({resid:rsid,roleid:roleid,type:"addscopeinfo",scopeid:scopeid,roletype:1}), 
+        success: function (msg) {
+			
+			if(msg.flag==1)
+		{
+			alert("添加成功!");
+			bindoldres(roleid,rsid);
+			closediv();
+		}
+		else
+		{
+			alert("添加失败!");
+		}
+		
+				}//end sucess
+		   });//end ajax
+}
+
+
+//检查删除的资源
+function checkscope(rid)
+{
+
+	if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==rid)
+			{
+				oldres.splice(i,1); 
+			}
+		}
+	}
+}
+
+
+//检查删除的资源
+function checkscopehas(rid)
+{
+
+	if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==rid)
+			{
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+function selectedt()
+{
+$("input[name='scopelist']").each(function(){
+				if(checkscopehas($(this).val()))
+				{									   
+					$(this).attr("checked",true);
+				}
+														   
+				});
+}
+
+function bindoldres(troleid,resid)
+{
+var URL=config.modelUrl+"role_model.php?type=getrolescope&tid="+troleid+"&modelid="+resid;
+	oldres.length = 0;
+	$.ajax({
+        type: "get",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+		success: function (msg) {
+			if(msg!=null)
+			{
+				if(msg.children!=null&&msg.children.length>0)
+				{
+					for(var i=0;i<msg.children.length;i++)
+					{
+						oldres.push(msg.children[i].childid);	
+					}
+				}
+			}
+			    
+		}//end sucess
+		   });//end ajax
+}
+
+function closediv()
+{
+	$("#cfgmodel").dialog("close");
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">角色管理</span> <a href="rolelist.shtml"
+	style="float: right">角色列表</a>
+   <br/>
+  <br/>
+  请选择角色：
+  <select name="rolelist" id="rolelist" onchange="bindres(this.value)">
+              </select> 
+              <br/>
+              <br/>
+  <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+    <tr>
+      <!--<th scope="col">选择</th>-->
+      <th width="16%" scope="col">资源名称</th>
+      <th width="24%" scope="col">所属角色</th>
+      <th width="8%" scope="col">子节点</th>
+      <th width="25%" scope="col">资源描述</th>
+      <th width="14%" scope="col">创建时间</th>
+      <th width="13%" scope="col">操作</th>
+    </tr>
+  </table>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div></div>
+<!--#include file="foot.shtml"--><div id="cfgmodel" title="设置范围" class="openwindow">
+<div >租户信息列表：</div>
+<br/>
+<form id="frmscope">
+<div id="tenantlist"></div>
+<input type="button" value="保存" onclick="savescope();">
+</form>
+</div></div>
+
+</body>
+</html>

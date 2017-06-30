@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/bindcontrol.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+     <script type="text/javascript">
+	  checkuserusage();
+var tid=0;
+var oldres = new Array();
+var oldrole = new Array();
+//checkuserpure(1,1);
+$(function(){
+		changeTabTitle();
+		   var spArr = window.location.toString().split("tenantid=");
+	if(spArr!=null&&spArr!="")
+	{
+	tid = spArr[1];
+	}
+	if(typeof(tid)=='undefined')
+	{
+		roleid=0;
+	}
+		  bindtenant();  //租户下拉列表
+		  bindgroup(0,3); //绑定资源组
+		  bindrole();  //绑定可分配角色
+		  bindtenantrole(tid)  //绑定用户已分配角色
+		  bindresource(tid,0);  //绑定可分配资源
+		  bindtenantresource(tid);//绑定用于已分配的资源
+
+		   $("#frmuser").validate(
+					   
+{
+	submitHandler:function(form)
+               {
+				   sentresource();
+               },
+	rules:{
+   //addresource:"required",
+},
+    messages:{
+	//label:"",
+}
+});
+});	
+
+
+function bindrole()
+{ 
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytype&tid=3";
+	ajaxCommon(searchnameUrl, searchrole, "json");
+}
+
+
+function searchrole(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#roleid').append( new Option(data.children[i].label,data.children[i].roleid) );
+			$("<option value="+data.children[i].roleid+">"+data.children[i].label+"</option>").appendTo("#roleid");						   
+	});
+	}
+	
+}
+
+function bindroleresource(rid)
+{ 
+	var searchnameUrl = config.modelUrl+"resourcemapping_model.php?type=getmappingbyroleid&roleid="+rid;
+	ajaxCommon(searchnameUrl, searchroleresource, "json");
+}
+
+
+function searchroleresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#addresource').append( new Option(data.children[i].label,data.children[i].roleid) );
+		$("<option value="+data.children[i].roleid+">"+data.children[i].label+"</option>").appendTo("#addresource");							   
+	});
+		
+	}
+	
+}
+
+
+function bindtenant()
+{ 
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenant";
+	ajaxCommon(searchnameUrl, searchtenant, "json");
+}
+
+
+function searchtenant(data)
+{
+	$('#tenantid').append( new Option("请选择",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#tenantid').append( new Option(data.children[i].tenantname,data.children[i].tenantid));
+	$("<option value="+data.children[i].tenantid+">"+data.children[i].tenantname+"</option>").appendTo("#tenantid");								   
+	});
+		$("#tenantid").attr("value",tid);
+		
+		bindtenantrole($("#tenantid").val());
+	}
+}
+
+function bindresource(tid,groupid)
+{ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=gettenantresrel&gid="+tid+"&userid="+groupid;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+
+
+function searchresource(data)
+{$("#resourceid").empty();
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		if(data.children!=null&&data.children.length>0)
+		{
+		$.each(data.children, function(i){
+		//$('#resourceid').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#resourceid");
+		});
+		}
+		else
+		{
+		$("<option value=0>暂无记录!</option>").appendTo("#resourceid");
+		}
+	}
+	else
+	{
+		//$("#resourceid").empty();
+		//$('#resourceid').append( new Option('暂无记录！',0) )
+		$("<option value=0>暂无记录!</option>").appendTo("#resourceid");
+	}
+	
+}
+
+
+/*
+function sentresource()
+{
+	checkrole();
+	
+
+}
+*/
+/*
+function  checkrole()
+{
+	var tname = $("#label").val();
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebyname&name="+tname+"&roleid=0";
+	ajaxCommon(searchnameUrl, checkExits, "json");
+}
+*/
+
+function sentresource()
+{
+	var rid="";
+	var resid="";
+	
+	
+				
+	$("#tenantrole option").each(function() {  
+				
+				if(oldrole.length>0)
+				{
+					checkresource($(this).val(),1);
+				}
+				
+				if(rid=="")
+				{
+					rid=$(this).val()+",";
+				}
+				else
+				{					
+						rid+=$(this).val()+",";
+				}
+												   });        
+if(rid!="")
+{
+	rid = rid.substring(0,rid.length-1);
+}
+//获取资源信息
+
+$("#tenantresource option").each(function() { 
+				if(oldres.length>0)
+				{
+					checkresource($(this).val(),2);
+				}
+				if(resid=="")
+				{
+					resid=$(this).val()+",";
+				}
+				else
+				{					
+						resid+=$(this).val()+",";
+				}
+												   });        
+if(resid!="")
+{
+	resid = resid.substring(0,resid.length-1);
+}
+if(rid=="")
+{
+	if(confirm("是否将此租户的角色或资源设置为空，此操作将删除此租户所拥有的资源权限!"))
+	{
+		var URL=config.modelUrl+"resource_model.php";
+			$.ajax({
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        data: JSON.stringify({tenantid:$("#tenantid").val(),type:"settenantresource",roleid:rid,resourceid:resid}), 
+        success: function (msg) {
+		if(!msg.result)
+		{
+			alert(msg.msg);
+			window.history.back();
+		}
+		else
+		{	
+			if(msg.flag==1)
+			{
+				alert("设置成功!");
+			}
+			else
+			{
+				alert("设置失败!");
+			}
+		}
+		
+		
+				}//end sucess
+		   });//end ajax
+		   }
+}//end rid==''
+else
+{
+	var URL=config.modelUrl+"resource_model.php";
+			$.ajax({
+        type: "POST",
+        contentType: "application/json",
+        dataType: "json",
+        url: URL,
+        data: JSON.stringify({tenantid:$("#tenantid").val(),type:"settenantresource",roleid:rid,resourceid:resid,delrole:oldrole,delresource:oldres}), 
+        success: function (msg) {
+		if(!msg.result)
+		{
+			alert(msg.msg);
+			window.history.back();
+		}
+		else
+		{	
+			if(msg.flag==1)
+			{
+				alert("设置成功!");
+			}
+			else
+			{
+				alert("设置失败!");
+			}
+		}
+				}//end sucess
+		   });//end ajax
+}
+}
+
+function setresource(fromid,toid)
+{
+
+			$("#"+fromid+" option:selected").each(function() {  
+                //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+                $(this).appendTo($("#"+toid+":not(:has(option[value="+$(this).val()+"]))"));  
+                //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+                if($("#"+fromid+" option[value="+$(this).val()+"]").length > 0) {  
+                    $("#"+fromid).get(0)  
+                    .removeChild($("#"+fromid+" option[value="+$(this).val()+"]").get(0));  
+                }  
+            });  
+
+}
+
+
+function getresource()
+{
+	bindresource($("#groupid").val());	
+}
+
+
+/*
+function bindtenantrole(id)
+{ 
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytenant&tid="+id;
+	ajaxCommon(searchnameUrl, getrole, "json");
+}
+
+
+function getrole(data)
+{
+	//$('#roleid').append( anew Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#tenantrole').append( new Option(data.children[i].label,data.children[i].roleid) );
+		//获取用户已绑定的是角色信息
+					   
+	});
+	}
+	
+}
+*/
+//根据下拉列绑定租户资源
+function bindtenantres(tid)
+{
+	bindresource(tid); //绑定
+	bindtenantrole(tid);
+	bindtenantresource($("#tenantid").val());
+}
+
+//绑定租户已有资源
+function bindtenantresource(id)
+{
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getresourcebytenant&gid="+id;
+	ajaxCommon(searchnameUrl, getresourcebytenant, "json");
+}
+
+function getresourcebytenant(data)
+{$('#tenantresource').empty();
+	//$('#roleid').append( anew Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#tenantresource').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#tenantresource");
+		//绑定已绑定的资源
+		oldres.push(data.children[i].resourceid);	
+	});
+	}	
+}
+
+//绑定用户已有角色
+function bindtenantrole(id)
+{
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytenant&tid="+id;
+	ajaxCommon(searchnameUrl, getrolebytenant, "json");
+}
+
+function getrolebytenant(data)
+{
+	$('#tenantrole').empty();
+	//$('#roleid').append( anew Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#tenantrole').append( new Option(data.children[i].label,data.children[i].roleid) );
+		$("<option value="+data.children[i].roleid+">"+data.children[i].label+"</option>").appendTo("#tenantrole");
+		oldrole.push(data.children[i].roleid);							   
+	});
+	}	
+}
+
+//检查删除的资源
+function checkresource(rid,type)
+{
+	if(type==1)
+	{
+	if(oldrole.length>0)
+	{
+		for(var i=0;i<oldrole.length;i++)
+		{
+			if(oldrole[i]==rid)
+			{
+				//oldres.remove(i);
+				oldrole.splice(i,1); 
+			}
+		}
+	}
+	}
+	else
+	{
+		if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==rid)
+			{
+				oldres.splice(i,1); 
+			}
+		}
+	}
+	}
+	
+}
+
+function getproductbygroup(groupid)
+{
+	
+	bindresource($("#tenantid").val(),groupid);
+}
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">租户权限设置</span>
+    <a href="setuptenantlist.shtml" style="float: right">租户列表</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="30%" align="right" valign="middle" scope="col"><div align="right"></div></th>
+	     <th align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">&nbsp;&nbsp;<label>
+               <select name="tenantid" id="tenantid" onchange="bindtenantres(this.value)">
+               </select>
+             </label>
+	         </div>
+	       </label>
+	       </td>
+       </tr>
+              <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">所属资源组：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;<label>
+              <select name="groupid" id="groupid" onchange="getproductbygroup(this.value)">
+              </select>
+            </label>
+	       </div>
+	     </label></td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配角色：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="71%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td width="36%" align="center"><select name="roleid" size="10" style="height:200px" class="mselect" multiple="multiple" id="roleid">
+	           </select></td>
+	         <td width="15%" align="center"><p>
+	           <input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('roleid', 'tenantrole')" />
+	           </p>
+               <p>
+                 <input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('tenantrole','roleid')" />
+               </p></td>
+	         <td width="49%" align="center"><select name="tenantrole" size="10" style="height:200px"  class="mselect" multiple="multiple" id="tenantrole"></select></td>
+	         </tr>
+	       </table></th>
+       </tr>
+       <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配资源：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="71%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td width="36%" align="center"><select name="resourceid" size="10" style="height:200px" class="mselect" multiple="multiple" id="resourceid">
+	           </select></td>
+	         <td width="15%" align="center"><p>
+	           <input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('resourceid', 'tenantresource')" />
+	           </p>
+               <p>
+                 <input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('tenantresource','resourceid')" />
+               </p></td>
+	         <td width="49%" align="center"><select name="tenantresource" size="10" style="height:200px"  class="mselect" multiple="multiple" id="tenantresource">
+	           </select></td>
+	         </tr>
+	       </table></th>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></th>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" /><label>
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" value="取消" />
+	     </label></td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

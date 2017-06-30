@@ -1,0 +1,11 @@
+<!-- 新增任务还是分析任务 addType-->
+<div id="planMain" task_type="newTask" style="display:none;">
+<div id="planHead"> 
+
+	<div class='search'  align='right'><a id='addPlan' href='javascript:void(0);' style='color:blue;' align='right'>添加方案</a></div>
+</div>
+<div id="accordion">
+
+</div>
+</div>
+

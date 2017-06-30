@@ -1,0 +1,510 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/bindcontrol.js"></script>
+<script type="text/javascript">
+checkuserusage();
+var tid = 0;
+var roleid = 0;
+var oldres = new Array();
+var oldrole = new Array();
+//checkuserpure(1,1);
+$(function(){
+		changeTabTitle();
+	tid = commonFun.queryString("tenantid"); 
+    if (typeof(tid) == 'undefined') {
+        roleid = 0;
+    }
+	else{
+		roleid = commonFun.queryString("roleid"); 
+	}
+	bindgeneraloptions(); 
+    bindtenant(); //获取租户名称
+    bindrole(); //绑定可分配角色
+    bindtenantresource(tid, roleid); //绑定已分配的资源
+	bindresource(tid)//绑定可分配的资源
+    $("#frmuser").validate({
+        submitHandler: function(form) {
+            sentresource();
+        },
+        rules: {
+            //addresource:"required",
+        },
+        messages: {
+            //label:"",
+        }
+    });
+	$("input[name=allowaccessdata]").bind("click",function(){
+		var chkv = $("input[name=allowaccessdata]:checked").val();
+		if(parseInt(chkv,10)){
+			$("#accessdatalimit").removeAttr("disabled");
+		}
+		else{
+			$("#accessdatalimit").attr("disabled","disabled");
+		}
+	});
+});
+function bindgeneraloptions(){
+	//获取租户权限
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenantbyid&tid="+tid;
+	var tenantoptions = {};
+	ajaxCommon(searchnameUrl, function(data){
+		if(data!=null){
+			tenantoptions = data.children[0];
+		}
+	}, "json");
+
+
+	var url = config.modelUrl + "tenant_role_model.php";
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		dataType: "json",
+		url: url,
+		data: JSON.stringify({
+			type: "getgeneraloptions",
+			tenantid: tid,
+			roleid: roleid
+		}),
+		success: function(data){
+			if(data != null && data.children){
+				$.each(data.children, function(i, item){
+					//租户和角色权限的合并
+					$.each(["allowdrilldown", "allowlinkage", "allowoverlay", "allowdownload", "allowupdatesnapshot", "alloweventalert", "allowwidget", "allowaccessdata", "allowvirtualdata"], function(i, opt){
+						if(parseInt(tenantoptions[opt], 10)){
+							$("input[name="+opt+"][value="+item[opt]+"]").attr("checked", true);
+							$("#"+opt+"1").show();
+							$("label[for="+opt+"1]").show();
+							$("label[for="+opt+"0]").text("否");
+						}
+						else{
+							$("#"+opt+"1").hide();
+							$("label[for="+opt+"1]").hide();
+							$("input[name="+opt+"][value=0]").attr("checked", true);
+							$("label[for="+opt+"0]").text("该租户不允许");
+						}
+					});
+					if(parseInt(tenantoptions.allowaccessdata, 10)){
+						$("#accessdatalimit").attr("tenantdatalimit", tenantoptions.accessdatalimit);
+					}
+					else{
+						$("#accessdatalimit").removeAttr("tenantdatalimit");
+					}
+					//接口数据量
+					if(parseInt(item.allowaccessdata, 10) && parseInt(tenantoptions.allowaccessdata, 10)){
+						$("#accessdatalimit").removeAttr("disabled");
+					}
+					else{
+						$("#accessdatalimit").attr("disabled","disabled");
+					}
+					$("#accessdatalimit").val(item.accessdatalimit);
+				});
+			}
+		} //end sucess
+	});
+
+}
+function bindrole() {
+    var searchnameUrl = config.modelUrl + "role_model.php?type=getrolebyid&roleid="+roleid+"";
+    ajaxCommon(searchnameUrl, searchrole, "json");
+}
+
+function searchrole(data) {
+    if (data != null && data.children) {
+        $.each(data.children, function(i,item) {
+			if(item.roleid == roleid){
+				$("#roleid").text(item.label);
+			}
+        });
+    }
+}
+//绑定租户已有资源
+function bindtenantresource(id, roleid) {
+    var searchnameUrl = config.modelUrl + "resource_model.php?type=getresourcebytenant&gid="+id+"&roleid="+roleid+"";
+    ajaxCommon(searchnameUrl, getresourcebytenant, "json");
+}
+
+function getresourcebytenant(data) {
+    if(data != null && data.children) {
+		var reshtml = "";
+        $.each(data.children, function(i, item) {
+			reshtml += "<option value=" + item.resourceid + ">" + item.label + "</option>";
+            //绑定已绑定的资源
+            oldres.push(item.resourceid);
+        });
+		$("#tenantresource").empty().append(reshtml);
+    }
+}
+
+//获取租户名称
+function bindtenant() {
+    var searchnameUrl = config.modelUrl + "tenant_user_model.php?type=gettenant";
+    ajaxCommon(searchnameUrl, searchtenant, "json");
+}
+function searchtenant(data) {
+    if(data != null && data.children) {
+        $.each(data.children, function(i, item){
+			if(item.tenantid == tid){
+				$("#tenantid").text(item.tenantname);
+			}
+		});
+    }
+}
+function bindresource(tid, groupid) {
+	var searchnameUrl = config.modelUrl + "resource_model.php?type=gettenantresrel&gid=" + tid + "&userid=" + groupid;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+
+function searchresource(data) {
+    $("#resourceid").empty().append("<option value=0>暂无记录!</option>");
+    if(data != null && data.children) {
+        if (data.children != null && data.children.length > 0) {
+			var rhtml = "";
+            $.each(data.children, function(i, item) {
+				rhtml += "<option value=" + item.resourceid + ">" + item.label + "</option>";
+            });
+			$("#resourceid").empty().append(rhtml);
+        } 
+    } 
+}
+function sentresource(){
+	var result = true;
+	//通用权限获取值
+	var allowdrilldown = $("input[name=allowdrilldown]:checked").val();
+	var allowlinkage= $("input[name=allowlinkage]:checked").val();
+	var allowoverlay= $("input[name=allowoverlay]:checked").val();
+	var allowdownload= $("input[name=allowdownload]:checked").val();
+	var allowupdatesnapshot= $("input[name=allowupdatesnapshot]:checked").val();
+	var alloweventalert= $("input[name=alloweventalert]:checked").val();
+	var allowwidget = $("input[name=allowwidget]:checked").val();
+	var allowaccessdata = $("input[name=allowaccessdata]:checked").val();
+	var allowvirtualdata = $("input[name=allowvirtualdata]:checked").val();
+	var accessdatalimit = $("#accessdatalimit").val();
+	if($("#accessdatalimit:enabled").length > 0){
+		var re_adl = /^[1-9][0-9]*$/;
+		if(accessdatalimit == undefined || !re_adl.test(accessdatalimit)){
+			$("#accessdatalimit_error").text("请输入正整数");
+			$("#accessdatalimit").focus();
+			return false;
+		}
+		else{
+			var tenantdatalimit = $("#accessdatalimit").attr("tenantdatalimit");
+			if(parseInt(accessdatalimit, 10) > parseInt(tenantdatalimit, 10)){
+				$("#accessdatalimit_error").text("超出租户接口数据量限制!");
+				$("#accessdatalimit").focus();
+				return false;
+			}
+		}
+	}
+
+	//设置通用选项
+	var ourl = config.modelUrl+"tenant_role_model.php";
+	$.ajax({
+		type: "POST",
+		async:false,
+		contentType: "application/json",
+		dataType: "json",
+		url: ourl,
+		data: JSON.stringify({
+			type: "setgeneraloptions", //针对某一个租户和角色设置选项
+			tenantid: tid,
+			roleid: roleid,
+			allowdrilldown:allowdrilldown,
+			allowlinkage:allowlinkage,
+			allowoverlay:allowoverlay,
+			allowdownload:allowdownload,
+			allowupdatesnapshot:allowupdatesnapshot,
+			alloweventalert:alloweventalert,
+			allowwidget:allowwidget,
+			allowaccessdata:allowaccessdata,
+			accessdatalimit:accessdatalimit,
+			allowvirtualdata:allowvirtualdata
+		}),
+		success: function(msg) {
+			var stdata = jQuery.parseJSON(msg);
+			if(msg.flag != 1){
+				result = false;
+				alert("修改通用选项失败!");
+				return;
+			}
+		} //end sucess
+	});
+    var rid = roleid;
+    //获取资源信息
+    var resid = "";
+	var resarr = [];
+    $("#tenantresource option").each(function(){
+		var resval = $(this).val();
+        if (oldres.length > 0) {
+            checkresource(resval, 2);
+        }
+		resarr.push(resval);
+    });
+	if (resarr.length > 0) {
+        resid = resarr.join(",");
+    }
+    if(rid == "") {
+        if (confirm("是否将此租户的资源设置为空，此操作将删除此租户所拥有的资源权限!")) {
+            var URL = config.modelUrl + "resource_model.php";
+            $.ajax({
+                type: "POST",
+				async:false,
+                contentType: "application/json",
+                dataType: "json",
+                url: URL,
+                data: JSON.stringify({
+                    tenantid: tid,
+                    type: "settenantresource",
+                    roleid: rid,
+                    resourceid: resid
+                }),
+                success: function(msg) {
+                    var stdata = jQuery.parseJSON(msg);
+                    if (msg.flag != 1) {
+						result = false;
+						alert("删除资源失败!");
+						return;
+                    }
+                } //end sucess
+            }); //end ajax
+        }
+    }
+    else {
+        var URL = config.modelUrl + "resource_model.php";
+        $.ajax({
+            type: "POST",
+			async:false,
+            contentType: "application/json",
+            dataType: "json",
+            url: URL,
+            data: JSON.stringify({
+                tenantid: tid,
+                type: "settenantresource",
+                roleid: rid,
+                resourceid: resid,
+                delresource: oldres
+            }),
+            success: function(msg) {
+                var stdata = jQuery.parseJSON(msg);
+                if(msg.flag != 1){
+					result = false;
+					alert("设置资源失败!");
+					return;
+                }
+            } //end sucess
+        }); //end ajax
+    }
+	if(result){
+		window.location.href = "setuptenantlist.shtml";
+	}
+}
+
+function setresource(fromid, toid) {
+    $("#" + fromid + " option:selected").each(function() {
+        //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+        $(this).appendTo($("#" + toid + ":not(:has(option[value=" + $(this).val() + "]))"));
+        //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+        if ($("#" + fromid + " option[value=" + $(this).val() + "]").length > 0) {
+            $("#" + fromid).get(0).removeChild($("#" + fromid + " option[value=" + $(this).val() + "]").get(0));
+        }
+    });
+}
+
+//检查删除的资源
+function checkresource(rid, type) {
+    if (type == 1) {
+        if (oldrole.length > 0) {
+			for(var i = oldrole.length-1; i > -1; i--){
+                if (oldrole[i] == rid) {
+                    oldrole.splice(i, 1);
+                }
+            }
+        }
+    } else {
+        if (oldres.length > 0) {
+			for (var i = oldres.length - 1; i > -1 ; i--) {
+                if (oldres[i] == rid) {
+                    oldres.splice(i, 1);
+                }
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">角色权限设置</span>
+    <a href="setuptenantlist.shtml" style="float: right">设置角色权限</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="30%" align="right" valign="middle" scope="col"><div align="right"></div></th>
+	     <th align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label id="tenantid"> </label>
+	       </td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">已分配角色：</div></td>
+		 <td align="left" valign="middle" scope="col">
+			 <label id="roleid"></label>
+		 </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许钻取：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown1" value="1" checked="checked"/><label for="allowdrilldown1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown0" value="0" /><label for="allowdrilldown0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许联动：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage1" value="1" checked="checked"/><label for="allowlinkage1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage0"  value="0"/><label for="allowlinkage0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许叠加：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay1" value="1" checked="checked"/><label for="allowoverlay1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay0"  value="0"/><label for="allowoverlay0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许下载：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload1" value="1" /><label for="allowdownload1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload0"  value="0" checked="checked" /><label for="allowdownload0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">定时更新快照：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowupdatesnapshot1" value="1" /><label for="allowupdatesnapshot1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowupdatesnapshot0"  value="0" checked="checked" /><label for="allowupdatesnapshot0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">事件预警：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert1" value="1" /><label for="alloweventalert1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert0"  value="0" checked="checked" /><label for="alloweventalert0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许嵌入站点：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget1" value="1" /><label for="allowwidget1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget0"  value="0" checked="checked" /><label for="allowwidget0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许使用虚拟数据源：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata1" value="1" /><label for="allowvirtualdata1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata0"  value="0" checked="checked" /><label for="allowvirtualdata0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许访问数据接口：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+			   &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata1" value="1" /><label for="allowaccessdata1">是</label>
+			   &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata0" value="0" checked="checked" /><label for="allowaccessdata0">否</label>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">接口数据量限制：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="accessdatalimit" id="accessdatalimit" value="0" disabled maxlength="11" />
+	         &nbsp;<span style="color:red" id="accessdatalimit_error"></span>
+            </div>
+	     </td>
+       </tr>
+       <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配资源：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="71%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+			   <!--可分配的资源-->
+	         <td width="36%" align="center"><select name="resourceid" size="10" style="height:200px" class="mselect" multiple="multiple" id="resourceid">
+	           </select></td>
+	         <td width="15%" align="center"><p>
+	           <input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('resourceid', 'tenantresource')" />
+	           </p>
+               <p>
+                 <input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('tenantresource','resourceid')" />
+               </p></td>
+			   <!--已分配的资源-->
+	         <td width="49%" align="center"><select name="tenantresource" size="10" style="height:200px"  class="mselect" multiple="multiple" id="tenantresource">
+	           </select></td>
+	         </tr>
+	       </table></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

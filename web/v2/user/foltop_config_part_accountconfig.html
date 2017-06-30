@@ -1,0 +1,106 @@
+<fieldset>
+<legend>权限配置</legend>
+<div class="search"><span class="rightalign"> 昵称：</span> <input type="text" name="username" />
+	<input id="commendName" type="button" value="推荐"/>
+	<input type="checkbox" id="usernameanalyse" name="analyse" class="outborder"/>查昵称
+	<input type="checkbox" id="followeranalyse" name="followeranalyse" class="outborder"/>查粉丝
+    <input type="checkbox" id="friendanalyse" name="friendanalyse" class="outborder"/>查关注 
+    <input type="button" id="addCommendUser" name="btnadduser" value="添加限制" />&nbsp;&nbsp;
+</div>
+<div class="search"><span class="rightalign">昵称限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="username_nolimit" name="username_nolimit" class="outborder"/>不限
+    &nbsp;&nbsp;最大值个数：<input type="text" id="maxlimitlength_username" class="shortinput" />
+	&nbsp;&nbsp;修改限制次数：<input type="text" id="limitcontrol_username" class="shortinput" />
+	&nbsp;&nbsp;<input type="checkbox" id="allowcontrol_username" class="outborder"/>允许修改值
+</div>
+<div class="search"><span class="rightalign"></span><span id="endusername"></span></div>
+<div class="search"><span class="rightalign">查粉丝限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="usersfollower_nolimit" name="usersfollower_nolimit" class="outborder"/>不限
+    &nbsp;&nbsp;最大值个数：<input type="text" id="maxlimitlength_usersfollower" class="shortinput" />
+    &nbsp;&nbsp;修改限制次数：<input type="text" id="limitcontrol_usersfollower" class="shortinput" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_usersfollower" class="outborder"/>允许修改值
+</div>
+<div class="search"><span class="rightalign"></span><span id="endusersfollower"></span></div>
+<div class="search"><span class="rightalign">查关注限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="usersfriend_nolimit" name="usersfriend_nolimit" class="outborder"/>不限
+    &nbsp;&nbsp;最大值个数：<input type="text" id="maxlimitlength_usersfriend" class="shortinput" />
+    &nbsp;&nbsp;修改限制次数：<input type="text" id="limitcontrol_usersfriend" class="shortinput" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_usersfriend" class="outborder"/>允许修改值
+</div>
+<div class="search"><span class="rightalign"></span><span id="endusersfriend"></span></div>
+<div class="search" id="islimit_followerrank"> <span class="rightalign">粉丝数：</span>
+	&nbsp;&nbsp;<input type="checkbox" id="followerrank_nolimit" name="followerrank_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp; 最大值：<input type="text" name="followerrank_maxvalue" id="followerrank_maxvalue" value="" class="shortinput"/>
+	&nbsp;&nbsp; 最小值：<input type="text" name="followerrank_minvalue" id="followerrank_minvalue" value="" class="shortinput" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_followerrank" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_followerrank" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_followerrank" class="shortinput" />
+</div>
+<div class="search" id="islimit_friendrank"> <span class="rightalign">关注数：</span> 
+    &nbsp;&nbsp;<input type="checkbox" id="friendrank_nolimit" name="friendrank_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp;最大值：<input type="text" class="shortinput" name="friendrank_maxvalue" id="friendrank_maxvalue" value="" />
+	&nbsp;&nbsp;最小值：<input type="text" class="shortinput"  name="friendrank_minvalue" id="friendrank_minvalue" value=""  />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_friendrank" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_friendrank" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_friendrank" class="shortinput" />
+</div>
+<div class="search" id="islimit_statusesrank"> <span class="rightalign">文章数：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="statusesrank_nolimit" name="statusesrank_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp;最大值：<input type="text" class="shortinput"  name="statusesrank_maxvalue" id="statusesrank_maxvalue" value=""  />
+	&nbsp;&nbsp;最小值：<input type="text" class="shortinput"  name="statusesrank_minvalue" id="statusesrank_minvalue" value=""  />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_statusesrank" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_statusesrank" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_statusesrank" class="shortinput" />
+</div>
+<div class="search" id="islimit_registertime"> <span class="rightalign">博龄：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="registertime_nolimit" name="registertime_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp;最大值：<input type="text" class="shortinput"  name="registertime_maxvalue" id="registertime_maxvalue" value="" />
+	&nbsp;&nbsp;最小值：<input type="text" class="shortinput"  name="registertime_minvalue" id="registertime_minvalue" value="" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_registertime" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_registertime" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_registertime" class="shortinput" />
+</div>
+<div class="search" id="islimit_sex"> <span class="rightalign">性别限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="sex_nolimit" name="sex_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_sex" id="islimit_sexm" value="m" /> 男
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_sex" id="islimit_sexf" value="f" /> 女
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_sex" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_sex" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_sex" class="shortinput" />
+ </div>
+<div class="search" style="display:block;" id="islimit_verified"> <span class="rightalign">认证限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="verified_nolimit" name="verified_nolimit" class="outborder"/>不限
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_verified" id="islimit_verified1" value="1"  /> 是
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_verified" id="islimit_verified0" value="0"  /> 否
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_verified" class="outborder"/>允许修改值
+    &nbsp;&nbsp;<input type="hidden" id="maxlimitlength_verified" class="shortinput" />
+    &nbsp;&nbsp;<input type="hidden" id="limitcontrol_verified" class="shortinput" />
+</div>
+<div class="search" > <span class="rightalign">来源限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="source_nolimit" name="source_nolimit" class="outborder"/>不限
+    &nbsp;&nbsp;最大值个数：<input type="text" id="maxlimitlength_source" class="shortinput" />
+    &nbsp;&nbsp;修改限制次数：<input type="text" id="limitcontrol_source" class="shortinput" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_source" class="outborder"/>允许修改值
+</div>
+<div class="search"><span class="rightalign"></span><span id="span_limit_source"></span></div>
+<div class="search" id="islimit_areacode"><span class="rightalign">地区限制：</span>
+    &nbsp;&nbsp;<input type="checkbox" id="area_nolimit" name="area_nolimit" class="outborder"/>不限
+    &nbsp;&nbsp;最大值个数：<input type="text" id="maxlimitlength_area" class="shortinput" />
+    &nbsp;&nbsp;修改限制次数：<input type="text" id="limitcontrol_area" class="shortinput" />
+    &nbsp;&nbsp;<input type="checkbox" id="allowcontrol_area" class="outborder"/>允许修改值
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setarea" name="setarea" value="选择地区限制"  type="button">&nbsp;&nbsp;
+    <span id="selectedarea" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_areacode">
+</div>
+<!--<div class="search" style="display:block;" id="islimit_facet"> <span class="rightalign">分组查询限制：</span>
+     修改次数：<input name="editfacet" type="text" class="shortinput"  value="" /> 
+</div>-->
+<!--<div class="search" style="display:block;" id="islimit_output"> <span class="rightalign">输出限制：</span>
+     修改次数：<input name="editoutput" type="text" class="shortinput"  value="" /> 
+</div>-->
+<div class="search">
+	<input id="saverule" name="saverule" type="button" class="buttono" value="保存"/>
+</div>
+</fieldset>

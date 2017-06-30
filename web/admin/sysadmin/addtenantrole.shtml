@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/bindcontrol.js"></script>
+<script type="text/javascript">
+checkuserusage();
+var tid = 0;
+var oldres = new Array();
+var oldrole = new Array();
+//checkuserpure(1,1);
+$(function() {
+		changeTabTitle();
+	tid = commonFun.queryString("tenantid"); 
+    bindtenant(); //租户下拉列表
+    bindrole(); //绑定可分配角色
+	$("#frmuser").validate({
+		submitHandler:function(form){
+			settenantrole();
+        },
+        rules: {
+            //addresource:"required",
+        },
+        messages: {
+            //label:"",
+        }
+    });
+});
+//根据类型获取角色信息
+function bindrole() {
+    var searchnameUrl = config.modelUrl + "role_model.php?type=getrolebytype&tid=3";
+    ajaxCommon(searchnameUrl, searchrole, "json");
+}
+function searchrole(data) {
+    if(data != null && data.children){
+		var rolehtml = "";
+        $.each(data.children, function(i, item){
+			rolehtml += "<option value=" + item.roleid + ">" + item.label + "</option>";
+        });
+		$("#roleid").empty().append(rolehtml);
+    }
+}
+function bindtenant(){
+    var searchnameUrl = config.modelUrl + "tenant_user_model.php?type=gettenant";
+    ajaxCommon(searchnameUrl, searchtenant, "json");
+}
+function searchtenant(data) {
+    if (data != null && data.children) {
+		var tenantoption = "";
+        $.each(data.children, function(i, item){
+			var slt = "";
+			if(item.tenantid == tid){
+				slt = "selected='selected'";
+			}
+			tenantoption += "<option value="+item.tenantid+" "+slt+">"+item.tenantname+"</option>";
+        });
+		$("#tenantid").append(tenantoption);
+        bindtenantrole($("#tenantid").val());
+    }
+}
+//检查删除的资源
+function checkresource(rid) {
+	if(oldrole.length > 0){
+		for(var i = oldrole.length-1; i > -1; i--){
+			if (oldrole[i] == rid) {
+				oldrole.splice(i, 1);
+			}
+		}
+	}
+}
+function settenantrole(){
+    var rids = [];
+    $("#tenantrole option").each(function(){
+        if(oldrole.length > 0){
+            checkresource($(this).val());
+        }
+		rids.push($(this).val());
+    });
+	if(rids.length > 0){
+        rid = rids.join(",");
+    }
+    if (rid == "") {
+        if (confirm("是否将此租户的角色设置为空，此操作将删除此租户所拥有的资源权限!")) {
+            var URL = config.modelUrl + "tenant_role_model.php";
+            $.ajax({
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                url: URL,
+                data: JSON.stringify({
+                    tenantid: $("#tenantid").val(),
+                    type: "settenantrole",
+                    roleid: rid,
+                }),
+                success: function(msg) {
+                    if(msg.flag == 1) {
+                        alert("设置成功!");
+                        window.location.href = "setuptenantrolelist.shtml";
+                    } else {
+                        alert("设置失败!");
+                        return;
+                    }
+                } //end sucess
+            }); //end ajax
+        }
+    } //end rid==''
+    else {
+        var URL = config.modelUrl + "tenant_role_model.php";
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            url: URL,
+            data: JSON.stringify({
+                tenantid: $("#tenantid").val(),
+                type: "settenantrole",
+                roleid: rid,
+                delrole: oldrole,
+            }),
+            success: function(msg) {
+                if(msg.flag == 1) {
+                    alert("设置成功!");
+                    window.location.href = "setuptenantrolelist.shtml";
+                } else {
+                    alert("设置失败!");
+					return;
+                }
+            } //end sucess
+        }); //end ajax
+    }
+}
+function setresource(fromid, toid) {
+    $("#" + fromid + " option:selected").each(function() {
+        //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+        $(this).appendTo($("#" + toid + ":not(:has(option[value=" + $(this).val() + "]))"));
+        //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+        if ($("#" + fromid + " option[value=" + $(this).val() + "]").length > 0) {
+            $("#" + fromid).get(0).removeChild($("#" + fromid + " option[value=" + $(this).val() + "]").get(0));
+        }
+    });
+
+}
+//绑定用户已有角色
+function bindtenantrole(id){
+    var searchnameUrl = config.modelUrl + "tenant_role_model.php?type=getrolebytenant&tid=" + id;
+    ajaxCommon(searchnameUrl, getrolebytenant, "json");
+}
+function getrolebytenant(data){
+    $('#tenantrole').empty();
+    if (data != null && data.children) {
+		var rolehtml = "";
+        $.each(data.children, function(i, item){
+			rolehtml += "<option value="+item.roleid+">"+item.label+"</option>";
+            oldrole.push(item.roleid);
+        });
+		$("#tenantrole").empty().append(rolehtml);
+    }
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">租户角色设置</span>
+    <a href="setuptenantrolelist.shtml" style="float: right">给租户分配角色</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="30%" align="right" valign="middle" scope="col"><div align="right"></div></th>
+	     <th align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div align="left">&nbsp;&nbsp;<label>
+               <select name="tenantid" id="tenantid" onchange="bindtenantrole(this.value)"></select>
+             </label>
+	         </div>
+	       </label>
+	       </td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配角色：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="71%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td width="36%" align="center"><select name="roleid" size="10" style="height:200px" class="mselect" multiple="multiple" id="roleid">
+	           </select></td>
+	         <td width="15%" align="center"><p>
+	           <input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('roleid', 'tenantrole')" />
+	           </p>
+               <p>
+                 <input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('tenantrole','roleid')" />
+               </p></td>
+	         <td width="49%" align="center"><select name="tenantrole" size="10" style="height:200px"  class="mselect" multiple="multiple" id="tenantrole"></select></td>
+	         </tr>
+	       </table></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">&nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	     </td>
+       </tr>
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

@@ -1,0 +1,4420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--当前任务</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<link rel="stylesheet" href="css/jquery_datatables.css" type="text/css" />
+<style>
+.popupdiv{border:1px solid #B3CFE7;display:inline-block;border-radius:3;padding:15px;background:#fff;color:#000;box-shadow:0 0 4px #666;z-index:9999}
+.ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px 0; vertical-align:top; *vertical-align:middle}
+</style>
+<link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css" type="text/css">
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/jquery.jsPlumb-1.7.5-min.js"></script>
+
+<script type="text/javascript" src="js/jquery.ztree.core-3.5.js"></script>
+<script type="text/javascript" src="js/jquery.ztree.excheck-3.5.js"></script>
+<script type="text/javascript" src="js/jquery.ztree.exedit-3.5.js"></script>
+
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/base_util.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/parts/multiTab.js"></script>
+<script type="text/javascript" src="js/parts/doubleRichbox.js"></script>
+<script type="text/javascript" src="js/parts/myParamDef.js"></script>
+<script type="text/javascript" src="js/parts/myParamPath.js"></script>
+<script type="text/javascript" src="js/parts/myParamFilter.js"></script>
+<script type="text/javascript" src="js/parts/myGrabSteps.js"></script>
+<script type="text/javascript" src="js/taskcanvas.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript">
+	checkuserusage();
+	var _this = this;
+	var otherfieldsdiv = "otherfieldsdiv";
+	var tbl;
+	var tblslice;
+    //删除按钮
+	var deletecodearr = [];
+	var deletebtn = "<input type='button' value='删除' name='deleteitem' style='background-color:#2E6E9E;color:#FFFFFF;' />";
+	var deleteselectedbtn = "<input type='button' value='取消' name='deleteitemselected' style='background-color:#EA3D3D;color:#FFFFFF;' />";
+	this.setSelectedCountPosition = function(){
+		$("#selectdiv").css({
+			'display':'inline-block',
+			'position':'absolute',
+			'width':"20px",
+			'z-index': 1005,
+			'left': $("#selectedcount").offset().left,
+			'top': $("#selectedcount").offset().top - 40
+		});
+		$("#selectedcount").attr("currstate", "unfolded");
+	};
+	this.hideSelectedCount = function(){
+		$("#selectdiv").hide();
+		$("#selectedcount").attr("currstate", "folded");
+	};
+	this.deleteSubmitBtn = function(selector){
+		var checkedlen = deletecodearr.length;
+		if(checkedlen > 0){
+			var deletesubmitbtn = "<input type='button' id='confirmdelete' name='confirmdelete' value='确认删除' />&nbsp;<input type='button' id='selectedcount' name='selectedcount' value='已选择"+checkedlen+"条' currstate='folded' />";
+			$("#"+selector+"").empty().append(deletesubmitbtn);
+		}
+		else{
+			$("#"+selector+"").empty()
+		}
+	};
+
+	function initSpiderConfigSelect(pagestyletype){
+		$("select[name=config]").empty();
+		$("select[name=SEtemplate]").empty();
+		$("select[name=SStemplate]").empty();
+		$("select[name=usertemplate]").empty();
+	    $.each(config.allSpiderConfig, function(i,v){
+				if(pagestyletype != undefined){
+					if(v.pagestyletype == pagestyletype){
+						$("select[name=config]").append('<option value="'+v.id+'" >'+v.name+'</option>');
+					}
+				}
+				if(v.pagestyletype != undefined){
+					switch(parseInt(v.pagestyletype,10)){
+						case 1: //列表模板
+							$("select[name=SEtemplate]").append('<option value="'+v.id+'">'+v.name+'</option>')
+							break;
+						case 2: //文章模板
+							$("select[name=SStemplate]").append('<option value="'+v.id+'">'+v.name+'</option>')
+							break
+						case 3:
+							$("select[name=usertemplate]").append('<option value="'+v.id+'">'+v.name+'</option>')
+							break;
+						default:
+							break;
+					}
+				}
+	    });           
+	}
+	function initDatahostSelect(alldatahost){
+		$("select[name=srchost]").empty();
+		$("select[name=srchost]").append('<option value="0" >默认主机</option>');
+	    $.each(alldatahost,function(i,v){
+			$("select[name=srchost]").append('<option value="'+v.id+'" >'+v.alias+'</option>');
+	    });           
+	}
+	//getstart 是否显示第一页
+	function searchData(getstart){
+		var oSettings = tbl.fnSettings();
+		if(getstart){
+			oSettings.sAjaxSource = config.phpPath+"taskmanager.php?type=current&" + $("#formsearch").serialize();
+        	oSettings._iDisplayStart = 0;
+	    }
+		tbl.fnClearTable(0);
+		tbl.fnDraw();
+
+	}
+	function initTaskSelect(){
+		if(config.allTask.length == 0){
+			getAllTask(function(data){
+				if(data){
+					config.allTask = data;
+				}
+			});
+		}
+		$("#seltask").append("<option value=''>任务类型</option>");
+		$.each(config.allTask, function(di, ditem){
+				var ophtml = "<option value='"+ditem.id+"'>"+ditem.name+"</option>";
+				$("#seltask").append(ophtml);
+				switch(ditem.tasktype){
+				case 1:
+				$("#task").append(ophtml);
+				break;
+				case 2:
+				$("#s-task").append(ophtml);
+				break;
+				case 3:
+				$("#m-task").append(ophtml);
+				break;
+				default:
+				break;
+				}
+			});
+	}
+	function initTaskPageStyleType(){
+		if(config.allTaskPageStyleType.length == 0){
+			getAllTaskPageStyleType(function(data){
+				if(data){
+					config.allTaskPageStyleType = data;
+				}
+			});
+		}
+		$("#seltaskpagestyletype").append("<option value=''>任务内容类型</option>");
+		var tpthtml = "";
+		$.each(config.allTaskPageStyleType, function(ti, titem){
+				tpthtml += "<option value='"+titem.id+"'>"+titem.name+"</option>";
+		});
+		$("#seltaskpagestyletype").append(tpthtml);
+		$("#s-taskpagestyletype").append(tpthtml);
+	}
+	function initSearchForm(){
+		var tasklevelele = $("#seltasklevel");
+		if(tasklevelele.length > 0){
+			tasklevelele.append("<option value=''>选择级别</option>");
+			tasklevelele.append("<option value='1'>一</option>");
+			tasklevelele.append("<option value='2'>二</option>");
+			tasklevelele.append("<option value='3'>三</option>");
+			tasklevelele.append("<option value='4'>四</option>");
+			tasklevelele.append("<option value='5'>五</option>");
+		}
+		var taskstatusele = $("#seltaskstatus");
+		if(taskstatusele.length > 0){
+			taskstatusele.append("<option value=''>选择状态</option>");
+			taskstatusele.append("<option value='1'>正常</option>");
+			taskstatusele.append("<option value='2'>停止</option>");
+			taskstatusele.append("<option value='4'>排队中</option>");
+			taskstatusele.append("<option value='7'>挂起</option>");
+			taskstatusele.append("<option value='5'>崩溃</option>");
+			taskstatusele.append("<option value='0'>等待启动</option>");
+			taskstatusele.append("<option value='6'>等待验证</option>");
+			taskstatusele.append("<option value='-1'>等待停止</option>");
+			taskstatusele.append("<option value='8'>异常任务</option>");
+			taskstatusele.append("<option value='9'>相同任务</option>");
+		}
+		//根据爬虫错误码筛选任务   add by wang 2017-03-07
+		// var error_codeele = $("#selerror_code");
+		// if(error_codeele.length > 0){
+		// 	error_codeele.append("<option value=''>错误码</option>");
+		// 	error_codeele.append("<option value='1'>一</option>");
+		// 	error_codeele.append("<option value='2'>二</option>");
+		// 	error_codeele.append("<option value='3'>三</option>");
+		// 	error_codeele.append("<option value='4'>四</option>");
+		// 	error_codeele.append("<option value='5'>五</option>");
+		//     error_codeele.append("<option value='6'>六</option>");
+		// 	error_codeele.append("<option value='7'>七</option>");
+		// }
+
+		var machineele = $("#selmachine");
+		if(machineele.length > 0){
+			machineele.append("<option value=''>选择机器</option>");
+			$.getJSON(config.phpPath+"taskmanager.php?type=getmachine",function(r){
+				if(r){
+					$(r).each(function(i,item){
+						machineele.append("<option value='"+item+"'>"+item+"</option>");
+					});
+				}
+			});
+		}
+		var localele = $("#sellocal");
+		if(localele.length > 0){
+			localele.append("<option value=''>是否本地</option>");
+			localele.append("<option value='1'>是</option>");
+			localele.append("<option value='0'>否</option>");
+		}
+		var remoteele = $("#selremote");
+		if(remoteele.length > 0){
+			remoteele.append("<option value=''>是否远程</option>");
+			remoteele.append("<option value='1'>是</option>");
+			remoteele.append("<option value='0'>否</option>");
+		}
+
+	}
+	function onDetailClick(tar, id, task, datastatus,taskparams, local, remote, conflictdelay,error_code,error_msg){
+	
+		var v = {};
+		v.taskparams = (taskparams == undefined || taskparams == null) ? {} : taskparams;
+		v.id = id;
+		v.task = task;
+		v.datastatus = datastatus;
+		v.local = local;
+		v.remote = remote;
+		v.conflictdelay = conflictdelay;
+		v.error_code=error_code;
+		v.error_msg=error_msg;
+		var trid = 'tr_taskdetail'+v.id;
+	    if($('#'+trid).length > 0){
+	        $('#'+trid).remove();
+	    }
+	    else{
+	        var infohtm = getTaskDetail(v);
+	        var appendhtm = '<tr id="'+trid+'"><td align="left" colspan="14"><div style="text-align:left;padding:5px 10px;overflow-y:scroll;max-height:300px;max-width:790px;word-break:break-all;">'+infohtm+'</div></td></tr>';
+	        var targettr = $(tar).parent().parent();
+	        targettr.after(appendhtm);
+	    }
+	}
+	$(function(){
+		changeTabTitle();
+		initTaskSelect();
+		initTaskPageStyleType();
+		initSearchForm();
+		$("span[name=sort]").bind("click",function(){
+			//ui-icon ui-icon-triangle-1-s   ui-icon ui-icon-carat-2-n-s
+			var field = $(this).attr("_target");
+			var thisclass = $(this).children("span").attr("class");
+			var sortad = "";
+			//将其他排序字段置为不排序状态
+			$("span[name=sort][_target!="+field+"]").children("span").attr("class","ui-icon ui-icon-carat-2-n-s");
+			if(thisclass == "ui-icon ui-icon-carat-2-n-s" 
+				|| thisclass == "ui-icon ui-icon-triangle-1-s"){//当前未排序或当前倒序，则按正序
+				sortad = "asc";
+				$(this).children("span").attr("class","ui-icon ui-icon-triangle-1-n");
+			}
+			else{
+				$(this).children("span").attr("class","ui-icon ui-icon-triangle-1-s");
+				sortad = "desc";
+			}
+			$("#txtorderby").val(field+" "+sortad);
+			searchData(false);
+		});
+
+		//筛选
+		$("#btnsearch").bind("click", function(){
+			searchData(true);
+			tblslice = tbl.fnSettings().sAjaxSource;
+			var index = tblslice.indexOf("&task=");
+			tblslice = tblslice.substring(index + 1 );
+			$("#deleteAlldiv").html('');
+			$("#recallAlldiv").html('');
+			$("#batchAlldiv").html('<input type="button" value="批量操作">');
+//			$("#deleteAlldiv").html('<input type="button" value="批量删除">');
+//			$("#recallAlldiv").html('<input type="button" value="召回">');
+		});
+		$("#batchAlldiv").bind("click", function () {
+			$("#batchAlldiv").html('');
+			$("#deleteAlldiv").html('<input type="button" value="批量删除">');
+			$("#recallAlldiv").html('<input type="button" value="召回">');
+		});
+
+		//批量删除筛选后的当前任务
+		$("#deleteAlldiv").bind("click", function() {
+//			var spanid = $("#mytbl > tbody > tr >td:eq(1)")[0].innerHTML;
+			var spanid = $("#mytbl > tbody > tr >td:eq(1)")[0];
+//			console.log( spanid );
+			if( spanid ) {
+				if(confirm('此操作不可恢复，确定批量删除吗？')) {
+					$.ajax({
+						type: "POST",
+						url: config.phpPath + "taskmanager.php?type=delcurrent&" + tblslice,
+						dataType: "json",
+						beforeSend:function(){
+
+						},
+						complete:function(){
+						},
+						success:function(data){
+							if(data.result){
+								searchData(false);
+								$("#deleteAlldiv").html('');
+								$("#recallAlldiv").html('');
+								$("#batchAlldiv").html('<input type="button" value="批量操作">');
+							}
+							else{
+								alert(data.msg);
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+
+					});
+				}
+			}
+		});
+
+		//批量召回筛选后的当前任务
+		$("#recallAlldiv").bind("click", function() {
+			var spanid = $("#mytbl > tbody > tr >td:eq(1)")[0];
+//			console.log( spanid );
+			if( spanid ) {
+				if(confirm('此操作不可恢复，确定召回吗？')) {
+					$.ajax({
+						type: "POST",
+						url: config.phpPath + "taskmanager.php?type=recallcurrent&" + tblslice,
+						dataType: "json",
+						beforeSend:function(){
+
+						},
+						complete:function(){
+						},
+						success:function(data){
+							if(data.result){
+								searchData(false);
+								$("#deleteAlldiv").html('');
+								$("#recallAlldiv").html('');
+								$("#batchAlldiv").html('<input type="button" value="批量操作">');
+							}
+							else{
+								alert(data.msg);
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+
+					});
+				}
+			}
+		});
+
+		tbl = $('#mytbl').dataTable({
+		    "sAjaxSource":config.phpPath+"taskmanager.php?type=current&" + $("#formsearch").serialize(),
+		    "bLengthChange":false,
+		    "bSort":false,
+		    "iDisplayLength":20,
+            "aoColumns":
+	            [
+                    {"fnRender":function(o){
+    					if (o.aData.taskstatus != 1){
+                            return "<span id='"+o.aData.id+"' >"+deletebtn+"</span>";
+                        }
+                        else{
+                            return "";
+                        }
+                    }},
+					{ "mDataProp": "id" },
+					{ "fnRender": function (o) {
+						  return getTaskType(o.aData.task);
+					    }
+					},
+					{ "fnRender": function (o) {
+						  return getTaskPageStyleType(o.aData.taskpagestyletype);
+					    }
+					},
+                    { "mDataProp": "tasklevel" },
+                    {"fnRender":function(o){
+                    	return getTaskStatus(parseInt(o.aData.taskstatus));
+                    }},
+                    {"fnRender":function(o){
+                    	return (o.aData.datastatus == null ? '' : o.aData.datastatus);
+                    }},
+                    { "fnRender": function (o) {
+                        return timeToStr(o.aData.activatetime);
+                      }
+                    },
+                    { "fnRender": function (o) {
+                        return timeToStr(o.aData.starttime);
+                      }
+                    },
+					{
+						"fnRender":function(o){
+							return getTenantName(o.aData.tenantid);
+						}
+					},
+					{
+						"fnRender":function(o){
+							return getUserName(o.aData.userid);
+						}
+					},
+                    { "mDataProp": "machine" },
+                    //{ "mDataProp": "remarks" },
+					{
+						"fnRender":function(o){
+							var fontSize = 12;
+							var tdwidth = 100;
+							var partdes = getPartDes(o.aData.remarks, tdwidth, fontSize); 
+							var deshtml = "";
+							if(partdes.truncation){
+								deshtml = "<a title='"+o.aData.remarks+"'>"+partdes.retstr+"</a>"; 
+							}
+							else{
+								deshtml =  o.aData.remarks;
+							}
+							return deshtml;
+						}
+
+					},
+                    { "fnRender": function(o){
+                        var v = o.aData;
+                        var htm = "";
+                    	var detailhtm = "<a href='javascript:void(0);'  onclick='onDetailClick(this,"+o.aData.id+","+o.aData.task+","+o.aData.datastatus+","+o.aData.taskparams+", "+o.aData.local+","+o.aData.remote+","+o.aData.conflictdelay+","+o.aData.error_code+","+o.aData.error_msg+")'>详情</a>&nbsp;|&nbsp;";
+    					if(v.taskstatus == -1){
+    					  htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',1)">取消</a>';
+    					}
+    					else if(v.taskstatus == 0){
+    						htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',2)">取消</a>';
+    					}
+    					else if (v.taskstatus == 1){
+                            htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',-1)">停止</a>';
+                            if (v.timeout != null){
+                                htm += '&nbsp;|&nbsp;<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',0)">召回</a>';
+                            }
+    					}
+    					else if(v.taskstatus == 4){
+                            htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',2)">取消</a>';
+    					}
+    					else if(v.taskstatus == 7){
+    					    htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',-71)">继续</a>';
+    					    htm += '&nbsp;|&nbsp;<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',-72)">重试</a>';
+    					}
+    					else if (v.taskstatus == 6){
+    						htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',1)">已验证</a>';
+    						var taskparams = JSON.parse(v.taskparams);
+    						if (taskparams.scene && taskparams.scene.veriimage){
+    							var image = taskparams.scene.veriimage.substring(taskparams.scene.veriimage.lastIndexOf('/') + 1);
+    							htm += '&nbsp;|&nbsp;<a href="javascript:void(0);" onclick="openVeriCodeDiv('+v.id+',\''+image+'\')">验证码</a>';
+    						}
+    					}
+    					else {
+    						htm += detailhtm+'<a href="javascript:void(0);" onclick="onOPTButtonClick('+v.id+',0)">启动</a>';
+    					}
+                        /*
+    					if (v.taskstatus != 1){
+                        	htm += '&nbsp;|&nbsp;<a href="javascript:void(0);" onclick="onDelButtonClick('+v.id+')">删除</a>';
+    					}
+                        */
+						if(v.task == config.TASK_KEYWORD || v.task == config.TASK_WEIBO || v.task==config.TASK_WEBPAGE){ //抓取关键词, 抓取微博, 增加复制功能
+							var ormark = {"rm":o.aData.remarks};
+							var ormarkstr = JSON.stringify(ormark);
+                            htm += "&nbsp;|&nbsp;<a href='javascript:void(0);' onclick='openTaskDiv(\"divaddspt\", "+o.aData.tasklevel+","+o.aData.task+","+o.aData.taskparams+","+o.aData.activatetime+" ,"+ormarkstr+", "+o.aData.local+", "+o.aData.remote+", "+o.aData.conflictdelay+", "+o.aData.taskpagestyletype+")'>复制</a>";
+						}
+                        else if(v.task == config.TASK_COMMON){
+							htm += "&nbsp;|&nbsp;<a href='javascript:void(0);' onclick='openCommonTaskDiv("+o.aData.taskparams+")'>复制</a>";
+							htm += "&nbsp;|&nbsp;<a href='javascript:void(0);' onclick='exportCommonTask("+v.id+", "+o.aData.taskparams+")'>导出</a>";
+						}
+						else if(v.task == config.TASK_MIGRATEDATA){
+							var ormark = {"rm":o.aData.remarks};
+							var ormarkstr = JSON.stringify(ormark);
+                            htm += "&nbsp;|&nbsp;<a href='javascript:void(0);' onclick='openTaskDiv(\"divaddmit\", "+o.aData.tasklevel+","+o.aData.task+","+o.aData.taskparams+","+o.aData.activatetime+" ,"+ormarkstr+", "+o.aData.local+", "+o.aData.remote+", "+o.aData.conflictdelay+")'>复制</a>";
+						}
+                        return htm;
+
+                     }}
+	         	]}
+		  );
+		//绑定删除按钮
+		_this.deleteSubmitBtn("eventalertdeletediv");
+		$("#mytbl").find("input[name=deleteitem]").die("click");
+		$("#mytbl").find("input[name=deleteitem]").live("click", function(){
+		
+			var pid = $(this).parent("span").attr("id");
+			//var parent_id=$(this).parent("span").attr("parent_id");
+			//var pidarr = pid.split("_");
+			//var code = pidarr[1];
+			
+			deletecodearr = arrayAppend(deletecodearr, pid);
+			$("#"+pid+"").empty().append(deleteselectedbtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#mytbl").find("input[name=deleteitemselected]").die("click");
+		$("#mytbl").find("input[name=deleteitemselected]").live("click", function(){
+			var pid = $(this).parent("span").attr("id");
+			//var pidarr = pid.split("_");
+			//var code = pidarr[1];
+			deletecodearr = arrayDelete(deletecodearr, pid);
+			$("#"+pid+"").empty().append(deletebtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#confirmdelete").die("click");
+		$("#confirmdelete").live("click", function(){
+			if(confirm("确定删除"+deletecodearr.length+"条数据?")){
+                onDelButtonClick(deletecodearr);
+                //重置按钮
+                deletecodearr.length = 0;
+                //searchData(false);
+			}
+			else{
+				return false;
+			}
+			
+		});
+		$("#selectedcount").die("click");
+		$("#selectedcount").live("click", function(){
+			var selectshortcutdiv = "<div id='selectdiv'><input type='button' name='selectall' id='selectall' value='全选' style='margin:0;'/><input type='button' name='selectnone' id='selectnone' value='清空' style='margin:0;'/></div>";
+			if($("#selectdiv").length == 0){
+				$("body").append(selectshortcutdiv);
+			}
+			var currstate = $("#selectedcount").attr("currstate");
+			if(currstate == 'folded'){
+				_this.setSelectedCountPosition();
+			}
+			else{
+				_this.hideSelectedCount();
+			}
+			$("#selectdiv").bind("mouseleave", function(){
+				_this.hideSelectedCount();
+			});
+			$("#selectall").unbind("click");
+			$("#selectall").bind("click", function(){
+				$("#mytbl").find("input[name=deleteitem]").each(function(i, item){
+					var pid = $(item).parent("span").attr("id");
+					//var pidarr = pid.split("_");
+					//var code = pidarr[1];
+					//var parent_id=$(this).parent("span").attr("parent_id");
+					
+					deletecodearr = arrayAppend(deletecodearr, pid);
+					$(item).parent().empty().append(deleteselectedbtn);
+					
+
+				});
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				_this.setSelectedCountPosition();
+			});
+			$("#selectnone").unbind("click");
+			$("#selectnone").bind("click", function(){
+				$("#mytbl").find("input[name=deleteitemselected]").each(function(i, item){
+					$(item).parent().empty().append(deletebtn);
+				});
+				//清空点击时,清空全局数组
+				deletecodearr.length = 0;
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				$("#selectdiv").remove();
+			});
+		});	
+
+		$("#divaddmit").dialog({
+		    autoOpen: false,
+		    modal:true,
+		    height:450,
+		    width:730
+        });
+	
+		$("#divaddast").dialog({
+		    autoOpen: false,
+		    modal:true,
+		    height:650,
+		    width:770
+        });
+		$("#divaddast").bind("mousedown", function(event){
+			//alert(event.target.outerHTML+"\n"+$(event.target).parents("#otherfieldsdiv").length +"---"+ $(event.target).attr("id"));
+			if($(event.target).parents("#otherfieldsdiv").length > 0 
+				|| $(event.target).attr("id") == 'otherfieldsdiv'
+				|| $(event.target).attr("id") == 'linkOtherField'
+				|| $(event.target).val() == 'other'){
+				return false;
+			}
+			hideOtherField();
+		});
+		$("#divaddspt").dialog({
+            autoOpen: false,
+            modal:true,
+            height:550,
+            width:800
+        });
+		$("#embeduserdiv").dialog({
+			autoOpen: false,
+			modal:true,
+			height:525,
+			width:573
+		});
+        if($("#"+otherfieldsdiv).length == 0){
+            var otherfields = [];
+            otherfields.push({value:"reposts_count",text:"转发数&nbsp;&nbsp;&nbsp;"});
+            otherfields.push({value:"direct_reposts_count",text:"直接转发数"});
+            otherfields.push({value:"total_reposts_count",text:"总转发数"});
+            otherfields.push({value:"followers_count",text:"直接到达数"});
+            otherfields.push({value:"total_reach_count",text:"总到达数"});
+            otherfields.push({value:"comments_count",text:"评论数"});
+            otherfields.push({value:"area",text:"用户地区"});
+            otherfields.push({value:"time",text:"时间"});
+            var htm = "";
+            for(var i=0;i<otherfields.length;i++){
+                var postfix= "&nbsp;&nbsp;&nbsp;&nbsp;";
+                if((i+1) % 2 == 0){
+                    postfix= "<br/>";
+                }
+                htm += '<input name="otherfields[]" id="other_'+otherfields[i].value+'" type="checkbox" value="'+otherfields[i].value+'"/>';
+                htm += '<label style="width:60px" for="other_'+otherfields[i].value+'">'+otherfields[i].text+'</label>'+postfix;
+            }
+            var divhtm = '<div class="popupdiv" style="display:none" id="'+otherfieldsdiv+'">'+htm+'</div>';
+            $("#linkOtherField").parents("td").append(divhtm);
+            $("input[type=checkbox][name='otherfields[]']").click(function(event){
+                var chkcount = $("input[type=checkbox][name='otherfields[]']:checked").length;
+                $("input[type=checkbox][name='func_other']").prop("checked",chkcount>0);
+            });
+        }
+		$("#s-listweburl").bind("click", function(){
+			var listtpl;
+			listtpl = $("#s-SEtemplate").val();
+			var urltpl = {};
+			$.each(config.allSpiderConfig, function(ci, citem){
+				if(citem.id == listtpl){
+					urltpl = citem.urlconfigrule;
+					return false;
+				}
+			});
+			var selectedVal = {};
+			if($("#s-listweburl").attr("urlconfigrule") != undefined){
+				selectedVal = jQuery.parseJSON($("#s-listweburl").attr("urlconfigrule"));
+			}
+			/*
+			if($("#sh-listweburl").val()){
+				var urls =  jQuery.parseJSON($("#sh-listweburl").val());
+				$.each(urls, function(ui, uitem){
+					for(var item in urltpl){
+						var itemObj = urltpl[item];
+						itemObj.value = [];
+						switch(item){
+							case "engine":
+							case "keyword":
+							case "site":
+							case "inurl":
+							var re = new RegExp(""+item+":Enum\([^(|)]*\)","ig");
+								var arr = re.exec(uitem);
+								var nval = RegExp.$2;
+								if(itemObj.value == undefined){
+									itemObj.value = [];
+									itemObj.value.push(nval.split(","));
+								}
+								else{
+									itemObj.value.push(nval.split(","));
+								}
+							break;
+							default:
+							break;
+						}
+					}
+				});
+			}
+			*/
+			myURLGenerator(urltpl, function(data){
+				//$("#sh-listweburl").val(data.urls.toString());
+				$("#sh-listweburl").val(JSON.stringify(data.urls));
+				$("#s-listweburl").attr("urlconfigrule", JSON.stringify(data.urlconfigrule));
+				$("#s-listurlrule").text(JSON.stringify(data.urls));
+			}, selectedVal, "配置URL");
+		});
+		$("#s-textweburl").bind("click", function(){
+			var listtpl = $("#s-SStemplate").val();
+			var urltpl = {};
+			$.each(config.allSpiderConfig, function(ci, citem){
+				if(citem.id == listtpl){
+					urltpl = citem.urlconfigrule;
+					return false;
+				}
+			});
+			var selectedVal = {};
+			if($("#s-textweburl").attr("urlconfigrule") != undefined){
+				selectedVal = jQuery.parseJSON($("#s-textweburl").attr("urlconfigrule"));
+			}
+			myURLGenerator(urltpl, function(data){
+				$("#sh-textweburl").val(JSON.stringify(data.urls));
+				$("#s-textweburl").attr("urlconfigrule", JSON.stringify(data.urlconfigrule));
+				$("#s-texturlrule").text(JSON.stringify(data.urls));
+			}, selectedVal, "配置URL");
+		});
+		$("#s-userweburl").bind("click", function(){
+			var listtpl = $("#s-usertemplate").val();
+			var urltpl = {};
+			$.each(config.allSpiderConfig, function(ci, citem){
+				if(citem.id == listtpl){
+					urltpl = citem.urlconfigrule;
+					return false;
+				}
+			});
+			var selectedVal = {};
+			if($("#s-userweburl").attr("urlconfigrule") != undefined){
+				selectedVal = jQuery.parseJSON($("#s-userweburl").attr("urlconfigrule"));
+			}
+			myURLGenerator(urltpl, function(data){
+				//$("#sh-listweburl").val(data.urls.toString());
+				$("#sh-userweburl").val(JSON.stringify(data.urls));
+				$("#s-userweburl").attr("urlconfigrule", JSON.stringify(data.urlconfigrule));
+				$("#s-userurlrule").text(JSON.stringify(data.urls));
+			}, selectedVal, "配置URL");
+		});
+        $("#s-caltotal").bind("click", function(){
+			    var adduserarr = [];
+			    $("#s-addeduser").find(".useritem").each(function(i,item){
+				    adduserarr.push($(item).attr("code"));
+				});
+                var filterdup = $("input[name=filterdup]:checked").val();
+                var data = {
+					type:"gettotalcount",
+                    keywords:$("#s-keywords").val(),
+                    inputtype:$("input[name=inputtype]:checked").val(),
+                    adduserarr:adduserarr,
+                    starttime:$("#s-starttime").val(),
+                    sendtime:$("#s-endtime").val(),
+                    filterdup:filterdup
+				};
+				$.ajax({
+						type:"POST",
+						url:config.modelUrl + "taskmanager.php",
+						data:data,
+						dataType: "json",
+						beforeSend:function(){
+							$("#s-caltotalres").append("<span id='testwait'><img src='"+config.imagePath+"minwait.gif' width='15' height='15' /></span>");
+						},
+						complete:function(){
+							 $("#testwait").remove();
+						},
+						success:function(data){
+							if(data.result){
+								$("#s-caltotalres").val(data.totalnum);
+							}
+							else{
+								alert(data.msg);
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+					});
+                });
+		//数据迁移数据源的选择
+        $.each(["source_host", "users_source_host"], function(i, field){
+                $("#btn_"+field+"").bind("click", function(){
+                    var choiceValue = "sourceidUrl";
+                    var selectedVal = [];
+                    $("#m-"+field+" .useritem").each(function(i, item){
+                        var tmpobj = {};
+                        tmpobj.name = $(item).text();
+                        tmpobj.code = $(item).attr("code");
+                        selectedVal.push(tmpobj);
+                        });
+                    var srchostid = $("#srchost").val();
+                    myCommonSelect(choiceValue, function(data){
+                        var dhtml = "";
+                        $.each(data, function(di, ditem){
+                            dhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+                            });
+                        $("#m-"+field+"").empty().append(dhtml);
+                        }, selectedVal, "数据来源", undefined, undefined, false, undefined, undefined, field, undefined, srchostid);
+                    });
+                });
+        $("#t_btn_source_host").bind("click", function(){
+                var choiceValue = "sourceidUrl";
+                var selectedVal = [];
+                $("#t_source_host .useritem").each(function(i, item){
+                    var tmpobj = {};
+                    tmpobj.name = $(item).text();
+                    tmpobj.code = $(item).attr("code");
+                    selectedVal.push(tmpobj);
+                    });
+                var srchostid = $("#srchost").val();
+                myCommonSelect(choiceValue, function(data){
+                    var dhtml = "";
+                    $.each(data, function(di, ditem){
+                        dhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+                        });
+                    $("#t_source_host").empty().append(dhtml);
+                    }, selectedVal, "数据来源", undefined, undefined, false, undefined, undefined, "source_host", undefined, srchostid);
+                });
+
+		//数据主机下拉菜单
+		if(config.allDataHost.length == 0){
+			getDataHost(function(data){
+				if(data){
+					config.allDataHost = data;
+				}
+			});
+		}
+		initDatahostSelect(config.allDataHost);
+		//目标主机点击事件
+		$("#btn_dsthost").bind("click", function(){
+			var choiceValue = [{name:"默认主机", code:0}];
+			$.each(config.allDataHost, function(i, item){
+				var tmpobj = {};
+				tmpobj.name = item.alias;
+				tmpobj.code = item.id;
+				choiceValue.push(tmpobj);
+			});
+			var selectedVal = [];
+			$("#m-dsthost .useritem").each(function(i, item){
+				var tmpobj = {};
+				tmpobj.name = $(item).text();
+				tmpobj.code = $(item).attr("code");
+				selectedVal.push(tmpobj);
+			});
+			myCommonSelect(choiceValue, function(data){
+				var dhtml = "";
+				$.each(data, function(di, ditem){
+					dhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+				});
+				$("#m-dsthost").empty().append(dhtml);
+			}, selectedVal, "目标主机", undefined, undefined, false);
+		});
+		//丢弃数据点击事件
+		$("#dsthostempty").bind("click", function(){
+			if($(this).prop("checked")){
+				$("#m-dsthost").empty();
+				$("#dsthost").val("");
+				$("input[name=keepsrc]").attr("checked", false);
+				$("input[name=keepsrc][value=0]").attr("checked", true);
+				$("#btn_dsthost").attr("disabled", "disabled");
+				$("input[name=keepsrc]").attr("disabled", "disabled");
+
+				$("input[name=delseedweibo]").removeAttr("disabled");
+				$("input[name=deluser]").removeAttr("disabled");
+				var deluserval = $("input[name=deluser]:checked").val(); 
+				if(parseInt(deluserval,10)){
+					$("input[name=delseeduser]").removeAttr("disabled");
+				}
+				else{
+					$("input[name=delseeduser]").attr("disabled", "disabled");
+				}
+			}
+			else{
+				$("#btn_dsthost").removeAttr("disabled");
+				$("input[name=keepsrc]").removeAttr("disabled");
+
+				$("input[name=keepsrc]").attr("checked", false);
+				$("input[name=keepsrc][value=1]").attr("checked", true);
+
+				$("input[name=delseedweibo]").attr("checked", false);
+				$("input[name=delseedweibo][value=0]").attr("checked", true);
+				$("input[name=delseedweibo]").attr("disabled", "disabled");
+
+				$("input[name=deluser]").attr("checked", false);
+				$("input[name=deluser][value=0]").attr("checked", true);
+				$("input[name=deluser]").attr("disabled", "disabled");
+
+				$("input[name=delseeduser]").attr("checked", false);
+				$("input[name=delseeduser][value=0]").attr("checked", true);
+				$("input[name=delseeduser]").attr("disabled", "disabled");
+			}
+		});
+		//保留源数据点击事件
+		$("input[name=keepsrc]").bind("click", function(){
+			var keepsrcval = $("input[name=keepsrc]:checked").val();
+			if(parseInt(keepsrcval, 10)){ //选中保留源数据
+				$("input[name=delseedweibo]").attr("checked", false);
+				$("input[name=delseedweibo][value=0]").attr("checked", true);
+				$("input[name=delseedweibo]").attr("disabled", "disabled");
+
+				$("input[name=deluser]").attr("checked", false);
+				$("input[name=deluser][value=0]").attr("checked", true);
+				$("input[name=deluser]").attr("disabled", "disabled");
+
+				$("input[name=delseeduser]").attr("checked", false);
+				$("input[name=delseeduser][value=0]").attr("checked", true);
+				$("input[name=delseeduser]").attr("disabled", "disabled");
+			}
+			else{
+				$("input[name=delseedweibo]").removeAttr("disabled");
+				$("input[name=deluser]").removeAttr("disabled");
+				$("input[name=delseeduser]").attr("disabled", "disabled");
+			}
+		});
+		$("input[name=deluser]").bind("click", function(){
+			var deluserval = $("input[name=deluser]:checked").val();
+			if(parseInt(deluserval, 10)){
+				$("input[name=delseeduser]").removeAttr("disabled");
+			}
+			else{
+				$("input[name=delseeduser]").attr("disabled", "disabled");
+				$("input[name=delseeduser]").attr("checked", false);
+				$("input[name=delseeduser][value=0]").attr("checked", true);
+			}
+		});
+		//获取最大条数
+		$("#btn_maxcount").bind("click", function(){
+			var srchostval = $("#srchost").val(); 
+			var sourceval = $("#source").val();
+			var cond_ge_createdval = $("#cond_ge_created").val();
+			var cond_lt_createdval = $("#cond_lt_created").val();
+			var cond_ex_textval = $("#cond_ex_text").val();
+			var cond_in_textval = $("#cond_in_text").val();
+			var cond_ex_nameval = $("#cond_ex_name").val();
+			var cond_in_nameval = $("#cond_in_name").val();
+			var cond_in_customqueryval = $("#cond_in_customquery").val();
+			var data = {
+					type:"getallmigratecount",
+					srchost:srchostval,
+					source:sourceval,
+					cond_ge_created:cond_ge_createdval,
+					cond_lt_created:cond_lt_createdval,
+					cond_in_text:cond_in_textval,
+					cond_ex_text:cond_ex_textval,
+					cond_ex_name:cond_ex_nameval,
+					cond_in_name:cond_in_nameval,
+					cond_in_customquery:cond_in_customqueryval
+				};
+				$.ajax({
+						type:"POST",
+						url:config.modelUrl + "taskmanager.php",
+						data:data,
+						dataType: "json",
+						beforeSend:function(){
+							$("#span_maxcount").append("<span id='testwait'><img src='"+config.imagePath+"minwait.gif' width='15' height='15' /></span>");
+						},
+						complete:function(){
+							 $("#testwait").remove();
+						},
+						success:function(data){
+							if(data.result){
+								$("#span_maxcount").text(data.count);
+							}
+							else{
+								alert(data.msg);
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+					});
+		});
+		$("#source").change(function(){
+			 var sourceid = $(this).val();
+	         getAllDataCount(sourceid, function(data){
+		         if(data.result){
+		            $("#lblalldatacount").text(data.data);
+		         }
+			 });
+		});
+		$("#btnaddmigratedata").bind("click", function(){
+			if($("#m-task").val() == config.TASK_MIGRATEDATA){
+				var dsthostarr = [];
+			    $("#m-dsthost").find(".useritem").each(function(i,item){
+				    dsthostarr.push($(item).attr("code"));
+				});
+	            $("#dsthost").val(dsthostarr.toString());
+
+				var source_hostarr = [];
+			    $("#m-source_host").find(".useritem").each(function(i,item){
+				    source_hostarr.push($(item).attr("code"));
+				});
+				if(source_host.length > 1){
+					alert("只能选择一个!");
+					return false;
+				}
+	            $("#source_host").val(source_hostarr.toString());
+
+				var users_source_hostarr = [];
+			    $("#m-users_source_host").find(".useritem").each(function(i,item){
+				    users_source_hostarr.push($(item).attr("code"));
+				});
+				if(users_source_hostarr.length > 1){
+					alert("只能选择一个");
+					return false;
+				}
+	            $("#users_source_host").val(users_source_hostarr.toString());
+
+				var dsthostemptychk = $("#dsthostempty").prop("checked");
+				if(!dsthostemptychk){
+					var dsthostval = $("#dsthost").val();
+					if(dsthostval == ""){
+						alert("请选择目标主机或勾选丢弃数据!");
+						return false;
+					}
+				}
+			}
+    		addTask($("#formaddmigratedata").serialize(),function (r){
+		        if(r.result){
+	         	    $("#divaddmit").dialog("close");
+	         	   searchData(true);
+			    }
+				else{
+				    alert(r.msg);		
+				}	
+			});
+		});
+		//分析任务
+	    $("#btnaddanalysis").click(function(){
+			var taskval = $("#task").val();
+    		if(taskval == config.TASK_SYNC){
+				var $add_title_res = $("input[name='add_title_after_text']:checked").val();
+				var sstarttime = $("#starttime").val();
+				var sendtime = $("#endtime").val();
+				if(sstarttime != "" || sendtime != ""){
+					if(sstarttime != "" && sendtime != ""){
+						var sstart = getTimeSec(sstarttime);
+						var send = getTimeSec(sendtime);
+						if(send <= sstart){
+							alert('结束时间应晚于起始时间!');
+							return false;
+						}
+					}
+				}
+				var source_hostarr = [];
+			    $("#t_source_host").find(".useritem").each(function(i,item){
+				    source_hostarr.push($(item).attr("code"));
+				});
+				if(source_host.length > 1){
+					alert("只能选择一个!");
+					return false;
+				}
+	            $("#t_hd_source_host").val(source_hostarr.toString());
+
+
+        		var ec = $("#each_count").val();
+        		if(!testPositiveInt(ec,5)){
+        			alert('处理条数格式有误');
+        			$("#each_count").focus();
+        			return false;
+        		}
+                var startindex = $("#startdataindex").val();
+                var endindex = $("#enddataindex").val();
+                startindex = startindex == undefined ? '' : startindex;
+                endindex = endindex == undefined ? '' : endindex;
+                var sr = testPositiveInt(startindex, parseInt($("#startdataindex").attr("maxlength"), 10));
+                var er = testPositiveInt(endindex, parseInt($("#enddataindex").attr("maxlength"), 10));
+                if( !sr || parseInt(startindex,10) < 1){
+                    alert('起始数据范围输入有误');
+                    $("#startdataindex").focus();
+                    return false;
+                }
+                if( !er ){
+                    alert('结束数据范围输入有误');
+                    $("#enddataindex").focus();
+                    return false;
+                }
+                if( (endindex != '' && startindex != '') && (startindex >= endindex)){
+                    alert('结束数据范围应大于起始范围');
+                    $("#enddataindex").focus();
+                    return false;
+                }
+                var funcount = $("input[name='func[]']:checked").length;
+                var chkother = $("input[name='func_other']").prop("checked");
+                if(funcount == 0 && !chkother){
+                    alert("请选择功能");
+                    return false;
+                }
+                if(chkother){
+                    var otherfieldcount = $("input[type=checkbox][name='otherfields[]']:checked").length;
+                    if(otherfieldcount == 0){
+                    	alert("请选择字段");
+                        return false;
+                    }
+                }
+    		}
+			if(taskval == config.TASK_REPOSTPATH || taskval == config.TASK_COMMENTPATH){
+		    	var addorigurlarr = [];
+                $("#t-addedorigurl").find(".useritem").each(function(i,item){
+					addorigurlarr.push($(item).attr('realvalue'));
+                });
+                $("#t-hdaddedorigurl").val(addorigurlarr.toString());
+			}
+    		
+    		addTask($("#formaddanalysis").serialize(),function (r){
+		        if(r.result){
+	         	    $("#divaddast").dialog("close");
+	         	   searchData(true);
+			    }
+				else{
+				    alert(r.msg);		
+				}	
+			});
+	    });
+		//抓取任务
+	    $("#btnaddspider").click(function(){
+		    var taskid = $("#s-task").val();
+		    taskid = parseInt(taskid,10);
+		    if(taskid == config.TASK_WEIBO){//weibo
+			    var adduserarr = [];
+			    $("#s-addeduser").find(".useritem").each(function(i,item){
+				    adduserarr.push($(item).attr("code"));
+				});
+	            $("#s-hdaddeduser").val(adduserarr.toString());
+
+			    if($("#s-min_follower_count").val() != undefined){
+				    var smfc = $("#s-min_follower_count").val();
+			    	if(!testPositiveInt(smfc, parseInt($("#min_follower_count").attr("maxlength"), 10))){
+			    	    alert('粉丝数字段格式错误');
+			    	    $("#s-min_follower_count").focus();
+			    	    return false;
+			    	}
+			    }
+				//时间验证
+				var sstep = $("#s-step").val();
+				var sstarttime = $("#s-starttime").val();
+				var sendtime = $("#s-endtime").val();
+				if(sstep != ""){
+					if(sstarttime == "" || sendtime == ""){
+						alert("请选择开始和结束时间");
+						return false;
+					}
+				}
+				if(sstarttime != "" || sendtime != ""){
+					if(sstarttime != ""){
+						var sstart = getTimeSec(sstarttime);
+						if(sstart % 60 != 0){
+							alert("时间以分钟为最小单位!");
+							return false;
+						}
+					}
+					if(sendtime != ""){
+						var send = getTimeSec(sendtime);
+						if(send % 60 != 0){
+							alert("时间以分钟为最小单位!");
+							return false;
+						}
+					}
+					if(sstarttime != "" && sendtime != ""){
+						var sstart = getTimeSec(sstarttime);
+						var send = getTimeSec(sendtime);
+						//获取步长的值
+						var stepval = $("#s-step").val();
+						if(stepval == ""){
+							if(send < sstart){
+								alert('结束时间应晚于或等于起始时间!');
+								return false;
+							}
+						}
+						else{
+							if(send <= sstart){
+								alert('结束时间应晚于起始时间!');
+								return false;
+							}
+						}
+					}
+				}
+				//任务超时
+				var sduration = $("#s-duration").val();
+				if(sduration != ""){
+					var reg = new RegExp(/^\d*$/g);
+					if(!reg.test(sduration)){
+						alert("请填写数字!");
+						return false;
+					}
+					else{
+						if(sduration < 1){
+							alert("至少为1秒!");
+							return false;
+						}
+					}
+				}
+				else{
+					if($("#s-remote").prop("checked")){
+						alert("请选择超时时间!");
+						return false;
+					}
+				}
+				if($("#s-remote").prop("checked")){
+					var sc = $("#s-config").val();
+					if(sc == null){
+						alert("请选择抓取配置!");
+						return false
+					}
+				}
+				var addsourceid = [];
+				$("#s-addedsourceid").find(".useritem").each(function(i, item){
+					addsourceid.push($(item).attr("code"));
+						});
+				$("#s-hdaddedsourceid").val(addsourceid.toString());
+				//抓取帐号
+				var addaccountid = [];
+				$("#s-addedaccountid").find(".useritem").each(function(i, item){
+					addaccountid.push($(item).attr("code"));
+					});
+				$("#s-hdaddedaccountid").val(addaccountid.toString());
+				//是否使用全局帐号
+				var gachk = $("input[name=globalaccount]:checked").val();
+				if(parseInt(gachk, 10)){
+					if(addsourceid.length == 0){
+						alert("使用全局帐号,请选择帐号来源!");
+						return false;
+					}
+				}
+				//是否切换帐号
+				var isswitchchk = $("input[name=isswitch]:checked").val();
+				if(parseInt(isswitchchk, 10)){
+					var gachk = $("input[name=globalaccount]:checked").val();
+					if(addaccountid.length == 0 && parseInt(gachk, 10) == 0){
+						alert("请添加抓取帐号!");
+						return false;
+					}
+					else{
+						var switchpageval = $("#s-switchpage").val();
+						if(switchpageval <= 0){
+							alert("帐号切换策略页数需要大于0的整数");
+							return false;
+						}
+						var switchtimeval = $("#s-switchtime").val();
+						if(switchtimeval < 0){
+							alert("帐号切换策略时间需要大于或等于0的整数");
+							return false;
+						}
+						var gaccount = $("input[name=globalaccount]:checked").val();
+						if(parseInt(gaccount, 10)){
+							if(addaccountid.length > 1){
+								alert("初始帐号只添加一个!");
+								return false;
+							}
+						}
+					}
+				}
+				else{
+					if(addaccountid.length > 1){
+						alert("只能选择一个抓取帐号!");
+						return false;
+					}
+					else if(addaccountid.length == 0 && $("#s-remote").prop("checked")){
+						if(!confirm("未添加抓取帐号,是否提交!")){
+							return false;
+						}
+					}
+				}
+		    }
+			if(taskid == config.TASK_WEBPAGE){
+				var addsourceid = [];
+				$("#s-addedsourceid").find(".useritem").each(function(i, item){
+					addsourceid.push($(item).attr("code"));
+						});
+				$("#s-hdaddedsourceid").val(addsourceid.toString());
+				//抓取帐号
+				var addaccountid = [];
+				$("#s-addedaccountid").find(".useritem").each(function(i, item){
+					addaccountid.push($(item).attr("code"));
+					});
+				$("#s-hdaddedaccountid").val(addaccountid.toString());
+                var createdtimestart = $("#s-createdtimestart").val();
+                var createdtimeend = $("#s-createdtimeend").val();
+                if(createdtimestart != "" && createdtimeend != ""){
+                    var cstart = getTimeSec(createdtimestart);
+                    var cend = getTimeSec(createdtimeend);
+                    if(cend < cstart){
+                        alert('结束时间应晚于起始时间!');
+                        return false;
+                    }
+                }
+                var lastrplytimestart = $("#s-lastrplytimestart").val();
+                var lastrplytimeend = $("#s-lastrplytimeend").val();
+                if(lastrplytimestart != "" && lastrplytimeend != ""){
+                    var cstart = getTimeSec(lastrplytimestart);
+                    var cend = getTimeSec(lastrplytimeend);
+                    if(cend < cstart){
+                        alert('结束时间应晚于起始时间!');
+                        return false;
+                    }
+                }
+				//是否使用全局帐号
+				var gachk = $("input[name=globalaccount]:checked").val();
+				if(parseInt(gachk, 10)){
+					if(addsourceid.length == 0){
+						alert("使用全局帐号,请选择帐号来源!");
+						return false;
+					}
+				}
+				//是否切换帐号
+				var isswitchchk = $("input[name=isswitch]:checked").val();
+				if(parseInt(isswitchchk, 10)){
+					var gachk = $("input[name=globalaccount]:checked").val();
+					if(addaccountid.length == 0 && parseInt(gachk, 10) == 0){
+						alert("请添加抓取帐号!");
+						return false;
+					}
+					else{
+						var switchpageval = $("#s-switchpage").val();
+						if(switchpageval <= 0){
+							alert("帐号切换策略页数需要大于0的整数");
+							return false;
+						}
+						var switchtimeval = $("#s-switchtime").val();
+						if(switchtimeval < 0){
+							alert("帐号切换策略时间需要大于或等于0的整数");
+							return false;
+						}
+						var gaccount = $("input[name=globalaccount]:checked").val();
+						if(parseInt(gaccount, 10)){
+							if(addaccountid.length > 1){
+								alert("初始帐号只添加一个!");
+								return false;
+							}
+						}
+					}
+				}
+				else{
+					if(addaccountid.length > 1){
+						alert("只能选择一个抓取帐号!");
+						return false;
+					}
+					else if(addaccountid.length == 0 && $("#s-remote").prop("checked")){
+						if(!confirm("未添加抓取帐号,是否提交!")){
+							return false;
+						}
+					}
+				}
+			}
+		    if(taskid == config.TASK_REPOST_TREND || taskid == config.TASK_COMMENTS){//转发|评论
+				var each_count = $("#s-each_count").val();
+				if(each_count > 200){
+					alert("最大上限是200");
+					return false;
+				}
+		    	var addorigidarr = [];
+		    	var addorigmidarr = [];//mid
+                $("#s-addedorigid").find(".useritem").each(function(i,item){
+                    if($(item).attr('valtype') == "id"){
+                   	   addorigidarr.push($(item).attr('realvalue'));
+                    }
+                    else{
+                        addorigmidarr.push($(item).attr('realvalue'));
+                    }
+                });
+                $("#s-hdaddedorigid").val(addorigidarr.toString());
+                $("#s-hdaddedorigmid").val(addorigmidarr.toString());
+                if($("#s-min_reposts_count").val() != undefined){
+                    var smfc = $("#s-min_reposts_count").val();
+                    if(!testPositiveInt(smfc, parseInt($("#min_reposts_count").attr("maxlength"), 10))){
+                        alert('转发数字段格式错误');
+                        $("#s-min_reposts_count").focus();
+                        return false;
+                    }
+                }
+				//任务超时
+				var sduration = $("#s-duration").val();
+				if(sduration != ""){
+					var reg = new RegExp(/^\d*$/g);
+					if(!reg.test(sduration)){
+						alert("请填写数字!");
+						return false;
+					}
+					else{
+						if(sduration < 1){
+							alert("至少为1秒!");
+							return false;
+						}
+					}
+				}
+				else{
+					if($("#s-remote").prop("checked")){
+						alert("请选择超时时间!");
+						return false;
+					}
+				}
+				if($("#s-remote").prop("checked")){
+					var sc = $("#s-config").val();
+					if(sc == null){
+						alert("请选择抓取配置!");
+						return false
+					}
+				}
+				var addsourceid = [];
+				$("#s-addedsourceid").find(".useritem").each(function(i, item){
+					addsourceid.push($(item).attr("code"));
+						});
+				$("#s-hdaddedsourceid").val(addsourceid.toString());
+
+				//抓取帐号
+				var addaccountid = [];
+				$("#s-addedaccountid").find(".useritem").each(function(i, item){
+					addaccountid.push($(item).attr("code"));
+					});
+				$("#s-hdaddedaccountid").val(addaccountid.toString());
+
+				//是否使用全局帐号
+				var gachk = $("input[name=globalaccount]:checked").val();
+				if(parseInt(gachk, 10)){
+					if(addsourceid.length == 0){
+						alert("使用全局帐号,请选择帐号来源!");
+						return false;
+					}
+				}
+
+				//是否切换帐号
+				var isswitchchk = $("input[name=isswitch]:checked").val();
+				if(parseInt(isswitchchk, 10) == 0){
+					if(addaccountid.length > 1){
+						alert("只能选择一个抓取帐号");
+						return false;
+					}
+					else if(addaccountid.length == 0  && $("#s-remote").prop("checked")){
+						if(!confirm("未添加抓取帐号,是否提交!")){
+							return false;
+						}
+					}
+				}
+
+		    }
+			if(taskid == config.TASK_KEYWORD){ //合法性验证
+				var skeywords = $("#s-keywords").val();
+				if(skeywords.length < 1){
+					alert('请输入关键词!');
+					return false;
+				}
+				var susername = $("#s-username").val();
+			    var adduserarr = [];
+			    $("#s-addeduser").find(".useritem").each(function(i,item){
+				    adduserarr.push($(item).attr("code"));
+				});
+	            $("#s-hdaddeduser").val(adduserarr.toString());
+                var hdaddeduser = $("#s-hdaddeduser").val();
+				if($("#s-remote").prop("checked")){
+					var sc = $("#s-config").val();
+					if(sc == null){
+						alert("请选择抓取配置!");
+						return false
+					}
+				}
+
+				var sstep = $("#s-step").val();
+				var sstarttime = $("#s-starttime").val();
+				var sendtime = $("#s-endtime").val();
+				if(sstep != ""){
+					if(sstarttime == "" || sendtime == ""){
+						alert("请选择开始和结束时间");
+						return false;
+					}
+				}
+				if(sstarttime != "" || sendtime != ""){
+					if(sstarttime != ""){
+						var sstart = getTimeSec(sstarttime);
+						if(sstart % 60 != 0){
+							alert("时间以分钟为最小单位!");
+							return false;
+						}
+					}
+					if(sendtime != ""){
+						var send = getTimeSec(sendtime);
+						if(send % 60 != 0){
+							alert("时间以分钟为最小单位!");
+							return false;
+						}
+					}
+					if(sstarttime != "" && sendtime != ""){
+						var sstart = getTimeSec(sstarttime);
+						var send = getTimeSec(sendtime);
+						//获取步长的值, 
+						var stepval = $("#s-step").val();
+						if(stepval == ""){
+							if(send < sstart){
+								alert('结束时间应晚于或等于起始时间!');
+								return false;
+							}
+						}
+						else{
+							if(send <= sstart){
+								alert('结束时间应晚于起始时间!');
+								return false;
+							}
+						}
+					}
+				}
+
+				var sduration = $("#s-duration").val();
+				if(sduration != ""){
+					var reg = new RegExp(/^\d*$/g);
+					if(!reg.test(sduration)){
+						alert("请填写数字!");
+						return false;
+					}
+					else{
+						if(sduration < 1){
+							alert("至少为1秒!");
+							return false;
+						}
+					}
+				}
+				else{
+					alert("请选择超时时间!");
+					return false;
+				}
+				var addsourceid = [];
+				$("#s-addedsourceid").find(".useritem").each(function(i, item){
+					addsourceid.push($(item).attr("code"));
+						});
+				$("#s-hdaddedsourceid").val(addsourceid.toString());
+
+				//抓取帐号
+				var addaccountid = [];
+				$("#s-addedaccountid").find(".useritem").each(function(i, item){
+					addaccountid.push($(item).attr("code"));
+					});
+				$("#s-hdaddedaccountid").val(addaccountid.toString());
+
+				//是否使用全局帐号
+				var gachk = $("input[name=globalaccount]:checked").val();
+				if(parseInt(gachk, 10)){
+					if(addsourceid.length == 0){
+						alert("使用全局帐号,请选择帐号来源!");
+						return false;
+					}
+				}
+				//是否切换帐号
+				var isswitchchk = $("input[name=isswitch]:checked").val();
+				if(parseInt(isswitchchk, 10)){
+					var gachk = $("input[name=globalaccount]:checked").val();
+					if(addaccountid.length == 0 && parseInt(gachk, 10) == 0){
+						alert("请添加抓取帐号!");
+						return false;
+					}
+					else{
+						var switchpageval = $("#s-switchpage").val();
+						if(switchpageval <= 0){
+							alert("帐号切换策略页数需要大于0的整数");
+							return false;
+						}
+						var switchtimeval = $("#s-switchtime").val();
+						if(switchtimeval < 0){
+							alert("帐号切换策略时间需要大于或等于0的整数");
+							return false;
+						}
+						var gaccount = $("input[name=globalaccount]:checked").val();
+						if(parseInt(gaccount, 10)){
+							if(addaccountid.length > 1){
+								alert("使用全局帐号时初始帐号只添加一个!");
+								return false;
+							}
+						}
+					}
+				}
+				else{
+					if(addaccountid.length > 1){
+						alert("只能选择一个抓取帐号!");
+						return false;
+					}
+					else if(addaccountid.length == 0 && $("#s-remote").prop("checked")){
+						if(!confirm("未添加抓取帐号,是否提交!")){
+							return false;
+						}
+					}
+				}
+			}
+			if(taskid == config.TASK_FRIEND){
+				if($("#s-remote").prop("checked")){
+					var sc = $("#s-config").val();
+					if(sc == null){
+						alert("请选择抓取配置!");
+						return false
+					}
+				}
+
+				var user = $("input[name=inputuser]:checked").val();
+				var suidval = $("#s-uids").val();
+				suidval = commonFun.trim(suidval);
+				if(suidval == ""){
+					alert("请添加用户!");
+					return false;
+				}
+				var suids = suidval.split('\n');
+				if(user == "screen_name"){
+					var sc = $("#s-config").val();
+					//var sourceid = $("select[name=config] option[value="+sc+"]").attr("sourceid");
+					var sourceid = $("#s-source").val(); 
+					var existuser = false;
+					$.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						async:false,
+						url: config.modelUrl + "taskmanager.php",
+						data: JSON.stringify({
+							sourceid: sourceid,
+							uids: suids,
+							type: "checkscreenname"
+						}),
+						success: function(data){
+							if(data.flag == 0){
+								existuser = true;
+								var erruhtml = "";
+								$.each(data.user, function(di, ditem){
+									erruhtml += ditem+" "; 
+								});
+								$("#inputuser_tip").html("<span style='color:red;'>用户"+erruhtml+"不存在,请导入!</span>");
+							}
+							else if(data.flag == 1){
+								$("#s-hiddenuids").val(data.user.toString());
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+					});
+					if(existuser){
+						return false;
+					}
+				}
+				else if(user == "id"){
+					var isnum = true
+					$.each(suids, function(si, sitem){
+						if(!testPositiveInt(sitem, 256)){
+							isnum = false
+							return false;
+						}
+					});
+					if(!isnum){
+						alert("请输入正确用户ID!");
+						return false;
+					}
+					$("#s-hiddenuids").val(suids.toString());
+				}
+				var sduration = $("#s-duration").val();
+				if(sduration != ""){
+					var reg = new RegExp(/^\d*$/g);
+					if(!reg.test(sduration)){
+						alert("请填写数字!");
+						return false;
+					}
+					else{
+						if(sduration < 1){
+							alert("至少为1秒!");
+							return false;
+						}
+					}
+				}
+				else{
+					alert("请选择超时时间!");
+					return false;
+				}
+			}
+			if(taskid == config.TASK_NICKNAME){
+				var adduserarr = [];
+				$("#s-addeduser").find(".useritem").each(function(i,item){
+					adduserarr.push($(item).attr("code"));
+				});
+				$("#s-hdaddeduser").val(adduserarr.toString());
+				var each_count = $("#s-each_count").val();
+				if(each_count > 200){
+					alert("最大上限是200");
+					return false;
+				}
+			}
+			//针对所有任务，摘要不能为空
+			var remarks = $("#s-remarks").val();
+			if(remarks == ''){
+				alert("摘要不能为空");
+				return false;
+			}
+	    	addTask($("#formaddspider").serialize(),function (r){
+                if(r.result){
+                    $("#divaddspt").dialog("close");
+                    searchData(false);
+                }
+                else{
+                    var iderr = "";
+                    if(r.id != undefined){
+                        iderr = ":"+r.id.toString();
+                    }
+                    if(r.url != undefined){
+                    	iderr += ":"+r.url.toString();
+                    }
+					if(r.noexistuser){
+						if(r.noexistuser.length > 0){
+							iderr += ":"+r.noexistuser.join(",");
+						}
+					}
+					alert(r.msg+iderr);
+                }   
+            });
+        });
+	    $("#btnclosemigratedata").click(function(){
+	    	$("#divaddmit").dialog("close");
+	    });
+
+	    $("#btncloseanalysis").click(function(){
+	    	$("#divaddast").dialog("close");
+	    });
+        $("#btnclosespider").click(function(){
+            $("#divaddspt").dialog("close");
+        });
+        
+    	$("#task").change(function(){
+        	var taskvalue = $(this).val();
+        	$("tr[id^='t']").hide();
+			$("tr[id^='t"+taskvalue+"-']").show();
+			$("#t-addedorigurl").empty();
+			$("#t-hdaddedorigurl").val("");
+			switch(parseInt(taskvalue, 10)){
+				case config.TASK_REPOSTPATH:
+					break;
+				case config.TASK_COMMENTPATH:
+					$("#t16-1").show();
+					$("#t16-1-1").show();
+					break;
+				default:
+					break;
+			}
+        });
+		/*
+		$("#s-searchengine").bind("change", function(){
+			var ei = $(this).val();
+			initSearchEngineConfig(ei);
+		});
+		*/
+		$("#s-searchsite").bind("change", function(){
+			var si = $(this).val();
+			initSearchSiteConfig(si);
+		});
+		$("#s_is_monitor_nickname1, #s_is_monitor_nickname0").bind("click", function() {
+			var is_monitor = $("input[name=is_monitor_nickname]:checked").val();
+			if(is_monitor == "1"){
+				$('#s10-2').show();
+			}else if(is_monitor == "0"){
+				$('#s10-2').hide();
+			}
+		})
+
+        $("#s-local, #s-remote").bind("click", function() {
+                  var taskid = $("#s-task").val();
+                  var locchk = $("#s-local").prop("checked");
+                  var remchk = $("#s-remote").prop("checked");
+                  if (!locchk && !remchk) {
+                    alert("请至少选择一项!");
+                    $(this).attr("checked", true);
+                  } else {
+                    if (taskid == config.TASK_WEIBO) {
+                      $("tr[id^='s']").hide();
+                      $("tr[id^='s4-']").show();
+                      if (locchk && remchk) {
+                        //选择源
+                        //$("#s-source").parents("tr").first().show();
+                        //每次抓取数
+                        $("#s-each_count").parents("tr").first().show();
+                        //抓取配置
+                        $("#s10-1").show();
+                        //步长
+                        $("#s10-3").show();
+                        $("#s15-10").show();
+                        //抓取帐号
+                        $("#s10-11").show();
+                        $("#s10-11-1").show();
+                        $("#s10-7").show();
+                        $("#s10-7-1").show();
+                        var gachk = $("input[name=globalaccount]:checked").val();
+                        if (parseInt(gachk, 10) == 0) {
+                          //是否切换帐号
+                          $("#s10-8").show();
+                          $("#s10-12").show();
+                        } else {
+                          $("#s10-8").hide();
+                          $("#s10-12").hide();
+                          $("input[name=logoutfirst]").attr("checked", false);
+                          $("input[name=logoutfirst][value=1]").attr("checked", true);
+                        }
+                        //使用全局帐号
+                        $("#s10-10").show();
+                        var switchchk = $("input[name=isswitch]:checked").val();
+                        if (parseInt(switchchk, 10)) {
+                          //切换帐号策略
+                          $("#s10-9").show();
+                        } else {
+                          //切换帐号策略
+                          $("#s10-9").hide();
+                        }
+
+                        //开始时间
+                        $("#s10-4-1").show();
+                        //结束时间
+                        $("#s10-4-2").show();
+                        //任务超时
+                        $("#s-duration").parents("tr").first().show();
+                        //是否种子
+                        $("#s-isseed1").parents("tr").first().show();
+                        //立即更新
+                        $("#s-islimit1").parents("tr").first().show();
+                      } else if (remchk) {
+                        //var configval = $("#s-config").val();
+                        //initSourceSelect(config.allSource, configval);
+
+                        //选择源
+                        //$("#s-source").parents("tr").first().hide();
+                        //每次抓取数
+                        $("#s-each_count").parents("tr").first().hide();
+                        $("#s15-10").show();
+                        //抓取配置
+                        $("#s10-1").show();
+                        //步长
+                        $("#s10-3").show();
+                        //抓取帐号
+                        $("#s10-11").show();
+                        $("#s10-11-1").show();
+                        $("#s10-7").show();
+                        $("#s10-7-1").show();
+                        var gachk = $("input[name=globalaccount]:checked").val();
+                        if (parseInt(gachk, 10) == 0) {
+                          //是否切换帐号
+                          $("#s10-8").show();
+                          $("#s10-12").show();
+                        } else {
+                          $("#s10-8").hide();
+                          $("#s10-12").hide();
+                          $("input[name=logoutfirst]").attr("checked", false);
+                          $("input[name=logoutfirst][value=1]").attr("checked", true);
+                        }
+                        //使用全局帐号
+                        $("#s10-10").show();
+                        var switchchk = $("input[name=isswitch]:checked").val();
+                        if (parseInt(switchchk, 10)) {
+                          //切换帐号策略
+                          $("#s10-9").show();
+                        } else {
+                          //切换帐号策略
+                          $("#s10-9").hide();
+                        }
+
+                        //开始时间
+                        $("#s10-4-1").show();
+                        //结束时间
+                        $("#s10-4-2").show();
+                        //立即更新
+                        $("#s-islimit1").parents("tr").first().hide();
+                      } else if (locchk) {
+                        //选择源
+                        //initSourceSelect(config.allSource);
+                        //$("#s-source").parents("tr").first().show();
+                        //每次抓取数
+                        $("#s-each_count").parents("tr").first().show();
+                        //任务超时
+                        $("#s-duration").parents("tr").first().hide();
+                        //是否种子
+                        $("#s-isseed1").parents("tr").first().hide();
+                        //立即更新
+                        $("#s-islimit1").parents("tr").first().show();
+                      }
+                    } 
+                    else if (taskid == config.TASK_KEYWORD) {
+                      $("tr[id^='s']").hide();
+                      $("tr[id^='s10-']").show();
+                      if (locchk && remchk) {
+                        $("#s15-10").show();
+                        $("#s15-3").hide();
+                      } else if (remchk) {
+                        $("#s15-10").show();
+                        $("#s15-3").hide();
+                        $("#s10-13").hide();
+                      } else if (locchk) {
+                        $("#s15-10").hide();
+                        $("#s15-3").show();
+                        $("#s10-5").hide();
+                        $("#s10-13").show();
+                        //ids
+                        $("#s4-2").show();
+                        $("#s4-2-1").show();
+                        //抓取配置
+                        $("#s10-1").hide();
+                        //开始时间
+                        $("#s10-4-1").show();
+                        //结束时间
+                        $("#s10-4-2").show();
+                        //账号
+                        $("#s10-11").hide();
+                        $("#s10-11-1").hide();
+                        $("#s10-7").hide();
+                        $("#s10-7-1").hide();
+                        $("#s10-10").hide();
+                        $("#s10-8").hide();
+                        $("#s10-12").hide();
+                        $("#s10-9").hide();
+                        $("#s10-3").show();
+                      }
+                    }
+                    else if (taskid == config.TASK_REPOST_TREND) {
+                      $("tr[id^='s']").hide();
+                      $("tr[id^='s5-']").show();
+                      if (locchk && remchk) {
+                        $("#s15-10").show();
+                        $("#s15-3").hide();
+                      } else if (remchk) {
+                        $("#s15-10").show();
+                        $("#s15-3").hide();
+                        $("#s10-13").hide();
+                      } else if (locchk) {
+                        $("#s15-10").hide();
+                        $("#s15-3").show();
+                        $("#s10-5").hide();
+                        $("#s10-13").show();
+                        //ids
+                        $("#s4-2").show();
+                        $("#s4-2-1").show();
+                        //抓取配置
+                        $("#s10-1").hide();
+                        //开始时间
+                        $("#s10-4-1").show();
+                        //结束时间
+                        $("#s10-4-2").show();
+                        //账号
+                        $("#s10-11").hide();
+                        $("#s10-11-1").hide();
+                        $("#s10-7").hide();
+                        $("#s10-7-1").hide();
+                        $("#s10-10").hide();
+                        $("#s10-8").hide();
+                        $("#s10-12").hide();
+                        $("#s10-9").hide();
+                        $("#s10-3").hide();
+                      }
+                    }
+					else if (taskid == config.TASK_NICKNAME) {
+						$("tr[id^='s']").hide();
+						$("tr[id^='s18-']").show();
+
+					}
+                  }
+                });
+		$("input[name=isswitch]").bind("click", function(){
+			var sltval = $("input[name=isswitch]:checked").val();
+			var sltga = $("input[name=globalaccount]:checked").val();
+			if(parseInt(sltval, 10)){
+				var childlen = $("#s-addedaccountid").find(".useritem").length; 
+				//没有添加帐号,并且不使用全局帐号时
+				if(childlen == 0 && parseInt(sltga, 10) == 0){
+					$("input[name=isswitch]").attr("checked", false);		
+					$("input[name=isswitch][value=0]").attr("checked", true);		
+					alert("请添加抓取帐号!");
+					return false;
+				}
+				else{
+					//切换帐号策略
+					$("#s10-9").show();
+					//退出登录
+					$("#s10-12").hide();
+					$("input[name=logoutfirst]").attr("checked", false);
+					$("input[name=logoutfirst][value=1]").attr("checked", true);
+				}
+			}
+			else{
+				var childlen = $("#s-addedaccountid").find(".useritem").length; 
+				if(childlen > 1){
+					$("input[name=isswitch]").attr("checked", false);		
+					$("input[name=isswitch][value=1]").attr("checked", true);		
+					alert("不使用切换时最多选一个账号!");
+					return false;
+				}
+				else{
+					//切换帐号策略
+					$("#s10-9").hide();
+					//退出登录
+					$("#s10-12").show();
+				}
+			}
+		});
+		$("input[name=globalaccount]").bind("click", function(){
+			var sltval = $("input[name=globalaccount]:checked").val();
+			if(parseInt(sltval, 10)){
+				var childlen = $("#s-addedaccountid").find(".useritem").length; 
+				if(childlen > 0){
+					alert("使用全局帐号时不用添加帐号!");
+					return false;
+				}
+				$("input[name=isswitch][value=1]").attr("checked", true);
+				//是否切换帐号
+				$("#s10-8").hide();
+				$("#s10-12").hide();
+				$("input[name=logoutfirst]").attr("checked", false);
+				$("input[name=logoutfirst][value=1]").attr("checked", true);
+
+				//切换帐号策略
+				$("#s10-9").show();
+			}
+			else{
+				$("input[name=isswitch][value=0]").attr("checked", true);
+				//是否切换帐号
+				$("#s10-8").show();
+				$("#s10-12").show();
+				//切换帐号策略
+				$("#s10-9").hide();
+			}
+		});
+
+		/*
+		//切换数据来源时,选择的帐号清除
+		$("#s-source").bind("change", function(){
+				$("#s-addedaccountid").empty();
+				//帐号为空,不使用切换帐号
+				$("input[name=isswitch]").attr("checked", false);		
+				$("input[name=isswitch][value=0]").attr("checked", true);		
+				});
+		 */
+		$('#s-task').change(function(){
+				//控件初始化
+				planArray.length=0;
+				$("#dictionaryPlanText2").text("默认方案");
+				var plan1=[];
+				planArray.push(plan1);
+				var s1=JSON.stringify(planArray);
+				$("#dictionaryPlan2").val(s1);
+				var tv = $(this).val();
+				var tlevel = $("#s-tasklevel").val();
+				$("#formaddspider")[0].reset(); //任务字段会置为"抓取微博"
+				$("#s-addeduser").empty();
+				$("#s-hdaddeduser").val("");
+				$("#s-addedsourceid").empty();
+				$("#s-hdaddedsourceid").val("");
+				$("#s-addedaccountid").empty();
+				$("#s-hdaddedaccountid").val("");
+				//列表
+				$("#sh-listweburl").val("");
+				$("#s-listurlrule").text("");
+				$("#s-listweburl").removeAttr("urlconfigrule");
+				//文章详情
+				$("#sh-textweburl").val("");
+				$("#s-texturlrule").text("");
+				$("#s-textweburl").removeAttr("urlconfigrule");
+				//用户详情
+				$("#sh-userweburl").val("");
+				$("#s-userurlrule").text("");
+				$("#s-userweburl").removeAttr("urlconfigrule");
+				//是否派生用户任务
+				$("input[name=deriveusertask][value=1]").attr("checked", true);
+
+				$("#inputuser_tip").html("");
+				$("#s-addedorigid").empty();
+				$("input[name=isswitch]").attr("checked", false);		
+				$("input[name=isswitch][value=0]").attr("checked", true);		
+				$("#s-task").val(tv);
+				$("#s-tasklevel").val(tlevel);
+				initSpiderConfigSelect($("#s-taskpagestyletype").val());
+				$("#trcache").show();
+				$("tr[id^='s']").hide();
+				var tmptv = tv;
+				if(tv == config.TASK_COMMENTS){
+					tmptv = config.TASK_REPOST_TREND; //评论和转发条件相同的条件
+				}
+				$("tr[id^='s"+tmptv+"-']").show();
+				$("#s_isseedtd").text("是否种子：");
+				$("#s_weibotd").text("指定原创：");
+				switch(parseInt(tv, 10)){
+					case config.TASK_NICKNAME:
+						//选中远程
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().hide();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().show();
+						//抓取账号
+						$("#s4-2").show();
+						$("#s4-2-1").show();
+						//是否抓取转发
+						$("#s10-20").show();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().hide();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().hide();
+						//隐藏启动时间
+						$("#s-activatetime").parents("tr").first().hide();
+						break;
+					case config.TASK_WEIBO:
+						//选中远程
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().show();
+						//抓取配置
+						$("#s10-1").show();
+						//步长
+						$("#s10-3").show();
+						//抓取帐号
+						$("#s10-11").show();
+						$("#s10-11-1").show();
+						$("#s10-7").show();
+						$("#s10-7-1").show();
+						var gachk = $("input[name=globalaccount]:checked").val();
+						if(parseInt(gachk, 10) == 0){
+							//是否切换帐号
+							$("#s10-8").show();
+							$("#s10-12").show();
+						}
+						else{
+							$("#s10-8").hide();
+							$("#s10-12").hide();
+							$("input[name=logoutfirst]").attr("checked", false);
+							$("input[name=logoutfirst][value=1]").attr("checked", true);
+						}
+						//全局帐号
+						$("#s10-10").show();
+						var switchchk = $("input[name=isswitch]:checked").val();
+						if(parseInt(switchchk, 10)){
+							//切换帐号策略
+							$("#s10-9").show();
+						}
+						else{
+							//切换帐号策略
+							$("#s10-9").hide();
+						}
+						$("#s15-10").show();
+						//开始时间
+						$("#s10-4-1").show();
+						//结束时间
+						$("#s10-4-2").show();
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().show();
+						//选择源
+						//$("#s-source").parents("tr").first().hide();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().hide();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().show();
+						break;
+					case config.TASK_REPOST_TREND:
+						//选中本地
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().show();
+						//抓取配置
+						$("#s10-1").show();
+						//抓取帐号
+						$("#s10-11").show();
+						$("#s10-11-1").show();
+						$("#s10-7").show();
+						$("#s10-7-1").show();
+						$("#s10-12").show();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().show();
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//原创是否种子
+						$("#s_isseedtd").text("原创是否种子：");
+						$("#s-isseed1").parents("tr").first().show();
+						$("#s15-10").show();
+						$("#s15-17").show();
+						//隐藏前台不必要的内容
+						$("#s5-1").hide();
+						$("#s10-11").hide();
+						$("#s10-11-1").hide();
+						$("#s10-7").hide();
+						$("#s10-7-1").hide();
+						$("#s10-12").hide();
+
+
+						break;
+					case config.TASK_COMMENTS:
+						//选中远程
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().show();
+						//抓取配置
+						$("#s10-1").show();
+						//抓取帐号
+						$("#s10-11").show();
+						$("#s10-11-1").show();
+						$("#s10-7").show();
+						$("#s10-7-1").show();
+						$("#s10-12").show();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().show();
+						//最少评论数
+						$("#s5-1").hide(); //转发数隐藏
+						$("#s7-1").show(); //转发数隐藏
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//转发是否种子
+						$("#s5-4").hide();
+						$("#s_weibotd").text("指定微博：");
+						$("#s-isseed1").parents("tr").first().show();
+						$("#s15-10").show();
+						$("#s15-17").show();
+						break;
+					case config.TASK_KEYWORD: //抓取关键词任务, 隐藏不需要的字段
+						//选中远程,隐藏
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().show();
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().show();
+						//选择源
+						//$("#s-source").parents("tr").first().hide();
+						var switchchk = $("input[name=isswitch]:checked").val();
+						if(parseInt(switchchk, 10)){
+							//切换帐号策略
+							$("#s10-9").show();
+						}
+						else{
+							//切换帐号策略
+							$("#s10-9").hide();
+						}
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().hide();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().hide();
+						$("#s15-10").show();
+                        $("#s10-5").hide();
+                        $("#s10-13").hide();
+						//隐藏前台不必要的内容
+						$("#s10-1").hide();
+						$("#s10-11").hide();
+						$("#s10-11-1").hide();
+						$("#s10-7").hide();
+						$("#s10-7-1").hide();
+						$("#s10-10").hide();
+						$("#s10-8").hide();
+						$("#s10-12").hide();
+						break;
+					case config.TASK_FRIEND: //抓取关注
+						//选中远程,隐藏
+						$("#s-local").attr("checked",true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().hide();
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().show();
+
+						//抓取配置
+						$("#s10-1").show();
+						$("#s15-10").show();
+						//选择源
+						//$("#s-source").parents("tr").first().hide();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().hide();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().hide();
+						break;
+					case config.TASK_WEBPAGE: //切换任务到抓取论坛
+						//选中远程,隐藏
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked",false );
+						$("#s-local").parents("tr").first().hide();
+						//关键词
+						$("#s10-2").show();
+						$("#s15-9").hide();
+						//抓取帐号
+						$("#s10-11").show();
+						$("#s10-11-1").show();
+						$("#s10-7").show();
+						$("#s10-7-1").show();
+						var gachk = $("input[name=globalaccount]:checked").val();
+						if(parseInt(gachk, 10) == 0){
+							//是否切换帐号
+							$("#s10-8").show();
+							$("#s10-12").show();
+						}
+						else{
+							$("#s10-8").hide();
+							$("#s10-12").hide();
+							$("input[name=logoutfirst]").attr("checked", false);
+							$("input[name=logoutfirst][value=1]").attr("checked", true);
+
+						}
+						//全局帐号
+						$("#s10-10").show();
+						var switchchk = $("input[name=isswitch]:checked").val();
+						if(parseInt(switchchk, 10)){
+							//切换帐号策略
+							$("#s10-9").show();
+						}
+						else{
+							//切换帐号策略
+							$("#s10-9").hide();
+						}
+
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().hide();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().hide();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().hide();
+						//任务超时
+						$("#s-duration").parents("tr").first().show();
+						break;
+					case config.TASK_STATUSES_COUNT: //更新微博
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().hide();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().hide();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().hide();
+						//隐藏启动时间
+						$("#s-activatetime").parents("tr").first().hide();
+
+						//本地，远程隐藏
+						$("#s-local").parents("tr").first().hide();
+						$("#s6-1").hide();
+						$("#s6-2").hide();
+						$("#s6-3").hide();
+						$("#s6-3-1").hide();
+						//关键词
+						$("#s10-2").show();
+						//开始结束时间
+						$("#s10-4-1").show();
+						$("#s10-4-2").show();
+						break;
+					case config.TASK_DATAPUSH: //微博订阅
+						$("#s-each_count").parents("tr").first().hide();
+						$("#s-local").parents("tr").first().hide();
+						break;
+					default:
+						//选中本地,隐藏
+						$("#s-local").attr("checked", true);
+						$("#s-remote").attr("checked", false);
+						$("#s-local").parents("tr").first().hide();
+						//任务超时
+						$("#s-duration").parents("tr").first().hide();
+						//是否种子
+						$("#s-isseed1").parents("tr").first().hide();
+
+						//选择源
+						//$("#s-source").parents("tr").first().show();
+						//每次抓取数
+						$("#s-each_count").parents("tr").first().show();
+						//立即更新
+						$("#s-islimit1").parents("tr").first().show();
+						break;
+				}
+		});
+		//任务内容类型切换
+		$("#s-taskpagestyletype").bind("change", function(){
+			var pagetype = $(this).val();
+			var task = $("#s-task").val();
+			switch(parseInt(task, 10)){
+				case config.TASK_WEBPAGE:
+				$("#s15-15").show();
+				$("#s15-16").show();
+				$("#s15-17").show();
+				if(pagetype == config.TASK_PAGESTYLE_ARTICLELIST){ //文章列表
+					$("#s15-3").show();
+					$("#s15-4").show();
+					$("#s15-2").show();
+					$("#s15-7").show();
+					$("input[name=derivetexttask]").attr("checked", false);
+					$("input[name=derivetexttask][value=1]").attr("checked", true);
+					$("#s15-5").show();
+					$("#s15-8").show();
+					$("input[name=deriveusertask]").attr("checked", false);
+					$("input[name=deriveusertask][value=1]").attr("checked", true);
+					$("#s15-11").show();
+					$("#s15-12").show();
+					$("#s15-13").show();
+					$("#s15-14").show();
+					$("#s15-20-1").show();
+					$("#s15-20-2").show();
+					$("#s15-21-1").show();
+					$("#s15-21-2").show();
+				}
+				else if(pagetype == config.TASK_PAGESTYLE_ARTICLEDETAIL){ //文章详情
+					$("#s15-3").hide();
+					$("#s15-4").hide();
+					$("#s15-2").hide();
+					$("#s15-7").hide();
+					$("input[name=derivetexttask]").attr("checked", false);
+					$("input[name=derivetexttask][value=0]").attr("checked", true);
+					$("#s15-5").show();
+					$("#s15-8").show();
+					$("input[name=deriveusertask]").attr("checked", false);
+					$("input[name=deriveusertask][value=1]").attr("checked", true);
+					$("#s15-11").hide();
+					$("#s15-12").hide();
+					$("#s15-13").show();
+					$("#s15-14").show();
+					$("#s15-20-1").hide();
+					$("#s15-20-2").hide();
+					$("#s15-21-1").show();
+					$("#s15-21-2").show();
+				}
+				else if(pagetype == config.TASK_PAGESTYLE_USERDETAIL){ //用户详情
+					$("#s15-3").hide();
+					$("#s15-4").hide();
+					$("#s15-2").hide();
+					$("#s15-7").hide();
+					$("input[name=derivetexttask]").attr("checked", false);
+					$("input[name=derivetexttask][value=0]").attr("checked", true);
+					$("#s15-5").hide();
+					$("#s15-8").hide();
+					$("input[name=deriveusertask]").attr("checked", false);
+					$("input[name=deriveusertask][value=0]").attr("checked", true);
+					$("#s15-11").hide();
+					$("#s15-12").hide();
+					$("#s15-13").hide();
+					$("#s15-14").hide();
+					$("#s15-17").hide();
+					$("#s15-21-1").hide();
+					$("#s15-21-2").hide();
+					$("#s15-20-1").hide();
+					$("#s15-20-2").hide();
+				}
+				break;
+				default:
+				initSpiderConfigSelect(pagetype);
+				break;
+			}
+		});
+		$("input[name=derivetexttask]").unbind("click");
+		$("input[name=derivetexttask]").bind("click", function(){
+			var dval = $("input[name=derivetexttask]:checked").val();
+			if(parseInt(dval, 10)){
+				$("#s15-5").show();
+				$("#s15-8").show();
+				$("input[name=deriveusertask]").attr("checked", false);
+				$("input[name=deriveusertask][value=1]").attr("checked", true);
+				$("#s15-6").show();
+				$("#s15-13").show();
+				$("#s15-14").show();
+				$("#s15-15").show();
+				$("#s15-16").show();
+				$("#s15-18").show();
+				$("#s15-19").show();
+				$("#s15-21-1").show();
+				$("#s15-21-2").show();
+			}
+			else{
+				$("#s15-5").hide();
+				$("#s15-8").hide();
+				$("input[name=deriveusertask]").attr("checked", false);
+				$("input[name=deriveusertask][value=0]").attr("checked", true);
+				$("#s15-6").hide();
+				$("#s15-13").hide();
+				$("#s15-14").hide();
+				$("#s15-15").hide();
+				$("#s15-16").hide();
+				$("#s15-18").hide();
+				$("#s15-19").hide();
+				$("#s15-21-1").hide();
+				$("#s15-21-2").hide();
+			}
+		});
+		$("input[name=deriveusertask]").unbind();
+		$("input[name=deriveusertask]").bind("click", function(){
+			var dval = $("input[name=deriveusertask]:checked").val();
+			if(parseInt(dval, 10)){
+				$("#s15-6").show();
+				$("#s15-15").show();
+				$("#s15-16").show();
+				$("#s15-19").show();
+			}
+			else{
+				$("#s15-6").hide();
+				$("#s15-15").hide();
+				$("#s15-16").hide();
+				$("#s15-19").hide();
+			}
+		});
+		//时间控件,时间格式化
+		$("#s-lastrplytimestart").unbind("click");
+		$("#s-lastrplytimestart").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$("#s-lastrplytimeend").unbind("click");
+		$("#s-lastrplytimeend").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+
+
+		//时间控件,时间格式化
+		$("#s-createdtimestart").unbind("click");
+		$("#s-createdtimestart").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$("#s-createdtimeend").unbind("click");
+		$("#s-createdtimeend").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+
+		//时间控件,时间格式化
+		$("#starttime").unbind("click");
+		$("#starttime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$("#endtime").unbind("click");
+		$("#endtime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+
+		//时间控件,时间格式化
+		$("#s-starttime").unbind("click");
+		$("#s-starttime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+		});
+		$("#s-endtime").unbind("click");
+		$("#s-endtime").bind("click", function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+		});
+		/*
+		$("#s-config").bind("change", function(){
+			var prechksource = $("#s-source").val();
+			var configval = $(this).val();
+			initSourceSelect(config.allSource, configval);
+			var currsource = $("#s-source").val();
+			if(prechksource != currsource){
+				$("#s-source").change();
+			}
+		});
+		*/
+		//时间控件,时间格式化
+		$("#s-step").bind("change", function(){
+			$("#s-starttime").val("");
+			$("#s-endtime").val("");
+			var stepval = $(this).val();
+			if(stepval == "1d"){
+				$("#s-starttime").unbind("click");
+				$("#s-starttime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd 00:00:00'});
+				});
+				$("#s-endtime").unbind("click");
+				$("#s-endtime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd 00:00:00'});
+				});
+			}
+			else{
+				$("#s-starttime").unbind("click");
+				$("#s-starttime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+				});
+				$("#s-endtime").unbind("click");
+				$("#s-endtime").bind("click", function(){
+					WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});
+				});
+			}
+		});
+        $("#s-btnsearch").bind("click",function(){
+            var username = $("#s-txtscreenname").val();
+			var usertype = $("input[name=inputtype]:checked").val();
+            if(username != undefined && username != ""){
+				if(usertype == "id"){
+					myUserIDRecommend(username, function(data){
+						var uhtml = "";
+						$.each(data, function(di, ditem){
+							uhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+							//$("#s-txtscreenname").val(ditem.name);
+						});
+						$("#s-addeduser").append(uhtml);
+						$("#s-txtscreenname").val('');
+					});
+				}
+				else{
+					myUserRecommend(username, function(data){
+						var uhtml = "";
+						$.each(data, function(di, ditem){
+							uhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.name+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+							//$("#s-txtscreenname").val(ditem.name);
+						});
+						$("#s-addeduser").append(uhtml);
+						$("#s-txtscreenname").val('');
+					}, false);
+				}
+            }
+            else{
+                alert("请输入用户");
+            }   
+        });
+		//批量添加时更改用户添加类型,单个添加的同时更改
+		$("input[name=userinputtype]").bind("click", function(){
+			var chkval = $("input[name=userinputtype]:checked").val();
+			$("input[name=inputtype]").attr("checked", false);
+			$("input[name=inputtype][value="+chkval+"]").attr("checked", true);
+		});
+		//单个添加时更改用户添加类型,批量添加的同时更改
+		$("input[name=inputtype]").bind("click", function(){
+			var chkval = $("input[name=inputtype]:checked").val();
+			$("input[name=userinputtype]").attr("checked", false);
+			$("input[name=userinputtype][value="+chkval+"]").attr("checked", true);
+		});
+
+		$("#btnaddembeduser").bind("click", function(){
+			var uhtml = "";
+			var users = $("#screen_name").val();
+			var userArr = users.split('\n');
+			$.each(userArr, function(di, ditem){
+				if(ditem != ""){
+					ditem = commonFun.trim(ditem);
+					var has = false;
+					$("#s-addeduser .useritem").each(function(i,item){
+						if($(item).text() == ditem){
+							has = true;
+							return false;
+						}
+					});
+					if(!has){
+						uhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+ditem+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					}
+				}
+			});
+			$("#s-addeduser").append(uhtml);
+			$("#embeduserdiv").dialog("close");
+		});
+        $("#s-btnadduser").bind("click",function(){
+        	var username = $("#s-txtscreenname").val();
+        	username = username == undefined ? "" : commonFun.trim(username);
+        	if(username != ""){
+				var has = false;
+				$("#s-addeduser .useritem").each(function(i,item){
+					if($(item).text() == username){
+						has = true;
+						return false;
+					}
+				});
+				if(!has){
+					var userhtml = "<span class='selwordsbox'><span class='useritem' code='"+username+"'>"+username+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					$("#s-addeduser").append(userhtml);
+				}
+				$("#s-txtscreenname").val('');
+			}
+        	else{
+        		alert("请输入昵称");
+        	}
+        });
+		$("#s-sourceid").bind("click", function(){
+			var selectedVal = [];
+			$("#s-addedsourceid .useritem").each(function(i, item){
+				var tmpobj = {};
+				tmpobj.name = $(item).text();
+				tmpobj.code = $(item).attr("code")
+				selectedVal.push(tmpobj);
+			});
+
+			var choiceVal = [];
+			if(config.allAccountSource.length == 0){
+				//同步ajax方法
+				getAccountSource(function(data){
+					if(data){
+						config.allAccountSource = data;
+					}
+				});
+			}
+			$.each(config.allAccountSource, function(si, sitem){
+				var tmpobj = {};
+				tmpobj['name'] = sitem['name'];
+				tmpobj['code'] = sitem['id'];
+				choiceVal.push(tmpobj);
+			});
+			myAccountSelect(function(data){
+				if(data.length > 0){
+					var dhtml = "";
+					$.each(data, function(di, ditem){
+						$("#s-hdaddedsourceid").val(ditem.code);
+						dhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+					$("#s-addedsourceid").empty().append(dhtml);
+					$("#s-hdaddedsourceid").val();
+				}
+			}, selectedVal, choiceVal, false, undefined, undefined, undefined, false, "来源");
+		});
+		$("#s-accountid").bind("click", function(){
+			var choiceValue = [];
+			var selectedVal = [];
+			$("#s-addedaccountid .useritem").each(function(i, item){
+				var tmpobj = {};
+				tmpobj.name = $(item).text();
+				tmpobj.code = $(item).attr("code")
+				selectedVal.push(tmpobj);
+			});
+			var sourceid = $("#s-hdaddedsourceid").val();
+			if(!sourceid){
+				alert("请选择帐号来源!");
+				return false;
+			}
+			var searchnameUrl = config.modelUrl + "spideraccount_model.php";
+			var senddataobj = {
+				account_sourceid: sourceid,
+				type: "selectaccountbysourceid"
+			}
+			$.ajax({
+				type: "GET",
+				dataType: "json",
+				async:false,
+				url: searchnameUrl,
+				data: senddataobj,
+				success:function(data){
+					$.each(data.datalist, function(di, ditem){
+						var tmpobj = {};
+						tmpobj.name = ditem.username;
+						tmpobj.code = ditem.id;
+						choiceValue.push(tmpobj);
+					});
+				}
+			});
+			myCommonSelect(choiceValue, function(data){
+				var switchdisplay = $("#s10-8").css("display");
+				if(switchdisplay != "none"){
+					//当选择的帐号大于1个时需要选中切换帐号
+					if(data.length > 1){ //须使用切换帐号
+						$("input[name=isswitch]").attr("checked", false);
+						$("input[name=isswitch][value=1]").attr("checked", true);
+						$("#s10-9").show();
+					}
+					else if(data.length == 0){ //不使用切换帐号
+						$("input[name=isswitch]").attr("checked", false);
+						$("input[name=isswitch][value=0]").attr("checked", true);
+						$("#s10-9").hide();
+					}
+				}
+				var dhtml = "";
+				$.each(data, function(di, ditem){
+					dhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem.code+"' >"+ditem.name+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					if(ditem.sourceid != undefined){
+						$("#s-hdaddedsourceid").val(ditem.sourceid);
+					}
+				});
+				$("#s-addedaccountid").empty().append(dhtml);
+			}, selectedVal, "选择帐号", undefined, undefined, false, undefined, true);
+		});
+		//添加抓取帐号
+        $("#s-btnaddid").bind("click",function(){
+        	var weiboid = $("#s-txtid").val();
+        	weiboid = weiboid == undefined ? "" : commonFun.trim(weiboid);
+        	if(weiboid != ""){
+				var has = false;
+				$("#s-addedid .weiboiditem").each(function(i,item){
+					if($(item).text() == weiboid){
+						has = true;
+						return false;
+					}
+				});
+				if(!has){
+					var weiboidhtml = "<span class='selwordsbox'><span class='weiboiditem' code='"+weiboid+"'>"+weiboid+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					$("#s-addedid").append(weiboidhtml);
+				}
+				$("#s-txtid").val('');
+			}
+        	else{
+        		alert("请输入ID");
+        	}
+        });
+		$("#s-btnclearuser").bind("click", function(){
+			$("#s-addeduser").empty();
+		});
+
+		//导入用户
+		$("#s-btnimportuser").bind("click", function(){
+			$("#screen_name").val("");
+			$("#embeduserdiv").dialog("open");
+		});
+        $("#s-btnaddorigid").bind("click",function(){
+            var origid = $("#s-txtorigid").val();
+            var realvalue = commonFun.trim(origid);
+            if(origid != undefined && origid != ""){
+                var valtype = $("input[name=rdurlorid]:checked").val();
+                var html = "<span class='selwordsbox'><span class='useritem' realvalue='"+realvalue+"' valtype='"+valtype+"'>"+origid+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+                $("#s-addedorigid").append(html);
+                $("#s-txtorigid").val('');
+            }
+            else{
+                alert("请输入ID或URL");
+            }
+        });
+        $("#t-btnaddorigurl").bind("click",function(){
+            var origurl = $("#t-txtorigurl").val();
+            var realvalue = commonFun.trim(origurl);
+            if(origurl != undefined && origurl != ""){
+                var html = "<span class='selwordsbox'><span class='useritem' realvalue='"+realvalue+"'>"+origurl+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+                $("#t-addedorigurl").append(html);
+                $("#t-txtorigurl").val('');
+            }
+            else{
+                alert("请输入URL");
+            }
+        });
+        $("#task_import").bind("click", function(){
+            var jsonstr = $("#taskexportresult").val();
+            if(jsonstr){
+                var taskall = jQuery.parseJSON(jsonstr);
+                var query = {};
+                query.tasktype = 2;
+                query.task = 20;
+                query.tasklevel = taskall['root'].taskPro.tasklevel;
+                query.local = taskall['root'].taskPro.local;
+                query.remote = taskall['root'].taskPro.remote;
+				if(taskall['root'].taskPro.specifiedType ){
+					query.specifiedType = taskall['root'].taskPro.specifiedType;
+				} else {
+					query.specifiedType = "";
+				}
+				if(taskall['root'].taskPro.specifiedMac ){
+					query.specifiedMac = taskall['root'].taskPro.specifiedMac;
+				} else {
+					query.specifiedMac = "";
+				}
+				if(taskall['root'].taskPro.submiturl ){
+					query.submiturl = taskall['root'].taskPro.submiturl;
+				} else {
+					query.submiturl = "";
+				}
+				if(taskall['root'].taskPro.activatetime ){
+					query.activatetime = taskall['root'].taskPro.activatetime;
+				} else {
+					query.activatetime = 0;
+				}
+				//query.activatetime = taskall['root'].taskPro.activatetime;
+                query.conflictdelay = taskall['root'].taskPro.conflictdelay;
+                query.remarks = taskall['root'].taskPro.remarks;
+                query.taskparams = JSON.stringify(taskall);
+
+                addTask($.param(query), function(r){
+                    if(r.result){
+                        searchData(true); //task_index.html 中的函数
+                        $("#taskexportresult").val('');
+                    }
+                    else{
+                        alert(r.msg);		
+                        return false;
+                    }	
+                });
+            }
+            else{
+                alert("请导出的任务参数");
+            }
+        });
+
+	});
+    function cancelSelected(target){
+		var pid = $(target).parent().parent().attr("id");
+        $(target).parent().remove();
+		//爬虫抓取帐号为空时,勾选切换帐号为否
+		if(pid == "s-addedaccountid"){
+			var childlen = $("#s-addedaccountid").find(".useritem").length; 
+			if(childlen == 0){
+				$("input[name=isswitch]").attr("checked", false);
+				$("input[name=isswitch][value=0]").attr("checked", true);
+				$("#s10-9").hide();
+			}
+		}
+    }
+    function onDelButtonClick(ids){
+        if(confirm('此操作不可恢复，确定删除吗？')){
+	    	deleteTask(ids,function(r){
+	            if(r.result){
+	            	searchData(false);
+	            }
+	            else{
+	              alert(r.msg);     
+	            }   
+	        });
+        }
+    }
+
+	function onOPTButtonClick(id,status){
+		changeTaskStatus(id,status,function(r){
+			if(r.result){
+				searchData(false);
+			}
+			else{
+			  alert(r.msg);		
+			}	
+		});
+	}
+	function openVeriCodeDiv(id, image){
+		var imgurl = "/sysadmin/verify/"+image;
+		$("#veriCodeImg").attr("src", imgurl);
+		$("#veriCodeDiv").dialog({
+			title:"输入验证码",
+			autoOpen: true,
+			modal:true,
+			height:150,
+			width:250,
+			close:function(){
+				$("#code").val("");
+			},
+			buttons:{
+				"提交":function(){
+					var code = commonFun.trim($("#code").val());
+					if(code == ""){
+						return;
+					}
+					$.ajax({
+						type:"POST",
+						dataType: "json",
+						async:false,
+						url: config.modelUrl + "taskmanager.php",
+						data:{
+							id: id,
+							code: code,
+							type: "submitvericode"
+						},
+						success: function(r){
+							if(r.result){
+								searchData(false);
+							}
+							else{
+								alert(r.msg);
+							}
+						},
+						error:function(a,b,c){
+							alert(b);
+						}
+					});
+					$(this).dialog("close");
+				},
+				"看不清":function(){
+					changeTaskStatus(id,1,function(r){
+						if(r.result){
+							searchData(false);
+						}
+						else{
+			 			 alert(r.msg);		
+						}	
+					});
+					$(this).dialog("close");
+				},
+				"取消":function(){
+					$(this).dialog("close");
+				}
+			}
+		});
+	}
+	function openTaskDiv(divid,tasklevel,task,taskp,activatetime,remarks, local, remote, conflictdelay, taskpagestyletype){
+		$("#"+divid).dialog("open");
+		if(divid == "divaddmit"){ //数据迁移
+			$("#formaddmigratedata")[0].reset();
+			$("#m-source_host").empty();
+			$("#source_host").val("");
+			$("#m-users_source_host").empty();
+			$("#users_source_host").val("");
+
+			$("#m-dsthost").empty();
+			$("#dsthost").val("");
+			$("#srchost").removeAttr("disabled");
+			$("#btn_dsthost").removeAttr("disabled");
+			$("#dsthostempty").attr("checked", false);
+			$("input[name=keepsrc]").removeAttr("disabled");
+			$("#keepsrc1").attr("checked", true);
+			$("#span_maxcount").text("");
+			//默认删除种子微博,删除用户,删除种子用户不可用, 保留源数据选否时可用
+				$("input[name=delseedweibo]").attr("checked", false);
+				$("input[name=delseedweibo][value=0]").attr("checked", true);
+				$("input[name=delseedweibo]").attr("disabled", "disabled");
+
+				$("input[name=deluser]").attr("checked", false);
+				$("input[name=deluser][value=0]").attr("checked", true);
+				$("input[name=deluser]").attr("disabled", "disabled");
+
+				$("input[name=delseeduser]").attr("checked", false);
+				$("input[name=delseeduser][value=0]").attr("checked", true);
+				$("input[name=delseeduser]").attr("disabled", "disabled");
+			if(task != undefined){ //复制
+				//字段赋值
+				if(tasklevel != undefined){
+					$("#m-tasklevel").val(tasklevel);
+				}
+				$("#m-task").val(task);
+				if(taskp.srchost != undefined){
+					$("#srchost").val(taskp.srchost);
+				}
+				if(taskp.source_host != undefined && taskp.source_host.length > 0){
+					var mhtml = "";
+					$.each(taskp.source_host, function(di, ditem){
+						mhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+getSourceHostName(ditem)+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+					$("#m-source_host").empty().append(mhtml);
+				}
+				if(taskp.users_source_host != undefined && taskp.users_source_host.length > 0){
+					var mhtml = "";
+					$.each(taskp.users_source_host, function(di, ditem){
+						mhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+getSourceHostName(ditem)+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+					$("#m-users_source_host").empty().append(mhtml);
+				}
+
+				if(taskp.dsthost != undefined && taskp.dsthost.length > 0){
+					var mhtml = "";
+					$.each(taskp.dsthost, function(di, ditem){
+						mhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+getHostName(ditem)+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+					$("#m-dsthost").empty().append(mhtml);
+				}
+				else{
+					$("#dsthostempty").attr("checked", true);
+					$("#btn_dsthost").attr("disabled", "disabled");
+					//保留源数据
+					$("input[name=keepsrc]").attr("checked", false);
+					$("input[name=keepsrc][value=0]").attr("checked", true);
+					$("input[name=keepsrc]").attr("disabled", "disabled");
+
+					$("input[name=delseedweibo]").removeAttr("disabled");
+					$("input[name=deluser]").removeAttr("disabled");
+
+				}
+				if(taskp.keepsrc != undefined){
+					$("input[name=keepsrc]").attr("checked", false);
+					$("input[name=keepsrc][value="+taskp.keepsrc+"]").attr("checked", true);
+					var keepsrcval = parseInt(taskp.keepsrc, 10) ? true : false; 
+					if(!keepsrcval){
+						$("input[name=delseedweibo]").removeAttr("disabled");
+						$("input[name=deluser]").removeAttr("disabled");
+					}
+				}
+				if(taskp.delseedweibo != undefined){
+					$("input[name=delseedweibo]").attr("checked", false);
+					$("input[name=delseedweibo][value="+taskp.delseedweibo+"]").attr("checked", true);
+				}
+
+				if(taskp.delseeduser != undefined){
+					$("input[name=delseeduser]").attr("checked", false);
+					$("input[name=delseeduser][value="+taskp.delseeduser+"]").attr("checked", true);
+				}
+				if(taskp.deluser != undefined){
+					$("input[name=deluser]").attr("checked", false);
+					$("input[name=deluser][value="+taskp.deluser+"]").attr("checked", true);
+
+					var deluserval = parseInt(taskp.deluser, 10) ? true : false;
+					if(!deluserval){
+						$("input[name=delseeduser]").attr("checked", false);
+						$("input[name=delseeduser][value=0]").attr("checked", true);
+						$("input[name=delseeduser]").attr("disabled", "disabled");
+					}
+					else{
+						$("input[name=delseeduser]").removeAttr("disabled");
+					}
+				}
+				if(taskp.source != undefined){
+					$("#m-source").val(taskp.source);
+				}
+				if(taskp.cond_ge_created != undefined){
+					$("#cond_ge_created").val(timeToStr(taskp.cond_ge_created));
+				}
+				if(taskp.cond_lt_created != undefined){
+					$("#cond_lt_created").val(timeToStr(taskp.cond_lt_created));
+				}
+				if(taskp.cond_ex_name != undefined){
+					$("#cond_ex_name").val(taskp.cond_ex_name.join("\n"));
+				}
+				if(taskp.cond_in_name != undefined){
+					$("#cond_in_name").val(taskp.cond_in_name.join("\n"));
+				}
+				if(taskp.cond_ex_text != undefined){
+					$("#cond_ex_text").val(taskp.cond_ex_text.join("\n"));
+				}
+				if(taskp.cond_in_text != undefined){
+					$("#cond_in_text").val(taskp.cond_in_text.join("\n"));
+				}
+				if(taskp.eachcount != undefined){
+					$("#eachcount").val(taskp.eachcount);
+				}
+				if(taskp.maxcount != undefined){
+					$("#maxcount").val(taskp.maxcount);
+				}
+				if(taskp.iscommit != undefined){
+					var isc = taskp.iscommit ? 1 : 0;
+					$("input[name=iscommit][value="+isc+"]").attr("checked", true);
+				}
+				if(activatetime != undefined){
+					$("#m-activatetime").val(timeToStr(activatetime));
+				}
+				if(conflictdelay != undefined){
+					$("#m-conflictdelay").val(conflictdelay);
+				}
+				$("#m-remarks").val(remarks.rm);
+			}
+		}
+		else if(divid == "divaddast"){ //数据分析
+			if(config.allAccountSource.length == 0){
+				//同步ajax方法
+				getAccountSource(function(data){
+					if(data){
+						config.allAccountSource = data;
+					}
+				});
+			}
+			$("#source").empty();
+			$.each(config.allAccountSource, function(si, v){
+				$("#source").append('<option value="'+v.id+'">'+v.name+'</option>');
+			});
+			$("#t_source_host").empty();
+			$("#t_hd_source_host").val("");
+
+			//控件初始化
+			planArray.length=0;
+			$("#dictionaryPlanText1").text("默认方案");
+			var plan1=[];
+			planArray.push(plan1);
+			var s1=JSON.stringify(planArray);
+			$("#dictionaryPlan1").val(s1);
+			
+			$("#formaddanalysis")[0].reset();
+			$('#task').change();
+			$("#source").change();
+			hideOtherField();
+			if(task!=undefined){
+				if(taskp.min_created_time != undefined && taskp.min_created_time != null){
+					$("#starttime").val(timeToStr(taskp.min_created_time));
+				}
+				if(taskp.max_created_time != undefined && taskp.max_created_time != null){
+					$("#endtime").val(timeToStr(taskp.max_created_time));
+				}
+				if(taskp.urls != undefined){
+					$("#urls").val(taskp.urls.join("\n"));
+				}
+				if(taskp.source_host != undefined && taskp.source_host.length > 0){
+					var mhtml = "";
+					$.each(taskp.source_host, function(di, ditem){
+						mhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+getSourceHostName(ditem)+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+					$("#t_source_host").empty().append(mhtml);
+				}
+			}
+		}
+		else if(divid == "divaddspt"){ //新增和编辑
+			//爬虫配置下拉菜单
+			if(config.allSpiderConfig.length == 0){
+				getSpiderConfig(function(data){
+					if(data){
+						config.allSpiderConfig = data;
+					}
+				});
+			}
+			initSpiderConfigSelect($("#s-taskpagestyletype").val());
+
+			if(task != undefined){ //编辑
+				$("#s-task").val(task);
+				//任务选择初始化
+				$('#s-task').change(); //会重置所有字段
+				$("#s-tasklevel").val(tasklevel);
+
+				if(taskp.keywords != undefined){
+					$("#s-keywords").val(taskp.keywords.join("\n"));
+				}
+				if(taskp.username != undefined){
+					$("#s-username").val(taskp.username);
+				}
+				if(taskp.config != undefined){
+					$("#s-config").val(taskp.config);
+				}
+				$("#s-taskpagestyletype").val(taskpagestyletype);
+				//任务选择初始化
+				$('#s-taskpagestyletype').change();
+				if(taskp.SEtemplate != undefined){
+					$("#s-SEtemplate").val(taskp.SEtemplate);
+				}
+				if(taskp.listurls){
+					var tmparr = [];
+					tmparr.push(taskp.listurls);
+					$("#s-listurlrule").text(JSON.stringify(tmparr));
+					$("#sh-listweburl").val(JSON.stringify(tmparr));
+				}
+				if(taskp.SStemplate != undefined){
+					$("#s-SStemplate").val(taskp.SStemplate);
+				}
+				$("input[name=derivetexttask]").attr("checked", false);
+				$("input[name=derivetexttask][value=1]").attr("checked", true);
+				if(taskp.derivetexttask != undefined){
+					$("input[name=derivetexttask]").attr("checked", false);
+					$("input[name=derivetexttask][value="+taskp.derivetexttask+"]").attr("checked", true);
+				}
+				if(taskp.texturls){
+					var tmparr = [];
+					tmparr.push(taskp.texturls);
+					$("#s-texturlrule").text(JSON.stringify(tmparr));
+					$("#sh-textweburl").val(JSON.stringify(tmparr));
+				}
+				if(taskp.importarticlecount){
+					$("#s-importarticlecount").val(taskp.importarticlecount);
+				}
+				if(taskp.createdtimestart){
+					$("#s-createdtimestart").val(timeToStr(taskp.createdtimestart));
+				}
+				if(taskp.createdtimeend){
+					$("#s-createdtimeend").val(timeToStr(taskp.createdtimeend));
+				}
+				$("input[name=deriveusertask]").attr("checked", false);
+				$("input[name=deriveusertask][value=1]").attr("checked", true);
+				if(parseInt(taskp.deriveusertask, 10) == 1){
+					$("input[name=deriveusertask][value=1]").attr("checked", true);
+				}
+				else{
+					$("input[name=deriveusertask][value=0]").attr("checked", true);
+				}
+				if(taskp.usertemplate != undefined){
+					$("#s-usertemplate").val(taskp.usertemplate);
+				}
+				if(taskp.userurls){
+					var tmparr = [];
+					tmparr.push(taskp.userurls);
+					$("#s-userurlrule").text(JSON.stringify(tmparr));
+					$("#sh-userweburl").val(JSON.stringify(tmparr));
+				}
+				if(taskp.importusercount){
+					$("#s-importusercount").val(taskp.importusercount);
+				}
+				if(taskp.crawlpage != undefined){
+					$("#s-crawlpage").val(taskp.crawlpage);
+				}
+				if(taskp.lastrplytimestart){
+					$("#s-lastrplytimestart").val(timeToStr(taskp.lastrplytimestart));
+				}
+				if(taskp.lastrplytimeend){
+					$("#s-lastrplytimeend").val(timeToStr(taskp.lastrplytimeend));
+				}
+
+				if(taskp.step != undefined){
+					$("#s-step").val(taskp.step);
+				}
+				if(taskp.starttime != undefined && taskp.starttime != null){
+					$("#s-starttime").val(timeToStr(taskp.starttime));
+				}
+				if(taskp.endtime != undefined && taskp.endtime != null){
+					$("#s-endtime").val(timeToStr(taskp.endtime));
+				}
+				//
+				//分词方案
+				if(taskp.dictionaryPlan != undefined){
+					//数据放到全局数组里
+					planArray=JSON.parse(taskp.dictionaryPlan);
+					var planHtml="";
+					var count=1;
+					$.each(planArray,function(di, itemPlan){
+						planHtml +="方案"+count+":(";
+						var t2="";
+						var count2=0;
+						if(itemPlan!=undefined&&itemPlan.length==0){
+						if(count2!=0){
+								t2=t2+","+"默认方案";
+							}
+							else{
+								t2="默认方案";
+							}
+							count2++;
+							planHtml+=t2+")";
+							count++;
+						}
+						else {
+							$.each(itemPlan, function (dj, itemCategory){
+								if(count2!=0)
+								{
+									t2=t2+","+itemCategory.name;
+								}
+								else{
+									t2=itemCategory.name;
+									}
+								count2++;
+							});
+							planHtml+=t2+")";
+							count++;
+						}
+					});
+					$("#dictionaryPlanText2").text(planHtml);	
+				}
+				$("#s-duration").val(taskp.duration);
+				$("input[name=isseed][value="+taskp.isseed+"]").attr("checked", true);
+				if(activatetime != undefined){
+					$("#s-activatetime").val(timeToStr(activatetime));
+				}
+				if(conflictdelay != undefined){
+					$("#s-conflictdelay").val(conflictdelay);
+				}
+				$("#s-remarks").val(remarks.rm);
+				if(taskp.each_count != undefined){
+					$("#s-each_count").val(taskp.each_count);
+				}
+				if(taskp.iscommit != undefined){
+					var isc = taskp.iscommit ? 1 : 0;
+					$("input[name=iscommit][value="+isc+"]").attr("checked", true);
+				}
+				if(taskp.isseed != undefined){
+					var iss = taskp.isseed ? 1 : 0;
+					$("input[name=isseed][value="+iss+"]").attr("checked", true);
+				}
+				if(taskp.filterdup != undefined){
+					var filter = taskp.filterdup ? 1 : 0;
+					$("input[name=filterdup][value="+filter+"]").attr("checked", true);
+				}
+				if(taskp.min_follower_count != undefined){
+					$("#s-min_follower_count").val(taskp.min_follower_count);
+				}
+				if(taskp.source != undefined){
+					//$("#s-source").val(taskp.source);
+					var sourcename = getSourceName(taskp.source);
+                    var uhtml = "";
+					uhtml += "<span class='selwordsbox'><span class='useritem' code='"+taskp.source+"' >"+sourcename+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+                    $("#s-addedsourceid").empty().append(uhtml);
+					$("#s-hdaddedsourceid").val(taskp.source);
+				}
+				if(taskp.inputtype != undefined){
+					$("input[name=inputtype][value="+taskp.inputtype+"]").attr("checked", true);
+					$("input[name=userinputtype][value="+taskp.inputtype+"]").attr("checked", true);
+				}
+				if(taskp.accountid != undefined && taskp.accountid.length > 0){
+                    var uhtml = "";
+					$.each(taskp.accountid, function(di, ditem){
+						var accountname = getSpiderAccountName(taskp.source, ditem);
+						uhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+accountname+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+                    $("#s-addedaccountid").empty().append(uhtml);
+				}
+				if(taskp.isswitch != undefined){
+					var isswitch = taskp.isswitch ? 1 : 0;
+					$("input[name=isswitch][value="+isswitch+"]").attr("checked", true);
+					if(isswitch){
+						$("#s10-9").show();
+					}
+				}
+				if(taskp.globalaccount != undefined){
+					var gac = taskp.globalaccount ? 1 : 0;
+					$("input[name=globalaccount][value="+gac+"]").attr("checked", true);
+					if(gac){
+						$("input[name=globalaccount][value=1]").attr("checked", true);
+						$("#s10-8").hide();
+						$("#s10-12").hide();
+						$("input[name=logoutfirst]").attr("checked", false);
+						$("input[name=logoutfirst][value=1]").attr("checked", true);
+
+					}
+				}
+				if(taskp.logoutfirst!=undefined){
+					var gac = taskp.logoutfirst? 1 : 0;
+					$("input[name=logoutfirst][value="+gac+"]").attr("checked", true);
+				}
+				if(taskp.switchpage != undefined){
+					$("#s-switchpage").val(taskp.switchpage);
+				}
+				if(taskp.switchtime != undefined){
+					$("#s-switchtime").val(taskp.switchtime);
+				}
+				if(taskp.users != undefined && taskp.users.length > 0){
+                    var uhtml = "";
+					$.each(taskp.users, function(di, ditem){
+						uhtml += "<span class='selwordsbox'><span class='useritem' code='"+ditem+"' >"+ditem+"</span><a class='useritem_a' onclick='cancelSelected(this)'>×</a></span>";
+					});
+                    $("#s-addeduser").append(uhtml);
+				}
+				//$('#s-task').change();
+			}
+			else{
+				$('#s-task').val(config.TASK_WEIBO);
+				$('#s-task').change();
+			}
+
+			if(remote == 0){
+				$("#s-remote").attr("checked", false);
+			}
+			else if(remote == 1){
+				$("#s-remote").attr("checked", true);
+			}
+
+			if(local == 1){
+				$("#s-local").attr("checked", true);
+			}
+			else if(local == 0){
+				$("#s-local").attr("checked", false);
+			}
+
+
+			if(task == config.TASK_WEIBO || task == config.TASK_KEYWORD){
+				if(remote == 1 && local == 1){
+					$("#s-remote").click();
+					$("#s-remote").attr("checked", true);
+					$("#s-local").attr("checked", true);
+				}
+				else if(remote == 1){
+					//远程初始化
+					$("#s-remote").click();
+					$("#s-remote").attr("checked", true);
+				}
+				else if(local == 1){
+					//本地初始化
+					$("#s-local").click();
+					$("#s-local").attr("checked", true);
+				}
+			}
+		}
+	}
+    function exportCommonTask(taskid, taskparams){
+        $("#taskIDspan").text(taskid);
+        var resstr = JSON.stringify(taskparams);
+        $("#taskexportresult").val(resstr);
+    }
+    function openCommonTaskDiv(taskparams){
+        window.taskcanvasobj = null;
+        window.taskcanvasobj = new taskCanvas();
+		window.taskcanvasobj.show(taskparams);
+    }
+    function showOtherField(){
+        $("#"+otherfieldsdiv).css({
+            'display':'inline-block',
+            'position':'absolute',
+            'width':"200px",
+            'height':"80px",
+            'left': $("#linkOtherField").position().left + $("#linkOtherField").width()+10,
+            'top': $("#linkOtherField").position().top
+        });
+    }
+
+    function hideOtherField(){
+    	$("#"+otherfieldsdiv).hide();
+    }
+	
+	function onfuncohterclick(target){
+		if($("#"+otherfieldsdiv).css("display") == "none"){
+			showOtherField();
+        }
+        else{
+        	hideOtherField();
+        }
+	}
+
+	function checkallotherfield(target){
+	    $("input[type=checkbox][name='otherfields[]']").prop("checked",$(target).prop("checked"));
+	}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+	<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; 
+		<span style="color: gray">当前任务</span> 
+		<span style="float: right">
+			<a href="javascript:void(0)" onclick="openTaskDiv('divaddmit')">新增数据迁移任务</a>&nbsp;|&nbsp;
+			<a href="javascript:void(0)" onclick="openTaskDiv('divaddast')">新增分析任务</a>&nbsp;|&nbsp;
+			<a href="javascript:void(0)" onclick="openTaskDiv('divaddspt')">新增抓取任务</a>&nbsp;|&nbsp;
+			<a href="javascript:void(0)" onclick="openCommonTaskDiv()">配置抓取任务</a>
+		</span>
+<form id="formsearch" name="formsearch">
+<table width="98%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td><select id="seltask" name="task"></select>&nbsp;&nbsp;
+		<select id="seltaskpagestyletype" name="taskpagestyletype"></select>&nbsp;&nbsp;
+		<select id="seltasklevel" name="tasklevel"></select>&nbsp;&nbsp;
+		<select id="seltaskstatus" name="taskstatus"></select>&nbsp;&nbsp;
+			<!--add by wang 2017-03-07 筛选异常任务类型-->
+			<!-- <select id="selerror_code" name="error_code"></select>&nbsp;&nbsp; -->
+			<span style="display:inline-block;">错误码：<input  id="selerror_code" name="error_code" value='' style="width:50px;"/></span>&nbsp;&nbsp;
+			<!--add by wang 2017-03-07-->
+		<select id="selmachine" name="machine"></select>&nbsp;&nbsp;
+		<select id="sellocal" name="local"></select>&nbsp;&nbsp;
+		<select id="selremote" name="remote"></select>&nbsp;&nbsp;
+		<span style="display:inline-block;">ID:<input id="selidstart" name="id_start" value='-1' class="shortinput"/>到<input id="selidend" name="id_end" value='-1' class="shortinput"/></span>
+		<input id="btnsearch" name="btnsearch" value="筛选" type="button" /><input type="hidden" id="txtorderby" name="orderby"></td>
+	</tr>
+</table>
+</form>
+<table width="98%" border="0" cellspacing="0" cellpadding="0" class="list" id="mytbl">
+	 <thead>
+	<tr>
+        <th scope="col" style="width: 35px"><span>选择</span></th>
+		<th scope="col" style="width: 35px"><span name="sort" _target="id" style="display:inline-block;cursor:pointer">ID<span class="ui-icon ui-icon-triangle-1-n" style="display:inline-block;"></span></span></th>
+		<th scope="col" style="width: 70px">类型</th>
+		<th scope="col" style="width: 70px">内容类型</th>
+		<th scope="col" style="width: 40px"><span name="sort" _target="tasklevel" style="display:inline-block;cursor:pointer">级别<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 50px">状态</th>
+		<th scope="col" style="width: 50px"><span name="sort" _target="datastatus" style="display:inline-block;cursor:pointer">数据<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 70px"><span name="sort" _target="activatetime" style="display:inline-block;cursor:pointer">启动时间<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 70px"><span name="sort" _target="starttime" style="display:inline-block;cursor:pointer">开始时间<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 40px"><span name="sort" _target="tenantid" style="display:inline-block;cursor:pointer">租户<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 55px"><span name="sort" _target="userid" style="display:inline-block;cursor:pointer">用户名<span class="ui-icon ui-icon-carat-2-n-s" style="display:inline-block"></span></span></th>
+		<th scope="col" style="width: 60px">当前机器</th>
+		<th scope="col">摘要</th>
+		<th scope="col" style="width: 130px">操作</th>
+	</tr>
+	 </thead>
+	<tbody>
+	</tbody>
+<tfoot>
+    <tr>
+        <th colspan='14' align='left'>
+			<div style='text-align:left; float: left' id='eventalertdeletediv'></div>
+			<div style='text-align:left; float: right;margin-right:10px;' id='batchAlldiv'>
+				<!--<input type="button" value="批量操作">-->
+			</div>
+			<div style='text-align:left; float: right;margin-right:10px;' id='deleteAlldiv'>
+			<!--<input type="button" value="批量删除">-->
+		</div>
+			<div style='text-align:left; float: right;margin-right:10px;' id='recallAlldiv'>
+				<!--<input type="button" value="召回">-->
+			</div>
+		</th>
+    </tr>
+</tfoot>
+</table>
+<div id="divaddmit" title="新增数据迁移任务" class="openwindow" style="display:none;">
+<form id="formaddmigratedata"><input type="hidden" name="tasktype" value="3" />
+<table class="formtable" style="width:100%">
+	<tr>
+		<td class="tdleft">任务级别：</td>
+		<td><select id="m-tasklevel" name="tasklevel" class="shortselect">
+			<option value="1">一</option>
+			<option value="2">二</option>
+			<option value="3">三</option>
+			<option value="4">四</option>
+			<option value="5">五</option>
+		</select></td>
+		<td class="tdtip">数字越小级别越高</td>
+	</tr>
+	<tr>
+		<td class="tdleft">选择任务：</td>
+		<td><select id="m-task" name="task">
+				<!--
+			<option value="12">数据迁移</option>
+			-->
+		</select></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">源主机：</td>
+		<td>
+			<select id="srchost" name="srchost"></select>
+		</td>
+		<td class="tdtip">选中"默认主机",将使用配置文件中的主机</td>
+	</tr>
+	<tr>
+		<td class="tdleft">目标主机：</td>
+		<td>
+			<input type="button" id="btn_dsthost" name="btn_dsthost" value="选择目标主机" />
+			<input type="checkbox" name="dsthostempty" id="dsthostempty" /><label for="dsthostempty">丢弃数据</label>
+		</td>
+		<td class="tdtip">不选择目标主机,将丢弃源主机数据!</td>
+	</tr>
+	<tr>
+		<td class="tdleft">已添加：</td>
+		<td>
+			<span id="m-dsthost"></span>
+			<input type="hidden" id="dsthost" name="dsthost" value="" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">保留源数据：</td>
+		<td>
+			<input type="radio" id="keepsrc1" name="keepsrc" value="1" checked="checked" /><label for="keepsrc1">是</label>
+			<input type="radio" id="keepsrc0" name="keepsrc" value="0" /><label for="keepsrc0">否</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">删除种子微博：</td>
+		<td>
+			<input type="radio" id="delseedweibo1" name="delseedweibo" value="1" /><label for="delseedweibo1">是</label>
+			<input type="radio" id="delseedweibo0" name="delseedweibo" value="0" checked="checked" /><label for="delseedweibo0">否</label>
+		</td>
+		<td class="tdtip">是否删除种子微博</td>
+	</tr>
+	<tr>
+		<td class="tdleft">删除用户：</td>
+		<td>
+			<input type="radio" id="deluser1" name="deluser" value="1" /><label for="deluser1">是</label>
+			<input type="radio" id="deluser0" name="deluser" value="0" checked="checked" /><label for="deluser0">否</label>
+		</td>
+		<td class="tdtip">是否删除没有微博的用户</td>
+	</tr>
+	<tr>
+		<td class="tdleft">删除种子用户：</td>
+		<td>
+			<input type="radio" id="delseeduser1" name="delseeduser" value="1" /><label for="delseeduser1">是</label>
+			<input type="radio" id="delseeduser0" name="delseeduser" value="0" checked="checked" /><label for="delseeduser0">否</label>
+		</td>
+		<td class="tdtip">是否删除种子用户</td>
+	</tr>
+	<tr>
+		<td class="tdleft">选择文章数据源：</td>
+		<td>
+			<input type="button" id="btn_source_host" value="选择文章数据源"/>
+		</td>
+		<td class="tdtip">只处理所选源的数据</td>
+	</tr>
+	<tr>
+		<td class="tdleft">已添加：</td>
+		<td>
+			<span id="m-source_host"></span>
+			<input type="hidden" id="source_host" name="source_host" value="" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">选择用户数据源：</td>
+		<td>
+			<input type="button" id="btn_users_source_host" value="选择用户数据源"/>
+		</td>
+		<td class="tdtip">只处理所选源的数据</td>
+	</tr>
+	<tr>
+		<td class="tdleft">已添加：</td>
+		<td>
+			<span id="m-users_source_host"></span>
+			<input type="hidden" id="users_source_host" name="users_source_host" value="" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">创建时间：</td>
+		<td>
+			<input id="cond_ge_created" name="cond_ge_created" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+			至
+			<input id="cond_lt_created" name="cond_lt_created" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+		</td>
+		<td class="tdtip">微博的创建时间</td>
+	</tr>
+	<tr>
+        <td class="tdleft">排除关键词：</td>
+		<td>
+			<textarea id="cond_ex_text" name="cond_ex_text" rows="5" cols="20"></textarea>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">包含关键词：</td>
+		<td>
+			<textarea id="cond_in_text" name="cond_in_text" rows="5" cols="20"></textarea>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">排除用户昵称：</td>
+		<td>
+			<textarea id="cond_ex_name" name="cond_ex_name" rows="5" cols="20"></textarea>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">包含用户昵称：</td>
+		<td>
+			<textarea id="cond_in_name" name="cond_in_name" rows="5" cols="20"></textarea>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">自定义条件：</td>
+		<td>
+			<textarea id="cond_in_customquery" name="cond_in_customquery" rows="5" cols="20"></textarea>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+        <td class="tdleft">每次处理条数：</td>
+        <td><input type="text" maxlength='5' value="100" name="eachcount" id="eachcount" /></td>
+        <td class="tdtip"></td>
+    </tr>
+	<!--最大处理条数-->
+	<tr>
+		<td class="tdleft">最大处理条数：</td>
+		<td>
+			<input type="text" id="maxcount" name="maxcount" />
+			<input type="button" id="btn_maxcount" value="获取总条数" />
+			<span id="span_maxcount"></span>
+		</td>
+		<td class="tdtip">根据筛选条件查询源主机数据量</td>
+	</tr>
+	<tr>
+        <td class="tdleft">立即更新：</td>
+        <td><input type="radio" value="1" name="iscommit" id="m-islimit1" checked="checked" /><label for='m-islimit1'>是</label>
+        <input type="radio" value="0" name="iscommit" id="m-islimit0" /><label for='m-islimit0'>否</label>
+        </td>
+        <td class="tdtip">每次立即更新检索引擎数据</td>
+    </tr>
+	<tr>
+		<td class="tdleft">启动时间：</td>
+		<td><input id="m-activatetime" name="activatetime" class="Wdate"
+			type="text" readonly="readonly" style="width:150px;"
+			onclick="WdatePicker({minDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">冲突延迟：</td>
+		<td>
+			<input id="m-conflictdelay" name="conflictdelay" type="text" />秒		
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">摘 要：</td>
+		<td><textarea name="remarks" id="m-remarks" rows="5" cols="7"></textarea></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input class="buttono" type="button" value="提 交" id="btnaddmigratedata" />&nbsp;&nbsp; 
+			<input class="buttono" type="button" id="btnclosemigratedata" value="取 消" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+<div id="divaddast" title="新增分析任务" class="openwindow" style="display:none;">
+<form id="formaddanalysis"><input type="hidden" name="tasktype" value="1" />
+<table class="formtable" style="width:100%">
+	<tr>
+		<td class="tdleft">任务级别：</td>
+		<td><select id="tasklevel" name="tasklevel" class="shortselect">
+			<option value="1">一</option>
+			<option value="2">二</option>
+			<option value="3">三</option>
+			<option value="4">四</option>
+			<option value="5">五</option>
+		</select></td>
+		<td class="tdtip">数字越小级别越高</td>
+	</tr>
+	<tr>
+		<td class="tdleft">选择任务：</td>
+		<td><select id="task" name="task">
+				<!--
+			<option value="3">重新分析</option>
+			<option value="1">分析桥接用户</option>
+			<option value="2">分析桥接案例</option>
+			-->
+		</select></td>
+		<td class="tdtip"></td>
+	</tr>
+	<!--
+	<tr id="t3-1">
+		<td class="tdleft">选择源：</td>
+		<td><select id="source" name="source"><option value="">全部</option>
+		</select></td>
+		<td class="tdtip">只处理所选源的数据</td>
+	</tr>
+	-->
+	<tr>
+		<td class="tdleft">选择源：</td>
+		<td>
+			<input type="button" id="t_btn_source_host" value="选择文章数据源"/>
+		</td>
+		<td class="tdtip">只处理所选源的数据</td>
+	</tr>
+	<tr>
+		<td class="tdleft">已添加：</td>
+		<td>
+			<span id="t_source_host"></span>
+			<input type="hidden" id="t_hd_source_host" name="source_host" value="" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="t3-2">
+		<td class="tdleft">选择时间：</td>
+		<td><input id="minanalysistime" name="minanalysistime" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> 到 <input id="maxanalysistime" name="maxanalysistime" class="Wdate" type="text" readonly="readonly" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+		<td class="tdtip">只处理所选时间范围的数据</td>
+	</tr>
+	<tr id="t3-9">
+		<td class="tdleft">链接：</td>
+		<td>
+			<textarea id="urls" name="urls" rows="10" style="width:430px;"></textarea>
+		</td>
+		<td class="tdtip">要分析的原创或主帖链接</td>
+	</tr>
+	<tr id="t3-8-1">
+		<td class="tdleft">开始时间：</td>
+		<td>
+			<input id="starttime" name="starttime" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">文章的起始时间</td>
+	</tr>
+	<tr id="t3-8-2">
+		<td class="tdleft">结束时间：</td>
+		<td>
+			<input id="endtime" name="endtime" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">文章的结束时间</td>
+	</tr>
+	<!--是否添加标题到内容后面-->
+	<tr id="t3-15">
+		<td class="tdleft">添加标题到内容后面</td>
+		<td>
+			<input type="radio" name="add_title_after_text" value="1"/>是
+			<input type="radio" name="add_title_after_text" checked value="0"/>否
+		</td>
+		<td class="tdtip">针对项目特别需求：如果标题存在内容中，则不添加；如果不存在，则添加到内容后面</td>
+	</tr>
+	<!--  添加分词方案 -->
+	<tr id="t3-1">
+		<td class="tdleft">分词方案：</td>
+		<td>
+		<input type="button" value="设置" onclick="popPlan2('analysisTask');" id="s-dictionaryPlan1" /></td>
+		
+		<input type="hidden" name="dictionaryPlan" id="dictionaryPlan1" value="" />
+		</td>
+		<td class="tdtip">系统对每个方案的分词结果去重后保存,未配置则用默认词典。</td>
+	</tr>
+	<tr id="t3-2">
+		<td class="tdleft">已添加：</td>
+		<td>
+		<span class="selwordsbox" id="dictionaryPlanText1">默认方案</span></td>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="t3-4">
+        <td class="tdleft">每次处理条数：</td>
+        <td><input type="text" maxlength='5' value="200" name="each_count" id="each_count" /></td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr id="t3-5">
+        <td class="tdleft">立即更新：</td>
+        <td><input type="radio" value="1" name="iscommit" id="islimit1" checked="checked" /><label for='islimit1'>是</label>
+        <input type="radio" value="0" name="iscommit" id="islimit0" /><label for='islimit0'>否</label>
+        </td>
+        <td class="tdtip">每次立即更新检索引擎数据</td>
+    </tr>
+	<!--
+    <tr id="t3-3">
+        <td class="tdleft">选择数据范围：</td>
+        <td>
+            第<input id="startdataindex" name="startdataindex" maxlength="20" type="text" class="shortinput" />条
+            至 第<input id="enddataindex" name="enddataindex"  maxlength="20" type="text" class="shortinput" />条
+            &nbsp;&nbsp;&nbsp;&nbsp;(总数据条数：<label id="lblalldatacount"></label>)
+        </td>
+        <td class="tdtip">数据范围最小值为1</td>
+    </tr>
+	-->
+	<tr id="t3-7">
+		<td class="tdleft">选择功能：</td>
+		<td><label title="重新分析情感、地区、行业、关键词、话题等" ><input name="func[]" type="checkbox" value="text" />原文内容</label>&nbsp; 
+            <label title="重新分析认证原因"><input name="func[]" type="checkbox" value="verified_reason"/>认证原因</label>&nbsp;
+		    <label title="重新分析用户简介"><input name="func[]" type="checkbox" value="description"/>用户简介</label>&nbsp; 
+		    <label title="重新分析帖子标题"><input name="func[]" type="checkbox" value="post_title"/>帖子标题</label>&nbsp; 
+		    <label title="更新转发数、评论数等字段"><input name="func_other" type="checkbox" value="other" onclick="checkallotherfield(this)"/><a id="linkOtherField" href="javascript:void(0)" style="text-decoration:underline;color:#37547D" onclick="onfuncohterclick(this)">其他字段</a></label>
+		</td>
+		<td class="tdtip">不选则全部处理</td>
+	</tr>
+	<tr id="t16-1">
+        <td class="tdleft">指定源URL：</td>
+        <td><input type="text" style="width:200px;" id="t-txtorigurl" /><br/>
+        <input type="button" value="添加" id="t-btnaddorigurl" /></td>
+        <td class="tdtip">分析指定源的轨迹</td>
+	</tr>
+    <tr id="t16-1-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="t-addedorigurl"></span>
+        <input type="hidden" id="t-hdaddedorigurl" name="addedorigurl" />
+    </tr>
+	<tr>
+		<td class="tdleft">启动时间：</td>
+		<td><input id="t-activatetime" name="activatetime" class="Wdate"
+			type="text" readonly="readonly" style="width:150px;"
+			onclick="WdatePicker({minDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">冲突延迟：</td>
+		<td>
+			<input id="m-conflictdelay" name="conflictdelay" type="text" />秒		
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">摘 要：</td>
+		<td><textarea name="remarks" rows="5" cols="7"></textarea></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><input class="buttono"
+			type="button" value="提 交" id="btnaddanalysis" />&nbsp;&nbsp; <input
+			class="buttono" type="button" id="btncloseanalysis" value="取 消" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+<div id="divaddspt" title="新增抓取任务" class="openwindow" style="display:none;">
+<form id="formaddspider"><input type="hidden" name="tasktype" value="2" />
+<table class="formtable" style="width:100%">
+    <tr>
+        <td class="tdleft">任务级别：</td>
+        <td><select id="s-tasklevel" name="tasklevel" class="shortselect">
+			<option value="1">一</option>
+			<option value="2">二</option>
+			<option value="3">三</option>
+			<option value="4">四</option>
+			<option value="5">五</option>
+        </select></td>
+        <td class="tdtip">数字越小级别越高</td>
+    </tr>
+    <tr>
+        <td class="tdleft">选择任务：</td>
+        <td><select id="s-task" name="task">
+				<!--
+            <option value="4">抓取微博</option>
+            <option value="5">处理转发</option>
+            <option value="6">更新转发数评论数</option>
+            <option value="7">抓取评论</option>
+            <option value="10">抓取关键词</option>
+            <option value="11">抓取关注</option>
+			-->
+        </select></td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+		<td class="tdleft">应用类型：</td>
+		<td>
+			<input type="checkbox" name="local" id="s-local" checked="checked"/><label for="s-local">本地任务</label>
+			<input type="checkbox" name="remote" id="s-remote" /><label for="s-remote">远程任务</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s10-20">
+		<td class="tdleft">抓取转发：</td>
+		<td>
+			<input type="radio" name="is_grab_repost" id="s_is_grab_repost1" value='1'/><label for="s_is_grab_repost1">是</label>
+			<input type="radio" name="is_grab_repost" id="s_is_grab_repost0" checked="checked"  value='0'/><label for="s_is_grab_repost0">否</label>
+		</td>
+		<td class="tdtip">是则进行判断，转发数大于0的创建转发任务</td>
+	</tr>
+    <tr>
+        <td class="tdleft">每次抓取数：</td>
+        <td><input type="text" name="each_count" id="s-each_count" value="10" /></td>
+        <td class="tdtip">每次请求抓取的数据条数,最大<span style="color:red">200</span></td>
+    </tr>
+    <!--抓取微博的条件设置-->
+    <tr id="s4-1">
+        <td class="tdleft">用户类型：</td>
+        <td><select name="usertype"><option value="">全部</option><option value="0">普通用户</option><option value="1">种子用户</option></select></td>
+        <td class="tdtip">选择需要抓取哪种用户的微博</td>
+    </tr>
+    <tr id="s4-2">
+        <td class="tdleft">用户昵称：</td>
+		<td><input type="radio" name="inputtype" id="s-userid" value="id" /><label for="s-userid" >UID</label><input type="radio" name="inputtype" id="s-screenname" value="screen_name" checked="checked" /><label for="s-screenname" >昵称</label><input type="text" id="s-txtscreenname" />&nbsp;<input type="button" value="推荐" id="s-btnsearch" />&nbsp;<input type="button" value="添加" id="s-btnadduser" />&nbsp;<input type="button" value="批量添加" id="s-btnimportuser" />&nbsp;<input type="button" value="清空" id="s-btnclearuser" /></td>
+        <td class="tdtip">抓取指定用户的微博</td>
+    </tr>
+    <tr id="s4-2-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="s-addeduser"></span><input type="hidden" id="s-hdaddeduser" name="addeduser" /></td>
+    </tr>
+    <tr id="s4-3">
+        <td class="tdleft">用户粉丝数：</td>
+        <td><input type="text" name="min_follower_count" maxlength="20" id="s-min_follower_count" value="" /></td>
+        <td class="tdtip">抓取粉丝数大于此值的用户的微博</td>
+    </tr>
+    <!--处理转发的条件设置-->
+    <tr id="s5-1">
+        <td class="tdleft">最少转发数：</td>
+        <td><input type="text" name="rmin_reposts_count" maxlength="20" id="s-rmin_reposts_count" value="0" /></td>
+        <td class="tdtip">当微博转发数大于此值时，抓取其转发微博</td>
+    </tr>
+	<!--抓取账号微博的条件设置-->
+	<tr id="s18-1">
+		<td class="tdleft">是否监控账号内容：</td>
+		<td>
+			<input type="radio" name="is_monitor_nickname" id="s_is_monitor_nickname1" value='1'/><label for="s_is_monitor_nickname1">是</label>
+			<input type="radio" name="is_monitor_nickname" id="s_is_monitor_nickname0" checked="checked"  value='0'/><label for="s_is_monitor_nickname0">否</label>
+		</td>
+		<td class="tdtip">监控账号内容</td>
+	</tr>
+	<!--抓取账号微博 end-->
+    <!--抓取评论-->
+    <tr id="s7-1">
+        <td class="tdleft">最少评论数：</td>
+        <td><input type="text" name="rmin_comments_count" maxlength="20" id="s-rmin_comments_count" value="0" /></td>
+        <td class="tdtip">当微博评论数大于此值时，更新</td>
+    </tr>
+    <!--抓取评论 end-->
+    <tr id="s5-2">
+        <td class="tdleft" id="s_weibotd">指定原创：</td>
+        <td><input type="text" style="width:200px;" id="s-txtorigid" /><br/>
+        <input type="radio" id="s-rdurl" name="rdurlorid" value="url" checked /><label for="s-rdurl">URL</label>
+        <input type="radio" id="s-rdid" name="rdurlorid" value="id" /><label for="s-rdid">ID</label>
+        <input type="button" value="添加" id="s-btnaddorigid" /></td>
+        <td class="tdtip">抓取指定微博的转发</td>
+    </tr>
+    <tr id="s5-2-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="s-addedorigid"></span>
+        <input type="hidden" id="s-hdaddedorigid" name="addedorigid" />
+        <input type="hidden" id="s-hdaddedorigmid" name="addedorigmid" /></td>
+    </tr>
+    <!--更新转发数评论数的条件设置-->
+    <tr id="s6-1">
+        <td class="tdleft">最少转发数：</td>
+        <td><input type="text" name="min_reposts_count" maxlength="20" id="s-min_reposts_count" value="0" /></td>
+        <td class="tdtip">当微博转发数大于此值时，更新</td>
+    </tr>
+    <tr id="s6-2">
+        <td class="tdleft">最后更新时间：</td>
+        <td><input id="max_updatetime" name="max_updatetime" class="Wdate"
+            type="text" readonly="readonly"
+            onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+        <td class="tdtip">比所选时间的早的微博将被更新</td>
+    </tr>
+    <tr id="s6-3">
+        <td class="tdleft">指定ID：</td>
+        <td><input type="text" id="s-txtid" />&nbsp;<input type="button" value="添加" id="s-btnaddid" /></td>
+        <td class="tdtip">更新指定ID的微博</td>
+    </tr>
+    <tr id="s6-3-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="s-addedid"></span><input type="hidden" id="s-hdaddedid" name="addedid" /></td>
+    </tr>
+	<tr id="s15-10">
+		<td class="tdleft">内容类型：</td>
+		<td>
+			<select id="s-taskpagestyletype" name="taskpagestyletype">
+			</select>
+		</td>
+		<td class="tdtip">抓取配置的内容类型</td>
+
+	</tr>
+	<!--抓取关键词的条件设置-->
+	<tr id="s10-2">
+		<td class="tdleft">关键词：</td>
+		<td>
+			<!--
+			<input type="text" name="keywords" id="s-keywords" style="width:250px;"/>
+			-->
+			<textarea id="s-keywords" name="keywords" rows="15" cols="30"></textarea>
+		</td>
+		<td class="tdtip">要抓取的关键词</td>
+	</tr>
+	<tr id="s10-5">
+		<td class="tdleft">用户昵称：</td>
+		<td>
+			<input type="text" name="username" id="s-username"/>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s10-1">
+		<td class="tdleft">抓取配置：</td>
+		<td>
+			<select id="s-config" name="config">
+			</select>
+		</td>
+		<td class="tdtip">抓取配置的名称</td>
+	</tr>
+	<!--
+    <tr>
+        <td class="tdleft">选择源：</td>
+        <td><select id="s-source" name="source">
+        </select></td>
+        <td class="tdtip">抓取指定的源的数据</td>
+    </tr>
+	-->
+	<tr id="s15-4">
+		<td class="tdleft">文章列表模板：</td>
+		<td>
+			<select id="s-SEtemplate" name="SEtemplate">
+			</select>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-11">
+		<td class="tdleft">文章列表URL：</td>
+		<td>
+			<input type="button" id="s-listweburl" value="生成URL" />
+			<input type="hidden" id="sh-listweburl" name="listweburl" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-12">
+		<td class="tdleft">url规则：</td>
+		<td>
+			<span id="s-listurlrule" style="word-break: break-all;display:inline-block;"></span>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s10-13">
+		<td class="tdleft">起始页码：</td>
+		<td>
+			<input id="s-page" name="page" type="text" value="1" style="width:150px;" />
+		</td>
+		<td class="tdtip">起始页码</td>
+	</tr>
+	<tr id="s15-3">
+		<td class="tdleft">列表页码：</td>
+		<td>
+			<input id="s-crawlpage" name="crawlpage" type="text" value="-1" />		
+		</td>
+		<td class="tdtip">抓取列表的页数,-1为不限制</td>
+	</tr>
+	<tr id="s15-20-1">
+		<td class="tdleft">主帖发表开始时间：</td>
+		<td>
+			<input id="s-createdtimestart" name="createdtimestart" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">要抓取文章的开始时间</td>
+	</tr>
+	<tr id="s15-20-2">
+		<td class="tdleft">主帖发表结束时间：</td>
+		<td>
+			<input id="s-createdtimeend" name="createdtimeend" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">要抓取文章的结束时间</td>
+	</tr>
+	<tr id="s15-7">
+		<td class="tdleft">派生文章详情任务：</td>
+		<td>
+			<input type="radio" id="s-derivetexttask1" name="derivetexttask" value="1" checked="checked" /><label for="s-derivetexttask1">是</label>
+			<input type="radio" id="s-derivetexttask0" name="derivetexttask" value="0" /><label for="s-derivetexttask0">否</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr id="s15-5">
+        <td class="tdleft">文章详情模板：</td>
+        <td>
+			<select id="s-SStemplate" name="SStemplate">
+			</select>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr id="s15-13">
+		<td class="tdleft">文章详情URL：</td>
+		<td>
+			<input type="button" id="s-textweburl" value="生成URL" />
+			<input type="hidden" id="sh-textweburl" name="textweburl" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-14">
+		<td class="tdleft">url规则：</td>
+		<td>
+			<span id="s-texturlrule" style="word-break: break-all;display:inline-block;"></span>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-18">
+		<td class="tdleft">每个任务文章条数：</td>
+		<td>
+			<input id="s-importarticlecount" name="importarticlecount" type="text" value="1" />		
+		</td>
+		<td class="tdtip">每个任务包含源文章条数</td>
+	</tr>
+    <!--
+	<tr id="s15-21-1">
+		<td class="tdleft">文章发表时间起始：</td>
+		<td>
+			<input id="s-lastrplytimestart" name="lastrplytimestart" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">发表帖子的时间起始</td>
+	</tr>
+	<tr id="s15-21-2">
+		<td class="tdleft">文章发表时间结束：</td>
+		<td>
+			<input id="s-lastrplytimeend" name="lastrplytimeend" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+        <td class="tdtip">发表帖子的时间结束</td>
+	</tr>
+    -->
+	<tr id="s15-8">
+		<td class="tdleft">派生用户详情任务：</td>
+		<td>
+			<input type="radio" id="s-deriveusertask1" name="deriveusertask" value="1" checked="checked" /><label for="s-deriveusertask1">是</label>
+			<input type="radio" id="s-deriveusertask0" name="deriveusertask" value="0"/><label for="s-deriveusertask0">否</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+    <tr id="s15-6">
+        <td class="tdleft">用户详情模板：</td>
+        <td>
+			<select id="s-usertemplate" name="usertemplate">
+			</select>
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr id="s15-15">
+		<td class="tdleft">用户详情URL：</td>
+		<td>
+			<input type="button" id="s-userweburl" value="生成URL" />
+			<input type="hidden" id="sh-userweburl" name="userweburl" />
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-16">
+		<td class="tdleft">url规则：</td>
+		<td>
+			<span id="s-userurlrule" style="word-break: break-all;display:inline-block;"></span>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s15-19">
+		<td class="tdleft">每个任务用户数：</td>
+		<td>
+			<input id="s-importusercount" name="importusercount" type="text" value="1" />		
+		</td>
+		<td class="tdtip">每个任务包含用户个数</td>
+	</tr>
+    <tr id="s10-11">
+        <td class="tdleft">帐号来源：</td>
+        <td><input type='button' value='选择源' id='s-sourceid'/></td>
+        <td class="tdtip">先指定源再选择帐号</td>
+    </tr>
+    <tr id="s10-11-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="s-addedsourceid"></span><input type="hidden" id="s-hdaddedsourceid" name="source" /></td>
+    </tr>
+	<tr id="s10-7">
+		<td class="tdleft">抓取帐号：</td>
+		<td><input type="button" id="s-accountid" value="添加"></td>
+        <td class="tdtip">对应源下可用抓取帐号,未添加帐号时需在抓取客户端输入用户名密码</td>
+	</tr>
+    <tr id="s10-7-1">
+        <td class="tdleft">已添加：</td>
+        <td colspan="2"><span id="s-addedaccountid"></span><input type="hidden" id="s-hdaddedaccountid" name="accountid" /></td>
+    </tr>
+	<tr id="s10-10">
+		<td class="tdleft">使用全局帐号：</td>
+		<td>
+			<input type="radio" id="s-globalaccount1" value="1" name="globalaccount"><label for="s-globalaccount1">是</label>
+			<input type="radio" id="s-globalaccount0" value="0" name="globalaccount" checked="checked"><label for="s-globalaccount0">否</label>
+		</td>
+	</tr>
+	<tr id="s10-8">
+		<td class="tdleft">是否切换帐号：</td>
+		<td>
+			<input type="radio" id="s-isswitch1" value="1" name="isswitch" ><label for="s-isswitch1">是</label>
+			<input type="radio" id="s-isswitch0" value="0" name="isswitch" checked="checked"><label for="s-isswitch0">否</label>
+		</td>
+	</tr>
+	<tr id="s10-12">
+		<td class="tdleft">退出登录：</td>
+		<td>
+			<input type="radio" id="s-logoutfirst1" value="1" name="logoutfirst"><label for="s-logoutfirst1">是</label>
+			<input type="radio" id="s-logoutfirst0" value="0" name="logoutfirst" checked="checked"><label for="s-logoutfirst0">否</label>
+		</td>
+        <td class="tdtip">任务开始前退出当前登录账号</td>
+	</tr>
+	<tr id="s10-9">
+		<td class="tdleft">帐号切换策略：</td>
+		<td><input type="text" id="s-switchpage" name="switchpage" value="5" class="shortinput">页/<input type="text" id="s-switchtime" name="switchtime" value="0" class="shortinput">秒</td>
+		<td class="tdtip">帐号切换频率,0秒表示不限时间</td>
+	</tr>
+	<tr id="s10-3">
+		<td class="tdleft">步长：</td>
+		<td>
+			<select id="s-step" name="step">
+				<option value="">无</option>
+				<option value="1h">1小时</option>
+				<option value="2h">2小时</option>
+				<option value="3h">3小时</option>
+				<option value="4h">4小时</option>
+				<option value="6h">6小时</option>
+				<option value="8h">8小时</option>
+				<option value="12h">12小时</option>
+				<option value="1d">1天</option>
+			</select>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<!--  添加分词方案 -->
+	<tr >
+		<td class="tdleft">分词方案：</td>
+		<td>
+		<input type="button" value="设置" onclick="popPlan2('newTask');" id="s-dictionaryPlan2" /></td>
+		<input type="hidden" name="dictionaryPlan" id="dictionaryPlan2" value="" />
+		</td>
+		<td class="tdtip">系统对每个方案的分词结果去重后保存,未配置则用默认词典。</td>
+	</tr>
+	<tr >
+		<td class="tdleft">已添加：</td>
+		<td>
+		<span class="selwordsbox" id="dictionaryPlanText2">默认方案</span></td>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s10-4-1">
+		<td class="tdleft">开始时间：</td>
+		<td>
+			<input id="s-starttime" name="starttime" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">要抓取微博的起始时间</td>
+	</tr>
+	<tr id="s10-4-2">
+		<td class="tdleft">结束时间：</td>
+		<td>
+			<input id="s-endtime" name="endtime" class="Wdate" type="text" readonly="readonly" style="width:150px;" />		
+		</td>
+		<td class="tdtip">要抓取微博的结束时间</td>
+	</tr>
+	<tr id="s10-14">
+		<td class="tdleft">计算总条数：</td>
+		<td>
+			<input id="s-caltotalres" name="caltotalres" type="text" />		
+			<input id="s-caltotal" name="caltotal" type="button" value="计算总条数"/>		
+		</td>
+		<td class="tdtip">要抓取微博的结束时间</td>
+	</tr>
+	<tr id="s11-1">
+		<td class="tdleft">用户昵称/ID：</td>
+		<td>
+			<input type="radio" name="inputuser" id="s-id" value="id" checked="checked" /><label for="s-id">用户ID</label>
+			<input type="radio" name="inputuser" id="s-screen_name" value="screen_name" /><label for="s-screen_name">用户昵称</label>
+			<br>
+			<textarea id="s-uids" name="unames" rows="20" cols="20"></textarea>
+			<input type="hidden" name="uids" id="s-hiddenuids" />
+		</td>
+		<td class="tdtip" id="inputuser_tip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">任务超时：</td>
+		<td>
+			<input id="s-duration" name="duration" type="text" value="3600" style="width:150px;" />秒		
+		</td>
+		<td class="tdtip">完成任务的预期时间</td>
+	</tr>
+	<tr>
+		<td class="tdleft" id="s_isseedtd">是否种子：</td>
+		<td>
+			<input id="s-isseed1" name="isseed" type="radio" value="1" checked="checked" />是	
+			<input id="s-isseed0" name="isseed" type="radio" value="0" />否
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s5-4">
+		<td class="tdleft">转发是否种子：</td>
+		<td>
+			<input id="s-isrepostseed1" name="isrepostseed" type="radio" value="1" checked="checked" />是	
+			<input id="s-isrepostseed0" name="isrepostseed" type="radio" value="0" />否
+		</td>
+		<td class="tdtip">抓取的转发是否作为种子</td>
+	</tr>
+	<!--关键词任务,去除重复-->
+	<tr  id="s10-6">
+		<td class="tdleft">去除重复：</td>
+		<td>
+			<input id="s-filterdup1" name="filterdup" type="radio" value="1" />是	
+			<input id="s-filterdup0" name="filterdup" type="radio" value="0" checked="checked" />否
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr id="s5-3">
+		<td class="tdleft">强制抓取：</td>
+		<td>
+			<input id="s-forceupdate1" name="forceupdate" type="radio" value="1"/>是	
+			<input id="s-forceupdate0" name="forceupdate" type="radio" value="0" checked="checked" />否
+		</td>
+		<td class="tdtip">强制重新抓取以获取变化</td>
+	</tr>
+	<tr>
+		<td class="tdleft">启动时间：</td>
+        <td><input id="s-activatetime" name="activatetime" class="Wdate"
+            type="text" readonly="readonly" style="width:150px;"
+            onclick="WdatePicker({minDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">冲突延迟：</td>
+		<td>
+			<input id="s-conflictdelay" name="conflictdelay" type="text" />秒		
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">立即更新：</td>
+       <td><input type="radio" value="1" name="iscommit" id="s-islimit1" checked="checked" /><label for='s-islimit1'>是</label>
+       <input type="radio" value="0" name="iscommit" id="s-islimit0" /><label for='s-islimit0'>否</label>
+       </td>
+       <td class="tdtip">每次立即更新检索引擎数据</td>
+   </tr>
+	<tr id="s15-17">
+		<td class="tdleft">是否计算轨迹：</td>
+		<td>
+			<input type="radio" id="s-iscalctrend1" value="1" name="iscalctrend"><label for="s-iscalctrend1">是</label>
+			<input type="radio" id="s-iscalctrend0" value="0" name="iscalctrend" checked="checked"><label for="s-iscalctrend0">否</label>
+		</td>
+        <td class="tdtip">任务结束时是否计算轨迹</td>
+	</tr>
+    <tr>
+        <td class="tdleft">摘 要：</td>
+        <td><textarea name="remarks" id="s-remarks" rows="5" cols="7"></textarea></td>
+        <td class="tdtip"></td>
+    </tr>
+    <tr>
+		<td colspan="2" align="center">
+			<input class="buttono" type="button" value="提 交" id="btnaddspider" />
+			<span id="waitsubmit" style="margin-left:-20px"></span>
+			&nbsp;&nbsp;
+			<input class="buttono" type="button" id="btnclosespider" value="取 消" />
+		</td>
+        <td class="tdtip"></td>
+    </tr>
+</table>
+<br />
+<br />
+</form>
+</div>
+<!--批量添加用户-->
+<div id="embeduserdiv" style="display:none;">
+<table class="formtable">
+	<tr>
+		<td class="tdleft">用户昵称/ID：</td>
+		<td>
+			<span>
+				<input type="radio" name="userinputtype" id="userinputtype_id" value="id" /><label for="userinputtype_id">UID</label>
+				<input type="radio" name="userinputtype" id="userinputtype_name" value="screen_name" checked="checked" /><label for="userinputtype_name">昵称</label>
+			</span><br/>
+			<textarea rows="20" cols="15" id="screen_name"></textarea>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td align="center">&nbsp;&nbsp; </td>
+		<td><input class="buttono" type="button" value="添加用户" id="btnaddembeduser" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+</div>
+<!--导入任务-->
+<div style="display:inline-block;"><input type="button" id="task_import" value="导入任务">(添加任务参数JSON,结构和导出的相同,点击导入会添加相同的任务,谨慎执行!)</div>
+<div id="taskexportdiv" style="margin:10px;">
+    <span>任务参数</span>
+    <textarea id="taskexportresult" style="width:99%;height:300px;"></textarea>
+</div>
+<!--输入验证码-->
+<div id="veriCodeDiv" style="display:none;">
+	<table class="formtable">
+		<tr>
+			<td><img id="veriCodeImg" align="middle"><input name="code" id="code" type="text" size="8"></td>
+		</tr>
+	</table>
+</div>
+
+</div>
+</div>
+<!--#include file="multiTab.shtml"-->
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

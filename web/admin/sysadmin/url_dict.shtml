@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>博晓通--系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+	label {
+		vertical-align: middle
+	}
+	input[type=checkbox] {
+		vertical-align: middle;
+	}
+	.formtable .tdtip {
+		color:red;
+	}
+	.selwordsbox {
+		border: 1px solid #CCC;
+		padding: 1.5px 0 1.5px 1.5px;
+		margin: 3px 0 0 2px;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	//var pageCount;//存储总页数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	$(function () {
+		if($("#addurldictdiv").length == 1) {
+			$("#addurldictdiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 480,
+				height: 270,
+				close: function () {
+					$("#addud_url_text").val("");
+					$("#ro_url_tip").text("");
+				}
+			});
+		}
+		$("#addud_url_text").bind("focus", function(){
+			$("#ro_url_tip").text("");
+		});
+		$("#addurldict").bind("click", function () {
+			addUrlDictWordHtml();
+		});
+		$("#ud_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#urldictinfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+
+	function searchRequest(pagesize, curpage) {
+		$("#urldictinfo tr:not(:first)").remove();
+		var param = "";
+		/*
+		var fpc = $("#ud_url").val();
+		if (fpc != -1) {
+			param += "&ud_url=" + fpc + "";
+		}
+		*/
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "urldict_model.php?type=selecturldictinfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#urldictinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			//getBusinessByid(data);
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				fhtml = "<tr><td><input type='checkbox' name='checklist' id='checkfeture" + ditem.id+ "' value='" + ditem.id+ "'></input></td><td>" +ditem.id+ "</td><td>" +ditem.url+ "</td></tr>";
+				$("#urldictinfo").append(fhtml);
+				/*
+				$("#ud_"+di+"").bind("click", function () {
+					addUrlDictWordHtml(ditem);
+				});
+				*/
+			});
+			fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#urldictinfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#urldictinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", !this.checked);
+		});
+	}
+
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem)
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if (confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletetenant(delid);
+			}
+		}
+	}
+
+	function deletetenant(tid) {
+		var dataobj = {
+			type: "deletevalueword",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "urldict_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//新增特征词html初始化
+	function addUrlDictWordHtml(ditem) {
+		$("#addurldictdiv").attr("addopttype", "add");
+		//弹开新增窗口
+		addDicWord();
+	}
+	function submitDic(){
+		//短链接
+		var addud_url = $("#addud_url_text").val();
+		if(addud_url == ""){
+			$("#ro_url_tip").text("短链接不能为空!");
+			return false;
+		}
+		var senddataobj = {
+			ud_url: addud_url,
+			type: "checkvalueexist"
+		}
+
+		var searchnameUrl = config.modelUrl + "urldict_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addurldictdiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addurldictdiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						var existArr = [];
+						$.each(data.datalist, function(ddi, dditem){
+							var pk = dditem.url;
+							existArr.push(pk); 
+						});
+						$("#ro_url_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						return false;
+					} else {
+						senddataobj.type = "addurldict";
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "urldict_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addurldictdiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addurldictdiv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									if(msg.msg != undefined && msg.msg !=""){
+										alert(msg.msg);
+									}
+									searchRequest(pagesize);
+									$("#addurldictdiv").dialog("close");
+								} else {
+									alert(msg.msg);
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord() {
+		$("#addurldictdiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addurldictdiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+			var ud_id = $("#addurldictdiv").attr("ud_id");
+		}
+		$("#addurldictdiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addurldictdiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+	<!--#include file="top.shtml"-->
+	<div id="content">
+		<!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+			<a href="sysadmin_dictionary.shtml">系统词典</a>&gt; <span style="color: gray">短链接管理</span> 
+			<a href="javascript:void(0)" id="addurldict" style="float: right">新增词</a>
+			<div>
+				<!--
+				短链接类型：
+				<select id="ud_urldicttype" style='width:65px;'>
+					<option value="-1">未选择</option>
+				</select>
+				行业：
+				<select id="ud_business">
+					<option value="-1">未选择</option>
+				</select>
+				<input type="button" name="ud_search" value="查询" id="ud_search" />
+				-->
+			</div>
+			<table id="urldictinfo" name="urldictinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+				<tr>
+					<th width="4%" scope="col">选择</th>
+					<th width="13%" scope="col">短链接ID</th>
+					<th width="13%" scope="col">短链接</th>
+				</tr>
+			</table>
+			<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+		</div>
+	</div>
+	<div id="addurldictdiv" style="display:none;" addopttype="add" ud_id="" >
+		<table class="formtable">
+			<tr>
+				<td class="tdleft">短链接：</td>
+				<td id="addud_url_td" colspan = '2'>
+					<input id="addud_url_text" name="addud_url_text" type="text" /> (主机地址，不带http://)
+				</td>
+				<td class="tdtip" id="ro_url_tip"></td>
+			</tr>
+		</table>
+	</div>
+	<!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>
+

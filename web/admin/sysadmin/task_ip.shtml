@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>系统管理--IP管理</title>
+<link rel="stylesheet" href="css/jquery_datatables.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript">
+  var tbl;
+  $(function(){
+		changeTabTitle();
+	  tbl = $('#mytbl').dataTable({
+			    "sAjaxSource":config.phpPath+"taskmanager.php?type=gethistory",
+			    "bLengthChange":false,
+			    "bSort":false,
+			    "iDisplayLength":2,
+	            "aoColumns":
+		            [
+						{ "fnRender": function (o) {
+							  return getTaskType(o.aData.tasktype);
+						    }
+						},
+                        { "mDataProp": "tasklevel" },
+                        { "fnRender": function (o) {
+                            return getFormatTime(o.aData.starttime);
+                          }
+                        },
+                        { "fnRender": function (o) {
+                            return getFormatTime(o.aData.endtime);
+                          }
+                        },
+                        { "mDataProp": "datastatus" },
+                        { "mDataProp": "remarks" }
+		         	]}
+			  );
+  });
+
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+    style="color: gray">IP管理</span> 
+<p />
+<table width="98%" border="0" cellspacing="0" cellpadding="0"
+    class="list" id="mytbl">
+    <thead>
+    <tr>
+        <th scope="col" style="width: 60px">类型</th>
+        <th scope="col" style="width: 60px">级别</th>
+        <th scope="col" style="width: 100px">开始时间</th>
+        <th scope="col" style="width: 100px">结束时间</th>
+        <th scope="col" style="width: 100px">数据量</th>
+        <th scope="col">摘要</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<div id="Pagination" class="pagination"></div> 
+</div>
+</div>
+</div>
+</body>
+</html>

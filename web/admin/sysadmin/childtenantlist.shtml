@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--给租户分配资源</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+#pagestyle a{ cursor:pointer;}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript">
+checkuserusage();
+//checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+$(function(){
+		changeTabTitle();
+   $("#userinfo tr:not(:first)").remove();
+	searchRequest(10,1); //支持分页后，替换上两行
+	
+});
+
+
+//checkuserpure(1,0);
+
+function searchRequest(pagesize, curpage)
+{ $("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	//var searchnameUrl =  config.modelUrl+"tenant_user_model.php?type=getalltenant"+"&currpage="+curpage2+"&pagesize="+pagesize;
+	var searchnameUrl =  config.modelUrl+"tenant_user_model.php?type=gettenantbyrole"+"&currpage="+curpage2+"&pagesize="+pagesize;
+	
+	ajaxCommon(searchnameUrl, searchname, "json");
+}
+
+
+function searchname(data){
+	if(data!=null){
+		if(!data.result){
+			alert(data.msg);
+			return;
+		}
+		else{
+			//显示分页
+			totalCount = data.totalcount;
+			if(totalCount>0){
+				$.each(data.children, function(i){
+						var str=$("<tr><td>"+data.children[i].tenantname+"</td><td>"+data.children[i].prepayment+"</td><td>"+data.children[i].contact+"</td><td>"+data.children[i].weburl+"</td><td>"+data.children[i].email+"</td><td>"+data.children[i].updatetime+"</td><td><a href='addtenantresrel.shtml?tid="+data.children[i].tenantid+"&pid="+data.children[i].productid+"'>分配资源</a><a href='tenantallresrellist.shtml?tid="+data.children[i].tenantid+"'>  所有可用资源</a></td></tr>"); 
+						$("#userinfo").append(str);
+				});
+				$("#userinfo").append(str);
+			}
+			else{
+				var str=$("<tr><td colspan='7'>暂无记录!</td></tr>"); 
+				$("#userinfo").append(str);
+			}
+			$("#pagestyle").empty();
+			if(totalCount>pagesize){
+				pageDisplay(totalCount, searchRequest, "pagestyle", pagesize,curpage2);
+			}
+		}
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">给租户分配资源</span> 
+<p />
+<table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="13%" scope="col">租户名称</th>
+         <th width="11%" scope="col">积分</th>
+	     <th width="7%" scope="col">联系人</th>
+         <th width="12%" scope="col">二级域名</th>
+         <th width="12%" scope="col">电子邮件</th>
+         <th width="13%" scope="col">创建时间</th>
+	     <th width="15%" scope="col">操作</th>
+       </tr>
+</table>
+<div id="pagestyle" style="margin:5px;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

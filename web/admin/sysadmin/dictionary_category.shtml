@@ -1,0 +1,869 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+	label {
+		vertical-align: middle
+	}
+	input[type=checkbox] {
+		vertical-align: middle;
+	}
+	.formtable .tdtip {
+		color:red;
+	}
+	.selwordsbox {
+		border: 1px solid #CCC;
+		padding: 1.5px 0 1.5px 1.5px;
+		margin: 3px 0 0 2px;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/parts/popAddDictionaryCategory.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript">
+	var _this=this;
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	//var pageCount;//存储总页数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	var dicTypeArr = [1, 2]; //父级分类
+	var posArr = ["NR", "NN", "VV"];
+	var dicSubtypeBiz = [];
+	var dicSubtypeAllBiz  = [];
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	//删除按钮
+	var deletecodearr = [];
+	var deletebtn = "<input type='button' value='删除' name='deleteitem' style='background-color:#2E6E9E;color:#FFFFFF;' />";
+	var deleteselectedbtn = "<input type='button' value='取消' name='deleteitemselected' style='background-color:#EA3D3D;color:#FFFFFF;' />";
+	this.setSelectedCountPosition = function(){
+		$("#selectdiv").css({
+			'display':'inline-block',
+			'position':'absolute',
+			'width':"20px",
+			'z-index': 1005,
+			'left': $("#selectedcount").offset().left,
+			'top': $("#selectedcount").offset().top - 40
+		});
+		$("#selectedcount").attr("currstate", "unfolded");
+	};
+	this.hideSelectedCount = function(){
+		$("#selectdiv").hide();
+		$("#selectedcount").attr("currstate", "folded");
+	};
+	this.deleteSubmitBtn = function(selector){
+		var checkedlen = deletecodearr.length;
+		if(checkedlen > 0){
+			var deletesubmitbtn = "<input type='button' id='confirmdelete' name='confirmdelete' value='确认删除' />&nbsp;<input type='button' id='selectedcount' name='selectedcount' value='已选择"+checkedlen+"条' currstate='folded' />";
+			$("#"+selector+"").empty().append(deletesubmitbtn);
+		}
+		else{
+			$("#"+selector+"").empty()
+		}
+	};
+	//检查类别是否可以删除
+	function checkCategory(childID,parentID){
+		var myCheck=this;
+		var ret=false;
+		var senddata3 = {
+		   id: childID,
+		   parent_id: parentID,
+		   type: "checkCategoryExist"
+		}
+		$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		dataType: "json",
+		async :false,
+		url: config.modelUrl + "dictionary_category_model.php",
+		data: JSON.stringify(senddata3),
+		beforeSend:function(){
+			btnWaitDisplay("#dictionary_category_div");
+		},
+		complete:function(){
+			submitbtnDisplay2("#dictionary_category_div");
+		},
+		success: function (data) {
+		if (data != null) {
+			if (data.flag == 1) {
+			
+				alert("此类被分词字典引用,不能被删除!");
+				ret=false;
+				}
+				else{
+					ret=true;
+				}
+				}
+			}
+		});
+			
+		return ret;
+	}
+	$(function () {
+			changeTabTitle();
+		if ($("#adddictionarydiv").length == 1) {
+			$("#adddictionarydiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 540,
+				height: 430,
+				close: function () {
+					$("#adddic_type_select").val("");
+					$("#adddic_type_text").val("");
+					$("#adddic_subtype_select").val("");
+					$("#adddic_subtype_text").val("");
+					$("#adddic_type_add").attr("opttype", "select");
+					$("#adddic_subtype_add").attr("opttype", "select");
+
+					$("#ro_type_tip").text("");
+					$("#ro_subtype_tip").text("");
+					$("#ro_pos_tip").text("");
+					$("#ro_language_tip").text("");
+					$("#ro_value_tip").text("");
+				}
+			});
+		}
+		$.each(["type", "subtype"], function (k, item) {
+			$("#adddic_" + item + "_text").bind("change", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+		$("#adddic_type_select").bind("change", function () {
+			$("#ro_type_tip").text("");
+			var ptype = $("#adddic_type_select").val();
+			getDicSubtype("adddic_subtype_select", ptype);
+		});
+		//绑定父类事件
+		$("#dic_type").bind("change", function () {
+			var pclass = $("#dic_type").val();
+			if(pclass==""||pclass==-1){
+				$("#dic_subtype").empty().append("<option value='-1' >未选择</option>");
+				return false;
+			}
+			getChildCategory("dic_subtype", pclass);
+			
+		});
+		
+		$("#adddic_value").bind("focus", function(){
+			$("#ro_value_tip").text("");
+		});
+		//新增按钮
+		$("#adddictionary").bind("click", function () {
+			//addDictionaryWordHtml();
+			addDicWord2();
+			$("#dict_parent_text").css("display", "none");
+			$("#dict_parent_select").css("display", "");
+
+			$("#dict_child_text").css("display", "");
+			$("#dict_child_select").css("display", "none");
+			
+			
+		});
+		$("#adddic_type_add").bind("click", function () {
+			var addtype = $(this).attr("opttype");
+			if (addtype == "select") {
+				//隐藏下拉选择,显示input,新增
+				$("#adddic_type_text").css("display", "");
+				$("#adddic_type_select").css("display", "none");
+
+				$("#adddic_subtype_text").css("display", "");
+				$("#adddic_subtype_select").css("display", "none");
+
+				$("#adddic_subtype_add").css("display", "none");
+				$(this).attr("opttype", "add")
+				//更改新增为选择
+				$(this).text("选择字典类型");
+			} 
+			else if (addtype == "add") {
+				//显示下拉选择,隐藏input,新增
+				$("#adddic_type_text").css("display", "none");
+				$("#adddic_type_select").css("display", "");
+
+				$("#adddic_subtype_text").css("display", "none");
+				$("#adddic_subtype_select").css("display", "");
+
+				$("#adddic_subtype_add").css("display", "");
+
+				$(this).attr("opttype", "select")
+				//更改新增为新增
+				$(this).text("新增字典类型");
+			}
+		});
+		$("#adddic_subtype_add").bind("click", function () {
+			var addtype = $(this).attr("opttype");
+			if (addtype == "select") {
+				//隐藏下拉选择,显示input,新增
+				$("#adddic_subtype_text").css("display", "");
+				$("#adddic_subtype_select").css("display", "none");
+
+				$(this).attr("opttype", "add")
+				//更改新增为选择
+				$(this).text("选择具体类型");
+			} else if (addtype == "add") {
+				//显示下拉选择,隐藏input,新增
+				$("#adddic_subtype_text").css("display", "none");
+				$("#adddic_subtype_select").css("display", "");
+
+				$(this).attr("opttype", "select")
+				//更改新增为新增
+				$(this).text("新增具体类型");
+			}
+		});
+		
+		$("#dic_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#dictionaryinfo tr:not(:first)").remove();
+		//加载列表
+		searchRequest(pagesize);
+		//获取父类
+		getParentCategory("dic_type");
+		
+		
+	});
+	function searchRequest(pagesize, curpage) {
+		$("#dictionaryinfo tr:not(:first)").remove();
+		var fpc = $("#dic_type").val();
+		var param = "";
+		//if (fpc != -1) {
+			param += "&parent_id=" + fpc + "";
+	//	}
+		var fc = $("#dic_subtype").val();
+		if (fc != -1) {
+			param += "&id=" + fc + "";
+		}
+		
+		var dlan = $("#dic_language").val();
+		if (dlan != -1) {
+			param += "&state=" + dlan + "";
+		}
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "dictionary_category_model.php?type=select_dictionary_category_all&page=" + curpage2 + "&pagesize=" + pagesize + param; //searchfeatureclass
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#dictionaryinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+	
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				//类型
+				var type="无";
+				var disbtn = "";
+				if(deletecodearr.inArray(ditem.id)){
+					disbtn = deleteselectedbtn;
+				}
+				else{
+					disbtn = deletebtn;
+				}
+				var strState="默认";
+				if(ditem.state==2){
+					strState="禁用";
+				}else if(ditem.state==3){
+					strState="其他";
+				}
+					fhtml = "<tr><td><span id='delete_"+ditem.id+"' parent_id='" + ditem.parent_id+ "'>"+disbtn+"</span></td><td>"+ditem.parent_name+"</td><td>" + ditem.category_name+ "</td><td>" + strState + "</td><td><a href='javascript:void(0)' child_id='"+ditem.id+"' state='"+ditem.state+"' parent_id='" + ditem.parent_id+ "' id='dict_state" + di+ "' >修改</a></td></tr>";
+				//<input type='checkbox' name='check_category' id='check_category" + di+ "' parent_id='" + ditem.parent_id+ "' value='" + ditem.id+ "'></input>
+				
+				$("#dictionaryinfo").append(fhtml);
+				$("#dict_state" + di + "").bind("click", function () {
+				//打开修改窗体
+					addDicWord2(ditem);
+				});
+				
+				//$("#delete_" + ditem.id + "").click($checkCategory);
+		
+			});
+			//fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			fhtml="<tr><td colspan='5' align='left'><div style='text-align:left;' id='eventalertdeletediv'></div></td><tr>";
+			$("#dictionaryinfo").append(fhtml);
+			
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#dictionaryinfo").append(str);
+		}
+		//绑定删除按钮
+		_this.deleteSubmitBtn("eventalertdeletediv");
+		$("#dictionaryinfo").find("input[name=deleteitem]").die("click");
+		$("#dictionaryinfo").find("input[name=deleteitem]").live("click", function(){
+		
+			var pid = $(this).parent("span").attr("id");
+			var parent_id=$(this).parent("span").attr("parent_id");
+			var pidarr = pid.split("_");
+			var code = pidarr[1];
+			//验证删除是否合法，否则不让选择
+			var ret=checkCategory(code,parent_id);
+			if(ret==false){
+					return false;
+				}
+			deletecodearr = arrayAppend(deletecodearr, code);
+			$("#"+pid+"").empty().append(deleteselectedbtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#dictionaryinfo").find("input[name=deleteitemselected]").die("click");
+		$("#dictionaryinfo").find("input[name=deleteitemselected]").live("click", function(){
+			var pid = $(this).parent("span").attr("id");
+			var pidarr = pid.split("_");
+			var code = pidarr[1];
+			deletecodearr = arrayDelete(deletecodearr, code);
+			$("#"+pid+"").empty().append(deletebtn);
+			_this.deleteSubmitBtn("eventalertdeletediv");
+			
+		});
+		$("#confirmdelete").die("click");
+		$("#confirmdelete").live("click", function(){
+			if(confirm("确定删除"+deletecodearr.length+"条数据?")){
+				deletetenant(deletecodearr);
+				//重置按钮
+				deletecodearr.length = 0;
+				//searchRequest(pagesize, 1);
+			}
+			else{
+				return false;
+			}
+			
+		});
+		$("#selectedcount").die("click");
+		$("#selectedcount").live("click", function(){
+			var selectshortcutdiv = "<div id='selectdiv'><input type='button' name='selectall' id='selectall' value='全选' style='margin:0;'/><input type='button' name='selectnone' id='selectnone' value='清空' style='margin:0;'/></div>";
+			if($("#selectdiv").length == 0){
+				$("body").append(selectshortcutdiv);
+			}
+			var currstate = $("#selectedcount").attr("currstate");
+			if(currstate == 'folded'){
+				_this.setSelectedCountPosition();
+			}
+			else{
+				_this.hideSelectedCount();
+			}
+			$("#selectdiv").bind("mouseleave", function(){
+				_this.hideSelectedCount();
+			});
+			$("#selectall").unbind("click");
+			$("#selectall").bind("click", function(){
+				$("#dictionaryinfo").find("input[name=deleteitem]").each(function(i, item){
+					var pid = $(item).parent("span").attr("id");
+					var pidarr = pid.split("_");
+					var code = pidarr[1];
+					var parent_id=$(this).parent("span").attr("parent_id");
+					//验证删除是否合法，否则不让选择
+					var ret=checkCategory(code,parent_id);
+					if(ret==false){
+						return false;
+					}
+					deletecodearr = arrayAppend(deletecodearr, code);
+					$(item).parent().empty().append(deleteselectedbtn);
+					
+
+				});
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				_this.setSelectedCountPosition();
+			});
+			$("#selectnone").unbind("click");
+			$("#selectnone").bind("click", function(){
+				$("#dictionaryinfo").find("input[name=deleteitemselected]").each(function(i, item){
+					var parent_id=$(this).parent("span").attr("parent_id");
+					var pid = $(item).parent("span").attr("id");
+					var pidarr = pid.split("_");
+					var code = pidarr[1];
+					$(item).parent().empty().append(deletebtn);
+				});
+				//清空点击时,清空全局数组
+				deletecodearr.length = 0;
+				_this.deleteSubmitBtn("eventalertdeletediv");
+				$("#selectdiv").remove();
+			});
+		});	
+		//end delete_button
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", !this.checked);
+		});
+	}
+
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem)
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if (confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletetenant(delid);
+			}
+		}
+	}
+
+	function deletetenant(tid) {
+		var dataobj = {
+			type: "deletevalueword",
+			id: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "dictionary_category_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+
+
+
+	//新增特征词html初始化
+	function addDictionaryWordHtml(ditem) {
+		//显示下拉选择,隐藏input,新增
+		$("#adddic_type_text").css("display", "none");
+		$("#adddic_type_select").css("display", "");
+
+		$("#adddic_subtype_text").css("display", "none");
+		$("#adddic_subtype_select").css("display", "");
+
+		$("#adddic_subtype_add").css("display", "");
+		$("#adddic_type_add").text("新增字典类型");
+		$("#adddic_subtype_add").text("新增具体类型");
+
+		if (ditem != undefined) {
+			$("#adddictionarydiv").attr("addopttype", "update");
+			$("#adddictionarydiv").attr("dic_id", ditem.id)
+		} else {
+			$("#adddictionarydiv").attr("addopttype", "add");
+			changeFWordadd();
+		}
+		//父级选择
+		getParentCategory("dic_type");
+		var pclass;
+		if (ditem != undefined) {
+			$("#adddic_type_select").val(ditem.type);
+		}
+		//二级选择
+		pclass = $("#adddic_type_select").val();
+		if (ditem != undefined) {
+			//getDicSubtype("adddic_subtype_select", pclass, ditem.subtype); 
+			getChildCategory("adddic_subtype_select", pclass,ditem.subtype);
+		} else {
+			if(pclass != -1){
+				getChildCategory("adddic_subtype_select", pclass);
+				
+			}
+		}
+	
+		//语言
+	//	if (ditem != undefined && ditem.language!= undefined) {
+	//		$("#adddic_language_select").val(ditem.language);
+	//	}
+		//修改时 初始化关键词
+		if (ditem != undefined && ditem.value != undefined) {
+			var pk = ditem.value;
+			$("#adddic_value").val(pk);
+		}
+		addDicWord();
+	}
+
+	function changeFWordadd(ft, addopttype) {
+		if(addopttype != undefined && addopttype == "update"){
+			$("#adddic_value_td").empty().append("<input type='text' id='adddic_value' name='adddic_value' />")
+		}
+		else{
+			$("#adddic_value_td").empty().append("<textarea id='adddic_value' style='width:135px;' rows='8' ></textarea>")
+		}
+	}
+
+	function cancleUniqueuser(ele) {
+		$(ele).parent().remove();
+	}
+
+	function submitDic(){
+		var ty = $("#adddictionarydiv").attr("addopttype");
+		if (ty != "add") {
+			var dic_id = $("#adddictionarydiv").attr("dic_id");
+		}
+		var tp = $("#adddic_type_add").attr("opttype");
+		var adddic_type = $("#adddic_type_select").val();
+		if (tp == "add") { //新增字典类型
+			adddic_type = $("#adddic_type_text").val();
+		}
+		if (adddic_type == "" || adddic_type == -1) {
+			$("#ro_type_tip").text("字典类型不能为空!");
+			return false;
+		} else {
+			adddic_type = commonFun.trim(adddic_type);
+			if (adddic_type.length > 50) {
+				$("#ro_type_tip").text("最多50个字符!")
+				return false;
+			} else {
+				var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+				if (reg.test(adddic_type)) {
+					$("#ro_type_tip").text("不能含有特殊字符!");
+					return false;
+				}
+			}
+		}
+
+		//具体类型
+		var ctype = $("#adddic_subtype_add").attr("opttype");
+		var adddic_subtype = $("#adddic_subtype_select").val();
+		if (tp == "add" || ctype == "add") {
+			adddic_subtype = $("#adddic_subtype_text").val();
+		}
+		/*
+		if (adddic_subtype == "" || adddic_subtype == -1) {
+			$("#ro_subtype_tip").text("具体类型不能为空!");
+			return false;
+		} else {
+			adddic_subtype = commonFun.trim(adddic_subtype);
+			if (adddic_subtype.length > 50) {
+				$("#ro_subtype_tip").text("最多50个字符!")
+				return false;
+			} else {
+				var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+				if (reg.test(adddic_subtype)) {
+					$("#ro_subtype_tip").text("不能含有特殊字符!");
+					return false;
+				}
+			}
+		}
+		*/
+		
+		//状态
+		var adddic_language = $("#adddic_language_select").val();
+		//字典内容
+		var adddic_valueArr = [];
+		if ($("#adddic_value").length > 0) {
+			var adddic_value = $("#adddic_value").val();
+			if (adddic_value == undefined || adddic_value == '') {
+				$("#ro_value_tip").text("关键词不能为空!");
+				return false;
+			}
+			else{
+				var reg = new RegExp("[#！￥……（）【】；：。，、？]"); //不包含逗号
+				if (reg.test(adddic_value)) {
+					$("#ro_value_tip").text("不能含有特殊字符(#)!");
+					return false;
+				}
+			}
+			var tmpvalueArr = adddic_value.split('\n');
+			var repeatflag = false;
+			$.each(tmpvalueArr, function(ti, titem){
+				if(!adddic_valueArr.inArray(titem)){
+					adddic_valueArr.push(titem);
+				}
+				else{
+					repeatflag = true;
+					return false;
+				}
+			});
+			if(repeatflag){
+				$("#ro_value_tip").text("值重复!");
+			}
+		}
+
+		var searchnameUrl = config.modelUrl + "fudan_dictionary_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify({
+				dic_type: adddic_type,
+				dic_subtype: adddic_subtype,
+				dic_language: adddic_language,
+				dic_value: adddic_valueArr,
+				type: "checkvalueexist"
+			}),
+			beforeSend:function(){
+				btnWaitDisplay("#adddictionarydiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#adddictionarydiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						var existArr = [];
+						$.each(data.datalist, function(ddi, dditem){
+							var pk = dditem.value;
+							existArr.push(pk); 
+						});
+						$("#ro_value_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						return false;
+					} else {
+						var type = "adddictionary";
+						var dataobj = {
+							dic_type: adddic_type,
+							dic_subtype: adddic_subtype,
+				
+							dic_language: adddic_language,
+							dic_value: adddic_valueArr,
+							type: type
+						};
+						if (ty == "update") {
+							type = "updatedictionaryword";
+							dataobj = {
+								dic_id:dic_id,
+								dic_type: adddic_type,
+								dic_subtype: adddic_subtype,
+			
+								dic_language: adddic_language,
+								dic_value: adddic_valueArr,
+								type: type
+							};
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "fudan_dictionary_model.php",
+							data: JSON.stringify(dataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#adddictionarydiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#adddictionarydiv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+						
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#adddictionarydiv").dialog("close");
+									} else {
+										if(msg.msg != undefined && msg.msg !=""){
+											alert(msg.msg);
+										}
+										searchRequest(pagesize);
+										$("#adddictionarydiv").dialog("close");
+									}
+
+						
+
+								} else {
+									if (dic_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert(msg.msg);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		//var buttons = $(targetor).dialog( "option", "buttons" );
+		//buttons["确定"].css("background-color", "#DADADA");
+		//var waitimg = "<img src='"+config.imagePath+"loading.gif'  style='padding:10px;padding-left:215px;' id='waitimg'/>";
+		//$(targetor).dialog("option", "buttons",[{html:waitimg, click:function(){}}]);
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+		/*
+		$(targetor).dialog( "option", "show", function(){
+			$(":button").attr("disabled","disabled"); //按钮不可用
+		});
+		*/
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord() {
+		$("#adddictionarydiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#adddictionarydiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+			var dic_id = $("#adddictionarydiv").attr("dic_id");
+		}
+		$("#adddictionarydiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#adddictionarydiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+	<!--#include file="top.shtml"-->
+	<div id="content">
+		<!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+        <a href="index.shtml">首页</a>&gt; <span style="color: gray">字典类别</span> 
+		 	<a href="javascript:void(0)" id="adddictionary" style="float: right">新增类别</a> 
+			<div>
+				字典父类型：
+				<select id="dic_type" style='width:65px;'>
+					<option value="-1">未选择</option>
+				</select>
+				字典类型
+				<select id="dic_subtype">
+					<option value="-1">未选择</option>
+				</select>
+
+				子类状态：
+				<select id="dic_language" style='width:65px;'>
+					<option value='-1'>未选择</option>
+					<option value='1'>默认</option>
+					<option value='2'>禁用</option>
+					<option value='3'>其他</option>
+				</select>
+				<input type="button" name="dic_search" value="查询" id="dic_search" />
+			</div>
+		<!-- 	<table  width="98%" border="0" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+			<td class="tdtip" id="check_tip"> </td>
+			</tr>
+			</table> -->
+			
+			<table id="dictionaryinfo" name="dictionaryinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+			
+			<tr>
+					<th width="4%" scope="col">选择</th>
+					<th width="13%" scope="col">父类别</th>
+					<th width="11%" scope="col">类别</th>
+					<th width="7%" scope="col">类别状态</th>
+					<th width="10%" scope="col">操作</th>
+					<!--
+					<th width="10%" scope="col">操作</th>
+					-->
+				</tr>
+				
+			</table>
+			<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+		</div>
+	</div>
+	<div id="adddictionarydiv" style="display:none;" addopttype="add" dic_id="" >
+		<table class="formtable">
+			<tr>
+				<td class="tdleft">字典类型：</td>
+				<td id="adddic_type_td" width="150">
+					<input type="text" name="adddic_type_text" id="adddic_type_text" style="display:none;" />
+					<select id="adddic_type_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td width="120">
+					<!--
+					<a id="adddic_type_add" opttype="select" href='javascript:void(0)'>新增字典类型</a>
+					-->
+				</td>
+				<td class="tdtip" id="ro_type_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">具体分类：</td>
+				<td>
+					<input type="text" name="adddic_subtype_text" id="adddic_subtype_text" style="display:none;" />
+					<select id="adddic_subtype_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td>
+					<!--
+					<a id="adddic_subtype_add" opttype="select" href='javascript:void(0)'>新增具体类型</a>
+					-->
+				</td>
+				<td class="tdtip" id="ro_subtype_tip"></td>
+			</tr>
+		
+			<tr>
+				<td class="tdleft">语言：</td>
+				<td colspan = '2'>
+					<select id="adddic_language_select">
+						<option value='-1'>未选择</option>
+						<option value='cn'>中文</option>
+						<option value='en'>英文</option>
+					</select>
+				</td>
+				<td class="tdtip" id="ro_language_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">关键词：</td>
+				<td id="adddic_value_td" colspan = '2'>
+					<textarea rows="8" style="width:135px;" id="adddic_value"></textarea>
+				</td>
+				<td class="tdtip" id="ro_value_tip"></td>
+			</tr>
+		</table>
+	</div>
+	<!--#include file="popAddDictionaryCategory.shtml"-->
+	<!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>
+

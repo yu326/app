@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+  <script type="text/javascript">
+   checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+$(function(){
+		changeTabTitle();
+		   //$("#userinfo tr:not(:first)").remove();
+		   bindtenant();
+		searchRequest(pagesize,1,3,0);
+	
+});
+
+function searchRequest(pagesize, curpage,type,tid)
+{ 
+$("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=getalluser"+"&currpage="+curpage2+"&pagesize="+pagesize+"&tid="+type+"&uid="+tid;
+	
+	ajaxCommon(searchnameUrl, getuser, "json");
+}
+
+
+function getuser(data){
+
+		//显示分页
+		totalCount = data.totalcount
+	if(totalCount>0)
+	{
+		$.each(data.children, function(i){
+		var tname;
+		if(data.children[i].usertype==1)
+		{
+		tname="系统管理";
+		}
+		
+		if(data.children[i].usertype==2)
+		{
+			tname="租户管理";
+		}
+		if(data.children[i].usertype==3)
+		{
+			tname="租户";
+		}
+		if(data.children[i].usertype==3){
+									    var str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].userid+"'></input></td><td><a href=javascript:sendName(\""+data.children[i].userid+"\")>"+data.children[i].username+"</a></td><td>"+data.children[i].realname+"</td><td>"+tname+"</td><td>"+data.children[i].email+"</td><td><a href='setupuserrole.shtml?userid="+data.children[i].userid+"&type=3&tid="+data.children[i].tenantid+"'>设置用户权限</a></td></tr>");
+		}
+		else
+		{
+			var str=$("<tr><td><input type='checkbox' name='checklist' id='' value='"+data.children[i].userid+"'></input></td><td><a href=javascript:sendName(\""+data.children[i].userid+"\")>"+data.children[i].username+"</a></td><td>"+data.children[i].realname+"</td><td>"+tname+"</td><td>"+data.children[i].email+"</td><td>><a href='setupuserrole.shtml?userid="+data.children[i].userid+"&type=3&tid=0'>设置用户权限</a></td></tr>");
+		}
+		$("#userinfo").append(str);
+				
+		})
+				var str=$("<tr><td></td><td colspan='6' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>"); 
+				$("#userinfo").append(str);
+		}
+		else
+		{
+var str=$("<tr><td colspan='6'>暂无记录!</td></tr>"); 
+		$("#userinfo").append(str);
+		}
+	
+	
+		$("#pagestyle").empty();
+		if(totalCount>pagesize)
+		{
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+}
+function senduser(userid){
+	window.location.href= config.modelUrl+"modifyuser.shtml?userid="+encodeURIComponent(userid);
+}
+
+
+function selectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked","true"); });
+}
+function unselectall()
+{
+	$(":checkbox").each( function() { $(this).attr("checked",!this.checked); }); 
+}
+
+function delselect()
+{
+	var delid='';
+	var arrChk=$("input[name='checklist']:checked");
+     $(arrChk).each(function(){
+		if(delid=='')
+		{
+        	delid = this.value+",";
+		}
+		else
+		{
+			delid += this.value+",";
+		}
+     }); 
+	 if(delid=='')
+	 {
+		 alert("请选择要数据的记录!");
+	 }
+	 else
+	 {
+		 delid = delid.substring(0,delid.length-1);
+		 if(confirm("您确认要删除选中数据么，删除后将无法恢复!"))
+		 {
+			 deletetenant(delid);
+		 }
+	 }
+}
+
+function deletetenant(uid)
+{
+	var searchnameUrl =  config.modelUrl+"user_model.php?type=deleteuser&uid="+uid;
+	ajaxCommon(searchnameUrl, delcomplete, "json");
+}
+
+function delcomplete(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			alert("删除成功!");
+			searchRequest(pagesize, curpage2,$("#usertype").val());
+		}
+		else
+		{
+			alert("删除失败!");
+		}
+	}
+}
+
+
+function bindtenant()
+{ 
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenant";
+	ajaxCommon(searchnameUrl, searchtenant, "json");
+}
+
+
+function searchtenant(data)
+{
+	$('#tenantid').append( new Option("全部",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		$('#tenantid').append( new Option(data.children[i].tenantname,data.children[i].id) );
+	});	
+	}
+	
+}
+
+//加载不同类型用户
+function bindtenantuser(usertype)
+{
+	searchRequest(pagesize, 1,3,usertype); //支持分页后，替换上两行
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">用户管理</span> <a href="setuptenantlist.shtml"
+	style="float: right">设置租户权限</a>
+   <br/>
+  <br/>
+  请选择租户：<select name="tenantid" id="tenantid" onchange="bindtenantuser(this.value)">
+              </select> 
+              <br/>
+              <br/>
+  <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+    <tr>
+      <th scope="col">选择</th>
+      <th scope="col">用户名</th>
+      <th scope="col">真实姓名</th>
+      <th scope="col">所属租户</th>
+      <th scope="col">电子邮件</th>
+      <th scope="col">操作</th>
+    </tr>
+  </table>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+<div id="divaddast" title="新增租户" class="openwindow"></div>
+<div id="divaddspt" title="修改租户信息" class="openwindow"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

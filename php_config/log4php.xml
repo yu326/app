@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://logging.apache.org/log4php/">
+    <appender name="webapi" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/webapi/webapi.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="sync" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/sync/sync.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="crawling" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/crawling/crawling.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="repost_trend" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/repost_trend/repost_trend.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="statusescount" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/statusescount/statusescount.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="getcomment" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/getcomment/getcomment.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="import_weibo_url" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/import_weibo_url/import_weibo_url.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="import_user_id" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/import_user_id/import_user_id.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="scheduler" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/scheduler/scheduler.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="migrate_data" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/migrate_data/migrate_data.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="update_snapshot" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/update_snapshot/update_snapshot.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="getupdate" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/getupdate/getupdate.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="monitoring" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/monitoring/monitoring.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="datapush" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/datapush/datapush.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="historyemail" class="LoggerAppenderRollingFile">
+    <layout class="LoggerLayoutTTCC" />
+    <param name="file" value="D:/app/logs/historyemail/historyemail.log" />
+    <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="updatemysql" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/updatemysql/updatemysql.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="datapushuser" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/datapushuser/datapushuser.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="test" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/test/test.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <appender name="monitor_task" class="LoggerAppenderRollingFile">
+        <layout class="LoggerLayoutTTCC" />
+        <param name="file" value="D:/app/logs/monitor_task/monitor_task.log" />
+        <param name="maxBackupIndex" value="100" />
+    </appender>
+    <logger name="webapi">
+    	  <level value="debug" />
+        <appender_ref ref="webapi" />
+    </logger>
+    <logger name="sync">
+    	  <level value="debug" />
+    	  <appender_ref ref="sync" />
+    </logger>
+    <logger name="crawling">
+    	  <level value="debug" />
+    	  <appender_ref ref="crawling" />
+    </logger>
+    <logger name="repost_trend">
+    	  <level value="debug" />
+    	  <appender_ref ref="repost_trend" />
+    </logger>
+    <logger name="statusescount">
+    	  <level value="info" />
+    	  <appender_ref ref="statusescount" />
+    </logger>
+    <logger name="getcomment">
+    	  <level value="info" />
+    	  <appender_ref ref="getcomment" />
+    </logger>
+    <logger name="import_weibo_url">
+    	  <level value="info" />
+    	  <appender_ref ref="import_weibo_url" />
+    </logger>
+    <logger name="import_user_id">
+    	  <level value="info" />
+    	  <appender_ref ref="import_user_id" />
+    </logger>
+    <logger name="scheduler">
+    	  <level value="info" />
+    	  <appender_ref ref="scheduler" />
+    </logger>
+    <logger name="migrate_data">
+    	  <level value="debug" />
+    	  <appender_ref ref="migrate_data" />
+    </logger>
+    <logger name="update_snapshot">
+    	  <level value="debug" />
+    	  <appender_ref ref="update_snapshot" />
+    </logger>
+    <logger name="getupdate">
+        <level value="debug" />
+        <appender_ref ref="getupdate" />
+    </logger>
+    <logger name="monitoring">
+        <level value="debug" />
+        <appender_ref ref="monitoring" />
+    </logger>
+    <logger name="datapush">
+        <level value="debug" />
+        <appender_ref ref="datapush" />
+    </logger>
+    <logger name="historyemail">
+        <level value="debug" />
+        <appender_ref ref="historyemail" />
+    </logger>
+    <logger name="updatemysql">
+        <level value="debug" />
+        <appender_ref ref="updatemysql" />
+    </logger>
+    <logger name="datapushuser">
+        <level value="debug" />
+        <appender_ref ref="datapushuser" />
+    </logger>
+    <logger name="test">
+        <level value="debug" />
+        <appender_ref ref="test" />
+    </logger>
+    <logger name="monitor_task">
+        <level value="debug" />
+        <appender_ref ref="monitor_task" />
+    </logger>
+</configuration>

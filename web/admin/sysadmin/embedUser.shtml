@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--植入用户</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/task.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/parts/multiTab.js"></script>
+<script type="text/javascript" src="js/parts/doubleRichbox.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+var cancle = false;
+	$(function(){
+		changeTabTitle();
+		//控件初始化
+			planArray.length=0;
+			$("#dictionaryPlanText2").text("默认方案");
+			var plan1=[];
+			planArray.push(plan1);
+			var s1=JSON.stringify(planArray);
+			$("#dictionaryPlan2").val(s1);
+		$("#embedstatus").dialog({
+			title: "正在导入",
+			autoOpen: false,
+			resizable:false,
+            modal:true,
+            height:300,
+            width:400,
+            open:function(){
+              cancle = false;
+              $("#s_current").text('');
+              $("#s_name").text('');
+              $("#s_allcount").text('');
+              $("#s_error").text('');
+              $("#notext_info").html('');
+            }
+		});
+		checkSession();
+        getSource(function(data){
+            if(data){
+                $.each(data,function(i,v){
+                    $("select[name=source]").append('<option value="'+v.id+'">'+v.name+'</option>');
+                });           
+            }
+        });
+        $("#divwait").dialog({
+            autoOpen: false,
+            modal:true,
+            width:0,
+            height:0
+        });
+        $("#btnadduser").click(function(){
+            //alert($("#formadduser").serialize());
+            var sourceid =$("#source").val(); 
+            if(sourceid == undefined || sourceid == ''){
+                alert("请选择源");
+                return false;
+            }
+            var names = $("#screen_name").val();
+            if(names == undefined || names == ''){
+                alert("请输入用户昵称");
+                return false;
+            }
+            var nameArr = names.split('\n');
+            $("#embedstatus").dialog("open");
+            $("#embedstatus").dialog("option","title","正在导入");
+            $("#embedstatus").dialog("option","buttons",{"取消":function(){
+                if(confirm('导入尚未完成，确定取消吗？')){
+                    cancle = true;
+                  }
+            }});
+            var seeduser = $("input[name=seeduser]:checked").val();
+            var getfriends = $("#getfriends").prop("checked") ? 1 : 0;
+            $("#s_allcount").text(nameArr.length);
+            
+            var postdata = {};
+            postdata.source = sourceid;
+			postdata.dictionary_plan = $("#dictionaryPlan2").val();//添加分词方案
+            postdata.seeduser = seeduser;
+            postdata.inputtype = $("input[name=inputtype]:checked").val();//输入类型
+            postdata.getfriends = getfriends;
+            postUserid(postdata,nameArr);
+        });
+	});
+	function postUserid(postdata,nameArr){
+        if(nameArr.length == 0){
+			$("#s_name").text('');
+	        $("#embedstatus").dialog("option","title","已完成");
+	        $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+	        return false;
+        }
+		if(cancle){
+        	$("#embedstatus").dialog("option","title","已取消");
+            $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            return false;
+        }
+        var sn = commonFun.trim(nameArr.shift());
+        if(sn == ''){
+        	postUserid(postdata,nameArr);
+        	return true;
+        }
+        var curridx = parseInt($("#s_allcount").text(),10) - nameArr.length;
+        $("#s_current").text(curridx);
+        $("#s_name").text(sn);
+        postdata.screen_name = sn;
+        $.ajax({url:config.phpPath+'adduser.php',data:postdata, type:"post", success:function(r){
+            if(r.result){
+            	postUserid(postdata,nameArr);
+            }
+            else{
+                if(r.nores){
+                	nameArr.unshift(postdata.screen_name);
+                	addImportTask(postdata.source, nameArr, postdata.inputtype, postdata.seeduser, postdata.getfriends);
+                }
+                else if(r.notext){
+                	if($("#notext_info").html() == ""){
+                    	$("#notext_info").append("<br/><span style='color:red;'>不存在的用户(<span id='notext_count'>0</span>个)：</span><br/>");
+                    }
+                	$("#notext_info").append(postdata.screen_name+"<br/>");
+                	var c = parseInt($("#notext_count").text(),10);
+					c++;
+					$("#notext_count").text(c);
+                	postUserid(postdata,nameArr);
+                }
+                else{
+	                $("#s_error").text(r.msg);
+	                $("#embedstatus").dialog("option","title","出错了");
+	                $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+                }
+            }   
+        },dataType:"json",error:function(){ 
+        	$("#s_error").text("提交数据发生异常");
+        	$("#embedstatus").dialog("option","title","出错了");
+            $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+        }});
+	}
+    function addImportTask(source, names, inputtype, seeduser, getfriends){
+        var pd = {source:source, names:names, inputtype:inputtype, seeduser:seeduser, getfriends:getfriends, allcount:names.length};
+        $.ajax({url:config.phpPath+'adduser.php?type=addimporttask',data:pd, type:"post", success:function(r){
+            if(r.result){
+            	$("#s_error").text(r.msg);
+                $("#embedstatus").dialog("option","title","已完成");
+                $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            }
+            else{
+                $("#s_error").text(r.msg);
+                $("#embedstatus").dialog("option","title","出错了");
+                $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+            }
+        },dataType:"json", async:true, error:function(){
+           	$("#s_error").text("提交植入任务请求时，发生异常");
+            $("#embedstatus").dialog("option","title","出错了");
+            $("#embedstatus").dialog("option","buttons",{"关闭":function(){$(this).dialog('close');}});
+        }});
+    }
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">植入用户</span>
+<p />
+<div id="divaddast" title="新增分析任务" class="openwindow">
+<form id="formadduser">
+<table class="formtable">
+    <tr>
+        <td class="tdleft">选择源：</td>
+        <td><select id="source" name="source">
+        </select></td>
+        <td class="tdtip">选择需要植入用户的源</td>
+    </tr>
+	<tr>
+		<td class="tdleft">用户昵称/ID：</td>
+		<td>
+		<span></span><input type="radio" name="inputtype" id = "inputtype_name" value="screen_name"  checked="checked" /><label for="inputtype_name">昵称</label>
+		<input type="radio" name="inputtype" id = "inputtype_id" value="id" /><label for="inputtype_id">ID</label></span>
+		<br/>
+		<textarea rows="20" cols="20" id="screen_name"></textarea>
+		<span style="color:red">*</span>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<!--  添加分词方案 -->
+	<tr >
+		<td class="tdleft">分词方案：</td>
+		<td>
+		<input type="button" value="设置" onclick="popPlan2('newTask');" id="s-dictionaryPlan2" /></td>
+		
+		<input type="hidden" name="dictionaryPlan" id="dictionaryPlan2" value="" />
+		</td>
+		<td class="tdtip">系统对每个方案的分词结果去重后保存,未配置则用默认词典。</td>
+	</tr>
+	<tr >
+		<td class="tdleft">已添加：</td>
+		<td>
+		<span class="selwordsbox" id="dictionaryPlanText2">默认方案</span></td>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+		<td class="tdleft">是否种子用户：</td>
+		<td><input type="radio" name="seeduser" id = "seeduser2" value="1" checked="checked" /><label for="seeduser2">是</label>
+		<input type="radio" name="seeduser" id = "seeduser1" value="0"  /><label for="seeduser1">否</label>
+		</td>
+		<td class="tdtip"></td>
+	</tr>
+	<tr>
+        <td class="tdleft">抓取关注：</td>
+        <td><input type="checkbox" name="getfriends" id = "getfriends" value="1" /><label for="getfriends">立即抓取关注</label>
+        </td>
+        <td class="tdtip"></td>
+    </tr>
+	<tr>
+		<td align="center">&nbsp;&nbsp; </td>
+		<td><input class="buttono"
+            type="button" value="提 交" id="btnadduser" /></td>
+		<td class="tdtip"></td>
+	</tr>
+</table>
+<br />
+<br />
+</form>
+<div id="embedstatus" style="display:none">
+进度：<span id="s_current"></span> / <span id="s_allcount"></span><br/>
+正在导入：<span id="s_name"></span><br/>
+<span style="color:red" id="s_error"></span>
+<span id="notext_info"></span>
+</div>
+</div>
+</div>
+</div>
+<div id="divwait"></div>
+<!--#include file="multiTab.shtml"-->
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

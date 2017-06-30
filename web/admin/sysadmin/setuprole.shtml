@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+ <script type="text/javascript">
+  checkuserusage();
+var roleid=0;
+var roletype=1;
+var oldres = new Array();
+$(function(){
+		changeTabTitle();
+		var spArr = window.location.toString().split("roleid=");
+		if(spArr!=null&&spArr!="")
+		{
+		var tmpArr = spArr[1].split("&");
+		var tmptype=tmpArr[1].split("=");
+
+		roleid = tmpArr[0];
+		roletype = tmptype[1];
+		}
+		if(typeof(roleid)=='undefined')
+		{
+		roleid=0;
+		}
+		$("#roletype").attr("value",roletype);
+		bindrole(roletype);
+		bindresource(roletype);//根据类型绑定可分配资源
+		//bindroleresource(roleid,roletype);//绑定角色已分配的资源
+
+		$("#frmuser").validate(
+
+			{
+submitHandler:function(form)
+{
+sentresource();
+},
+rules:{
+//addresource:"required",
+},
+messages:{
+//label:"",
+}
+});
+});	
+
+
+function bindrole(type)
+{ 
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytype&tid="+type;
+	ajaxCommon(searchnameUrl, searchrole, "json");
+}
+
+
+function searchrole(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#roleid').append( new Option(data.children[i].label,data.children[i].roleid) );
+		$("<option value="+data.children[i].roleid+">"+data.children[i].label+"</option>").appendTo("#roleid");							   
+	});
+	}
+	if(roleid!=0)
+	{
+	//$("roleid").each(function(){alert(roleid); if($(this).val()==roleid){$(this).attr("checked","true")}});
+		$("#roleid").attr("value",roleid);
+	}
+	bindroleresource($("#roleid").val(),roletype);
+	
+}
+
+
+function bindroleresource(rid,type)
+{ 
+	var searchnameUrl = config.modelUrl+"resourcemapping_model.php?type=getmappingbyroleid&roleid="+rid+"&roletype="+type;
+	ajaxCommon(searchnameUrl, searchroleresource, "json");
+}
+
+
+function searchroleresource(data)
+{$('#addresource').empty();
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+				//$('#addresource').append( new Option(data.children[i].label,data.children[i].resourceid) );
+				$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#addresource");
+				//存储产品原有资源信息
+				oldres.push(data.children[i].resourceid);							   
+				});
+	}
+	
+}
+
+function bindresource(rid)
+{ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getresourcebytype&gid="+rid;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+
+
+function searchresource(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$("#resourceid").empty();
+		$.each(data.children, function(i){
+		//$('#resourceid').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		$("<option value="+data.children[i].resourceid+">"+data.children[i].label+"</option>").appendTo("#resourceid");
+		});
+	}
+	else
+	{
+		$("#resourceid").empty();
+		//$('#resourceid').append( new Option('暂无记录！',-1) );
+		$("<option value=-1>暂无记录!</option>").appendTo("#resourceid");
+	}
+	
+}
+
+
+
+function sentresource()
+{
+		var rid="";
+		
+			 $("#addresource option").each(function() {  
+if(oldres.length>0)
+				{
+				checkresource($(this).val());
+				}
+				if(rid=="")
+				{
+					rid=$(this).val()+",";
+				}
+				else
+				{					
+						rid+=$(this).val()+",";
+				}
+        });        
+if(rid!="")
+{
+	rid = rid.substring(0,rid.length-1);
+}
+
+if(rid=="")
+{
+	if(confirm("是否样此角色的可用资源设置为空,此操将删除相关资源的规则信息信息且无法恢复!"))
+	{
+		   $.post(config.modelUrl+"resourcemapping_model.php", {resourceid:rid,type:"addmapping",permission:1,roleid:$("#roleid").val(),delresource:oldres,roletype:$("#roletype").val()},     
+    function(msg){//alert(msg);
+       var stdata=jQuery.parseJSON(msg);
+	   
+if(!stdata.result)
+{
+	alert(data.msg);
+	window.history.back();
+}
+else
+{
+		if(stdata.flag==1)
+		{
+
+					window.location.href="rolelist.shtml";
+		}
+		else
+		{
+				alert("设置失败!");
+		}
+	}
+    });
+	}
+}
+else
+{
+    $.post(config.modelUrl+"resourcemapping_model.php", {resourceid:rid,type:"addmapping",permission:1,roleid:$("#roleid").val(),delresource:oldres,roletype:$("#roletype").val()},     
+    function(msg){  
+	var stdata=jQuery.parseJSON(msg); 
+	if(stdata.flag==1)
+		{
+			alert("设置成功，是否继续设置!")
+				window.location.href="rolelist.shtml?roleid="+roleid+"&roletype="+roletype;
+		}
+		else
+		{
+			alert("设置失败!");
+		}
+    });
+}
+}
+
+
+function setresource(fromid,toid)
+{
+
+			$("#"+fromid+" option:selected").each(function() {  
+                //将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+                $(this).appendTo($("#"+toid+":not(:has(option[value="+$(this).val()+"]))"));  
+                //目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+                if($("#"+fromid+" option[value="+$(this).val()+"]").length > 0) {  
+                    $("#"+fromid).get(0)  
+                    .removeChild($("#"+fromid+" option[value="+$(this).val()+"]").get(0));  
+                }  
+            });  
+
+}
+
+
+
+
+
+//绑定角色信息
+function bindroleinfo(type)
+{
+	bindresource(type);
+	var searchnameUrl = config.modelUrl+"role_model.php?type=getrolebytype&tid="+type;
+	ajaxCommon(searchnameUrl, getrolebytype, "json");
+}
+
+function getrolebytype(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$("#roleid").empty();
+		$.each(data.children, function(i){
+		//$('#roleid').append( new Option(data.children[i].label,data.children[i].roleid) );
+		$("<option value="+data.children[i].roleid+">"+data.children[i].label+"</option>").appendTo("#roleid");
+		});
+		bindroleresource($("#roleid").val(),$("#roletype").val());
+	}
+	else
+	{
+		$("#roleid").empty();
+		$('#roleid').append( new Option('请选择！',-1) );
+	}
+	
+}
+
+//检查删除的资源
+function checkresource(rid)
+{
+	if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==rid)
+			{
+				//oldres.remove(i);
+				oldres.splice(i,1); 
+			}
+		}
+	}
+}
+//绑定角色资源
+/*
+function bindroleresource(roleid)
+{
+		var searchnameUrl = config.modelUrl+"resource_model.php?type=getmappingbyroleid&roleid="+roleid+"&roletype="+$("#roletype").val();
+	ajaxCommon(searchnameUrl, getresourcebyrole, "json");
+}
+
+function getresourcebyrole(data)
+{
+	//$('#roleid').append( new Option("系统用户",0));
+	if(data!=null)
+	{
+		$("#addresource").empty();
+		$.each(data.children, function(i){
+		$('#addresource').append( new Option(data.children[i].label,data.children[i].resourceid) );
+		});
+	}
+	else
+	{
+		$("#addresource").empty();
+		$('#addresource').append( new Option('暂无记录！',-1) );
+	}
+	
+}
+*/
+
+function bindroleresource2(rid)
+{
+	bindroleresource(rid,$("#roletype").val());
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span
+	style="color: gray">角色权限设置</span> <a href="addrole.shtml" style="float: right">新增角色</a>
+    <a href="rolelist.shtml" style="float: right">角色列表</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+        <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">角色类型：</div></td>
+		 <td align="left" valign="middle" scope="col"><label>&nbsp;&nbsp;
+				 <select name="roletype" id="roletype" onchange="bindroleinfo(this.value)">              
+					 <option value="1">系统管理</option>
+					 <!-- <option value="2">租户管理</option>-->
+         </select>
+	     </label></td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">角色名称：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>&nbsp;&nbsp;<select name="roleid" id="roleid" onchange="bindroleresource2(this.value)"></select>
+	     </label></td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配资源：</div></td>
+	     <td align="left" valign="middle" scope="col"><table width="64%" border="0" cellspacing="0" cellpadding="0">
+	       <tr>
+	         <td align="center" width="42%"><select name="resourceid" style="height:200px" size="10" class="mselect" multiple="multiple" id="resourceid">
+	           </select></td>
+	         <td align="center" width="11%"><input type="button" id="btnjoin" name="btnjoin" value="&gt;&gt;" onclick="setresource('resourceid', 'addresource')" /><input type="button" id="btnunjoin" name="btnunjoin" value="&lt;&lt;" onclick="setresource('addresource','resourceid')" /></td>
+	         <td align="center" width="47%"><select name="addresource" size="10" style="height:200px" class="mselect" multiple="multiple" id="addresource">
+	           </select></td>
+	         </tr>
+	       </table></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;</div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

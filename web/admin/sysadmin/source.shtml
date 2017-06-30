@@ -1,0 +1,801 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip {
+	color:red;
+}
+.selwordsbox {
+	border: 1px solid #CCC;
+	padding: 1.5px 0 1.5px 1.5px;
+	margin: 3px 0 0 2px;
+	display: inline-block;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	//显示域名的列表
+	var hostpagesize = 5; //每页显示条数
+	var hostcurpage2; //当前页码
+	var hostpagenum = 10; //显示的页码数
+
+	var sourceTypeArr = []; //父级分类
+	var dicSubtypeBiz = [];
+	var dicSubtypeAllBiz  = [];
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	var configDicInfo = {
+		id: {
+			label: "自增ID",
+			formatter: null
+		},
+		business: {
+			label: "行业", //
+			formatter: function(item){
+				var ret = ""
+				$.each(dicSubtypeBiz, function(ui, uitem){
+					if(uitem.code == item){
+						ret = uitem.name; 	
+						return false;
+					}
+				});
+				return ret;
+			}
+		},
+		sourcetype: {
+			label: "来源类型", //类型(论坛,微博,SNS)
+		   formatter: function(item){
+			   var showname = "";
+			   /*
+			   switch(parseInt(item, 10)){
+				   case 1:
+					   showname = "微博";
+					   break;
+				   case 2:
+					   showname = "论坛";
+					   break;
+				   case 3:
+					   showname = "SNS";
+					   break;
+				   default:
+					   break;
+			   }
+			   */
+			   $.each(sourceTypeArr, function(si, sitem){
+				   if(sitem.code == item){
+				       showname = sitem.name;
+					   return false;
+				   }
+			   });
+			   return showname;
+		   }
+		}
+	};
+	$(function () {
+		changeTabTitle();
+			if($("#checksourcehost").length == 1){
+			$("#checksourcehost").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 480,
+				height: 370,
+				close:function(){
+					$("#addsou_source_text").val("");
+					$("#ro_source_tip").text("");
+				}
+				});
+			}
+		if($("#addsourcediv").length == 1) {
+			$("#addsourcediv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 480,
+				height: 270,
+				close: function () {
+					$("#addsou_id_text").val("");
+					$("#addsou_sourcetype_select").val("");
+					$("#addsou_business_select").val("");
+					$("#addsou_business_text").val("");
+					$("#addsou_sourcetype_add").attr("opttype", "select");
+					$("#addsou_business_add").attr("opttype", "select");
+
+					$("#addsou_name_text").val("");
+
+					$("#ro_sourcetype_tip").text("");
+					$("#ro_business_tip").text("");
+					$("#ro_name_tip").text("");
+					$("#ro_id_tip").text("");
+				}
+			});
+		}
+		$.each(["sourcetype", "business"], function (k, item) {
+			$("#addsou_" + item + "_text").bind("change", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+		$("#addsou_source_text").bind("focus", function(){
+			$("#ro_source_tip").text("");
+		});
+		$("#addsou_source_btn").bind("click", function(){
+			//添加域名
+			submitSoureHost();
+			$("#addsou_source_text").val("");
+		});
+		$("#addsource").bind("click", function () {
+			addSourceWordHtml();
+		});
+		$("#sou_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#sourceinfo tr:not(:first)").remove();
+		addSourcetype("sou_sourcetype");
+		getBusinessAll("sou_business");
+		searchRequest(pagesize);
+	});
+
+	function getBusinessAll(targetid) {
+		if(dicSubtypeAllBiz!=undefined && dicSubtypeAllBiz.length > 0){
+			$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+			var classopthtml = "";
+			$.each(dicSubtypeAllBiz, function (di, ditem) {
+					classopthtml += "<option value='"+ditem.code+"' >" + ditem.name + "</option>"
+					});
+			$("#" + targetid + "").append(classopthtml);
+		}
+		else{
+			var searchUrl = config.dataUrl+"?type=getbusiness";
+			ajaxRequest(searchUrl, function (data) {
+				if (data.errorcode != undefined) {
+					alert(data.errormsg);
+					return false;
+				}
+				$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+				if (data[0].datalist.length > 0) {
+					var classopthtml = "";
+					dicSubtypeAllBiz = data[0].datalist; 
+					$.each(data[0].datalist, function (di, ditem) {
+						classopthtml += "<option value='"+ditem.code+"' >" + ditem.name + "</option>"
+						});
+					$("#" + targetid + "").append(classopthtml);
+				}
+			}, "json");
+		}
+	}
+	function getBusinessByid(data){
+		//把行业的id存在数组,查找对应的行业名称
+		var bizids = [];
+		$.each(data.datalist, function(dai, daitem){
+			if(daitem.business != -1 && daitem.business != null){
+				if(!bizids.inArray(daitem.business)){
+					bizids.push(daitem.business);	
+				}
+			}
+		});
+		if(bizids.length > 0){
+			$.ajax({
+				url:config.dataUrl+"?type=getbusinessbyids&bizids="+bizids.join(",")+"",
+				type:"GET",
+				dataType:"json",
+				async:false,
+				beforeSend : function() {
+					$("#waitimg").parents("tr").first().remove();
+					$("#sourceinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				},
+				complete:function(XMLHttpRequest, textStatus) {
+					$("#waitimg").parents("tr").first().remove();
+				},
+				success:function(res){
+					if(res[0].datalist.length> 0) {
+						dicSubtypeBiz = res[0].datalist; 
+					}
+				}
+			});
+		}
+	}
+	function searchRequest(pagesize, curpage) {
+		$("#sourceinfo tr:not(:first)").remove();
+		var fpc = $("#sou_sourcetype").val();
+		var param = "";
+		if (fpc != -1) {
+			param += "&sou_sourcetype=" + fpc + "";
+		}
+		var fc = $("#sou_business").val();
+		if (fc != -1) {
+			param += "&sou_business=" + fc + "";
+		}
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "source_model.php?type=selectsourceinfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#sourceinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			getBusinessByid(data);
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				//来源类型
+				var sourcetype = ditem.sourcetype;
+				if(configDicInfo["sourcetype"].formatter != null) {
+					sourcetype = configDicInfo["sourcetype"].formatter(sourcetype);
+				}
+				//行业
+				var business = ditem.business;
+				if (configDicInfo["business"].formatter != null) {
+					business = configDicInfo["business"].formatter(business);
+					if(business == ""){
+						business = "无";
+					}
+				}
+				fhtml = "<tr><td><input type='checkbox' name='checklist' id='checksource" + ditem.id+ "' value='" + ditem.id+ "'></input></td><td>" +ditem.id+ "</td><td>" +ditem.name+ "</td><td>" +sourcetype+ "</td><td>" +business+ "</td><td><a href='javascript:void(0);' id='sou_"+di+"'>修改</a>&nbsp;&nbsp;<a href='javascript:void(0);' id='sou_url_"+di+"'>查看域名</a></td></tr>";
+				$("#sourceinfo").append(fhtml);
+				$("#sou_"+di+"").bind("click", function () {
+					addSourceWordHtml(ditem);
+				});
+				$("#sou_url_"+di+"").bind("click", function(){
+					checkSourceHost(ditem);
+				});
+			});
+			fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selecthostAll' id='selecthostAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselecthostAll' id='unselecthostAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#sourceinfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#sourceinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", !this.checked);
+		});
+	}
+	//来源域名的删除
+function delselectHost(){
+	var delsid = [];
+	var arrhostChk = $("input[name='checkhostlist']:checked");
+	$.each(arrhostChk, function(ari, aritem){
+		var val = $(aritem).val();
+		delsid.push({source:val});
+	});
+	if(delsid.length == 0){
+		alert("请选择要删除的数据!");
+	}
+	else{
+		if(confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+			deletesourcehost(delsid);
+		}
+	}
+}
+function deletesourcehost(delsid){
+	var dataobj = {
+		type: "deletesourcehost",
+		deldata: delsid
+	};
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		dataType: "json",
+		url: config.modelUrl + "source_model.php",
+		data: JSON.stringify(dataobj),
+		success: function (data) {
+			if (data != null) {
+				if(data.flag) {
+					if(data.msg != undefined && data.msg != ""){
+						alert(data.msg);
+					}
+					searchSourceRequest(hostpagesize);
+				} else {
+					alert(data.msg);
+				}
+			}
+		}
+	});
+}
+	//来源的删除
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem);
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if(confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletesource(delid);
+			}
+		}
+	}
+
+	function deletesource(tid) {
+		var dataobj = {
+			type: "deletevalueword",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "source_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//来源类型下拉选择
+	function addSourcetype(targetid){
+		if(sourceTypeArr != undefined) {
+			if(sourceTypeArr.length == 0){
+				$.ajax({
+					url:config.modelUrl+"source_model.php?type=getstyletype",
+					type:"GET",
+					dataType:"json",
+					async:false,
+					success:function(res){
+						if(res.length> 0) {
+							sourceTypeArr = res; 
+						}
+					}
+				});
+			}
+			var pcopt = "<option value='-1' >未选择</option>";
+			$.each(sourceTypeArr, function (pi, pitem) {
+				if(configDicInfo["sourcetype"].formatter != null) {
+					pcopt += "<option value='"+pitem.code+"' >" + configDicInfo["sourcetype"].formatter(pitem.code)+ "</option>";
+				}
+			});
+			if(targetid == undefined){
+				targetid =  "addsou_sourcetype_select";
+			}
+			$("#"+targetid+"").empty().append(pcopt);
+		}
+	}
+function searchSourceRequest(hostpagesize, hostcurpage){
+	$("#sourcehostinfo tr:not(:first)").remove();
+	hostcurpage2 = hostcurpage == undefined ? 1 : hostcurpage;
+	var sourceid = $("#checksourcehost").attr("sourceid");
+	var dataobj = {id:sourceid, type:"selectsourcehost", page:hostcurpage2, pagesize:hostpagesize};
+	$.ajax({
+			type:"GET",
+			contentType:"application/json",
+			dataType:"json",
+			url:config.modelUrl+"source_model.php?type=selectsourcehost&sourceid="+sourceid+"&page="+hostcurpage2+"&pagesize="+hostpagesize+"",
+			//data:JSON.stringify(dataobj),
+			beforeSend : function() {
+				$("#waitimg").parents("tr").first().remove();
+				$("#sourcehostinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+			},
+			complete:function(XMLHttpRequest, textStatus) {
+				$("#waitimg").parents("tr").first().remove();
+			},
+			success:function(data){
+				if(data.totalcount > 0){
+					var hosthtml = "";
+					$.each(data.datalist, function(di, ditem){
+						hosthtml = "<tr><td><input type='checkbox' name='checkhostlist' value='"+ditem.source+"' /></td><td>"+ditem.id+"</td><td>"+ditem.source+"</td></tr>";
+						$("#sourcehostinfo").append(hosthtml);
+					});
+					hosthtml = "<tr><td></td><td colspan='4' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselectHost()' value='删除'></td></tr>";
+					$("#sourcehostinfo").append(hosthtml);
+				}
+				else {
+					var str = $("<tr><td colspan='3'>暂无记录!</td></tr>");
+					$("#sourcehostinfo").append(str);
+				}
+				$("#hostpagestyle").empty();
+				if(data.totalcount > hostpagesize) {
+					pageDisplay(data.totalcount, searchSourceRequest, "hostpagestyle", hostpagesize, hostcurpage2);
+				}
+			}
+
+	});
+}
+	function checkSourceHost(ditem){
+		if(ditem != undefined){
+			$("#checksourcehost").dialog("open");
+			$("#checksourcehost").dialog({
+					title:ditem.name+"使用的域名"
+			});
+			$("#checksourcehost").attr("sourceid", ditem.id);
+			$("#checksourcehost").attr("bizid", ditem.business);
+			$("#sourcehostinfo tr:not(:first)").remove();
+			searchSourceRequest(hostpagesize);
+		}
+	}
+	//新增特征词html初始化
+	function addSourceWordHtml(ditem) {
+		if (ditem != undefined) {
+			$("#addsourcediv").attr("addopttype", "update");
+			$("#addsourcediv").attr("sou_id", ditem.id)
+		} else {
+			$("#addsourcediv").attr("addopttype", "add");
+		}
+		//来源类型下拉菜单
+		addSourcetype();
+		if(ditem != undefined) {
+			$("#addsou_sourcetype_select").val(ditem.sourcetype);
+			$("#addsou_id_text").val(ditem.id);
+		}
+		//行业下拉菜单
+		getBusinessAll("addsou_business_select");
+		//修改时初始化行业
+		if(ditem != undefined && ditem.business != undefined){
+			$("#addsou_business_select").val(ditem.business);
+		}
+		//修改时初始化名称
+		if(ditem != undefined && ditem.name!= undefined) {
+			var pk = ditem.name;
+			$("#addsou_name_text").val(pk);
+		}
+		//修改时初始化域名
+		/*if(ditem != undefined && ditem.source != undefined) {
+			var pk = ditem.source;
+			$("#addsou_source_text").val(pk);
+		}*/
+		//弹开新增窗口
+		addDicWord();
+	}
+function submitSoureHost(){
+	//域名
+	var addsou_source = $("#addsou_source_text").val();
+	if(addsou_source == ""){
+		$("#ro_source_tip").text("来源域名不能为空!");
+		return false;
+	}
+	var sendobj = {
+	sou_id:$("#checksourcehost").attr("sourceid"),
+	   sou_source: addsou_source,
+	   type: "checksourcehostexist"
+	};
+	var searchUrl = config.modelUrl+"source_model.php";
+	$.ajax({
+		type: "POST",
+		contentType: "application/json",
+		dataType: "json",
+		url: searchUrl,
+		data: JSON.stringify(sendobj),
+		beforeSend:function(){
+			$("#waitimg").parents("tr").first().remove();
+			$("#sourcehostinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+		},
+		complete:function(){
+			$("#waitimg").parents("tr").first().remove();
+		},
+		success: function (data) {
+			if (data != null) {
+				if (data.flag == 1) {
+					var existArr = [];
+					$.each(data.datalist, function(ddi, dditem){
+						var pk = dditem.source;
+						existArr.push(pk); 
+					});
+					$("#ro_source_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+					return false;
+				} else {
+					sendobj.type = "addsourcehost";
+					$.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						url: config.modelUrl + "source_model.php",
+						data: JSON.stringify(sendobj),
+						beforeSend:function(){
+							$("#waitimg").parents("tr").first().remove();
+							$("#sourcehostinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+						},
+						complete:function(){
+							$("#waitimg").parents("tr").first().remove();
+						},
+						success: function (msg) {
+							if (msg.flag == 1) {
+								if(msg.msg != undefined && msg.msg !=""){
+									alert(msg.msg);
+								}
+								searchSourceRequest(hostpagesize);
+							} else {
+								alert(msg.msg);
+							}
+						}
+					});
+				}
+			}
+		}
+	});
+}
+	function submitDic(){
+		var ty = $("#addsourcediv").attr("addopttype");
+		if (ty != "add") {
+			var sou_oldid = $("#addsourcediv").attr("sou_id");
+		}
+		//来源类型
+		var addsou_sourcetype = $("#addsou_sourcetype_select").val();
+		//所属行业
+		var addsou_business = $("#addsou_business_select").val();
+		//来源ID
+		var sou_id = $("#addsou_id_text").val();
+		sou_id = sou_id == undefined ? "" : commonFun.trim(sou_id);
+		if(sou_id == ""){
+			$("#ro_id_tip").text("请输入来源ID");
+			$("#addsou_id_text").focus();
+			return false;
+		}
+		//来源名称
+		var addsou_name = $("#addsou_name_text").val();
+		addsou_name = addsou_name == undefined ? "" : commonFun.trim(addsou_name);
+		if(addsou_name == ""){
+			$("#ro_name_tip").text("请输入名称!");
+			$("#addsou_name_text").focus();
+			return false;
+		}
+
+		var senddataobj = {
+			sou_oldid:sou_oldid,
+			sou_id:sou_id,
+			sou_sourcetype: addsou_sourcetype,
+			sou_business: addsou_business,
+			sou_name: addsou_name,
+			//sou_source: addsou_source,
+			type: "checkvalueexist"
+		}
+
+		var searchnameUrl = config.modelUrl + "source_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addsourcediv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addsourcediv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						if(data.datalist.name != undefined){
+							var existArr = [];
+							$.each(data.datalist.name, function(ddi, dditem){
+								var pk = dditem.name;
+								existArr.push(pk); 
+							});
+							$("#ro_name_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						}
+						if(data.datalist.id != undefined){
+							var existArr = [];
+							$.each(data.datalist.id, function(ddi, dditem){
+								var pk = dditem.id;
+								existArr.push(pk); 
+							});
+							$("#ro_id_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						}
+						return false;
+					} else {
+						senddataobj.type = "addsource";
+						if (ty == "update") {
+							senddataobj.type = "updatesourceword";
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "source_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addsourcediv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addsourcediv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#addsourcediv").dialog("close");
+									} else {
+										if(msg.msg != undefined && msg.msg !=""){
+											alert(msg.msg);
+										}
+										searchRequest(pagesize);
+										$("#addsourcediv").dialog("close");
+									}
+								} else {
+									if (sou_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert(msg.msg);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord() {
+		$("#addsourcediv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addsourcediv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+			$("#id_info").text("");
+		} else {
+			dialogtitle = "修改";
+			$("#id_info").text("请勿随意修改");
+			var sou_id = $("#addsourcediv").attr("sou_id");
+		}
+		$("#addsourcediv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addsourcediv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+    <!--#include file="top.shtml"-->
+    <div id="content">
+        <!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+        <a href="index.shtml">首页</a>&gt; <span style="color: gray">来源管理</span> <a href="javascript:void(0)" id="addsource" style="float: right">新增来源</a>
+            <div> 来源类型：
+                <select id="sou_sourcetype" style='width:65px;'>
+                    <option value="-1">未选择</option>
+                </select>
+                行业：
+                <select id="sou_business">
+                    <option value="-1">未选择</option>
+                </select>
+                <input type="button" name="sou_search" value="查询" id="sou_search" />
+            </div>
+            <table id="sourceinfo" name="sourceinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <tr>
+                    <th width="4%" scope="col">选择</th>
+                    <th width="13%" scope="col">来源ID</th>
+                    <th width="20%" scope="col">名称</th>
+                    <th width="11%" scope="col">来源类型</th>
+                    <th width="21%" scope="col">所属行业</th>
+                    <th width="10%" scope="col">操作</th>
+                </tr>
+            </table>
+            <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+        </div>
+    </div>
+    <div id="addsourcediv" style="display:none;" addopttype="add" sou_id="" >
+        <table class="formtable">
+            <tr>
+                <td class="tdleft">来源ID：</td>
+                <td id="addsou_id_td" width="150"><input id="addsou_id_text" name="addsou_id_text" type="text" style="width:60px" /></td>
+                <td width="120" id="id_info" style="color:gray"></td>
+                <td class="tdtip" id="ro_id_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">来源类型：</td>
+                <td id="addsou_sourcetype_td" width="150"><select id="addsou_sourcetype_select">
+                        <option value='-1'>未选择</option>
+                    </select></td>
+                <td width="120"></td>
+                <td class="tdtip" id="ro_sourcetype_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">所属行业：</td>
+                <td><select id="addsou_business_select" style="width:150px;">
+                        <option value='-1'>未选择</option>
+                    </select></td>
+                <td></td>
+                <td class="tdtip" id="ro_business_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">名称：</td>
+                <td colspan = '2'><input type="text" id="addsou_name_text" name="addsou_name_text" /></td>
+                <td class="tdtip" id="ro_name_tip"></td>
+            </tr>
+        </table>
+    </div>
+    <div id="checksourcehost" style="display:none;" sourceid="" bizid="">
+        <table id="addsourcehostinfo" name="addsourcehostinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="formtable">
+            <tr>
+                <td class="tdleft" style="width:60px;">域名：</td>
+                <td><input type="text" name="addsou_source_text"  id="addsou_source_text" style="width:110px;" />
+					<input name="addsou_source_btn" id="addsou_source_btn" type="button" value="添加" />
+				</td>
+                <td class="tdtip" id="ro_source_tip"></td>
+            </tr>
+        </table>
+        <table id="sourcehostinfo" name="sourcehostinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+            <tr>
+                <th width="4%" scope="col">选择</th>
+                <th width="13%" scope="col">来源ID</th>
+                <th width="13%" scope="col">主机域名</th>
+            </tr>
+        </table>
+        <div id="hostpagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+    </div>
+    <!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" href="http://192.168.0.30:83/css/jquery-ui-1.8.16.custom.css">
+		<script type="text/javascript" src="http://192.168.0.30:83/js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="http://192.168.0.30:83/js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="http://192.168.0.30:83/js/md5.js"></script>
+		<script type="text/javascript" src="http://192.168.0.30:83/js/widget.js"></script> <!--192.168.0.30:83 为服务器域名-->
+		<style>
+body{
+	background-image: none;
+	font-size: 12px;
+	color: #565553; font-family:Arial, Helvetica, sans-serif
+}
+</style>
+<script type="text/javascript">
+$(function(){
+	var token = "5a35Dg2IX+eqh8cfRSgZhc1A0zim/knB7HSAFCX84u+z0w";
+	//var token = "";
+		if(inter3i_widget.token != null){
+			token = inter3i_widget.token;
+		}
+		else{
+			var ht = $("#hidetoken").val();
+			if(ht != ""){
+				token = ht;
+			}
+		} 
+	inter3i_widget.setMsgUrl("/widget_dealmsg.html");//设置接收消息的html地址 
+	//增加编辑成功后的事件
+	inter3i_widget.attachEvent("editsuccess", function(){
+		$("#editdialog").dialog("close"); 
+		if(typeof window.currEditFrameID != "undefined"){
+				inter3i_widget.completeEditElement(window.currEditFrameID);
+		}
+	});
+	inter3i_widget.attachEvent("editcancel", function(){
+		$("#editdialog").dialog("close");
+	});
+	
+	inter3i_widget.attachEvent("error",inter3i_widget.showError);//绑定错误处理函数
+	//绑定checktoken事件，当调用checktoken后，会触发该事件
+	inter3i_widget.attachEvent("checktoken", function(result){
+		//参数result为boolean类型的。
+		if(result){
+			inter3i_widget.setToken(token);
+			inter3i_widget.render();//开始显示
+		}
+		else{
+			//token 无效重新获取token	
+			inter3i_widget.showError("token 无效,请重新获取!");
+		}
+	});
+	var r = inter3i_widget.init();
+	if(r){ 
+		inter3i_widget.checkToken(token);
+	}
+	$("#gettoken_btn").bind("click", function(){
+	    var uname = $("#username").val();
+	    var pwd = MD5($("#pwd").val());
+	    inter3i_widget.getToken(uname, pwd);
+		inter3i_widget.setToken(token);
+		token = inter3i_widget.token;
+		$("#hidetoken").val(token);
+		inter3i_widget.render();//开始显示
+	});
+	//inter3i_widget.setToken(token);
+	//绑定编辑事件
+	$('a').bind('click',function(){
+		if(inter3i_widget.token != null){
+			var frmid = $(this).attr("bindfrmid");
+			window.currEditFrameID = frmid;
+			$("#editdialog").dialog({
+				title:"编辑",
+				width:900,
+				height:600,
+				modal:true,
+				resizable:true,
+				close:function(){}
+			});
+			inter3i_widget.editElement('editdialog',frmid);			
+		}
+	});
+});
+</script>
+</head>
+<body>
+<div>用户名:<input type="text" id="username" />  &nbsp;&nbsp; 密码:<input type="password" id="pwd" /> &nbsp;&nbsp;<input type="button" value="获取token" id="gettoken_btn" /></div>
+<!--在平台下选择要添加到widget的show ,点击嵌入其他站点按钮,复制代码 替换掉iframe-->
+<iframe widget="inter3i" width="796" height="316" navid="149" id="inter3i_widget_frame_149_259_262_filterchart" instanceid="259" elementid="262" showid="filterchart" widgetsite="http://192.168.0.30:83/" scrolling="no" frameborder="0"></iframe>
+
+<!--复制替换后的iframe对应的id, 替换掉bindfrmid-->
+<a href="javascript:void(0)" bindfrmid="inter3i_widget_frame_149_259_262_filterchart" id="edit2">编辑</a>
+<div id="editdialog" style="text-align:center"></div>
+<input type="hidden" id="hidetoken" value="" />
+</body>
+</html>
+

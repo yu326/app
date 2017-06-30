@@ -1,0 +1,436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="js/base_util.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/base_commonFun.js"></script>
+<script type="text/javascript" src="js/parts/commonFun.js"></script>
+<script type="text/javascript" src="js/parts/limitconfig.js"></script>
+<script type="text/javascript" src="js/parts/foltop_config_part_accountconfig.js"></script>
+<script type="text/javascript" src="js/parts/user_config_part_accountconfig.js"></script>
+<script type="text/javascript" src="js/parts/topic_config_part_accountconfig.js"></script>
+<script type="text/javascript" src="js/parts/weibo_config_part_accountconfig.js"></script>
+<script type="text/javascript">
+checkuserusage();
+var pid=0;
+var tid=0;
+var tenanttype=2;
+var defaultflag=1;
+var oldres = new Array(); //存储要删除的资源
+var objsoruce;
+var objdest;
+var tscore;
+var usedscore;
+var tenantscore;
+var arrscore;
+var curresscore=0;
+var datajson=null;
+var alluseableresource = [];//可用资源
+var curruseableresource = null;
+var fcpac = null;
+$(function(){
+		changeTabTitle();
+	$("#divaccount").dialog({
+	   width:900,
+	   height:620,
+	   modal:true,
+	   autoOpen:false,
+	   title:"设置计费",
+	   buttons: {
+		   "确定":function(){
+			  if(fcpac != null){
+					datajson = fcpac.getParams();
+					if(datajson){
+						$(this).dialog("close");
+					}
+			  }
+		   },
+		   "取消":function(){$("#divaccount").dialog("close");}
+	   }
+	});
+	tid = commonFun.queryString("tid"); 
+	pid = commonFun.queryString("pid"); 
+	if(typeof(tid)=='undefined'){
+		tid=0;
+	}
+	if(typeof(pid)=='undefined'){
+		pid=0;
+	}
+	gettenantinfo(tid);
+	bindaddresource(tid);
+	bindgroup();
+    //绑定的产品
+	bindresource(0);
+	$("#frmuser").validate({
+		submitHandler:function(form){
+				   sentresource();
+               },
+		rules:{
+		   //addresource:"required",
+		},
+		messages:{
+			//label:"",
+		}
+	});
+});	
+function bindgroup(){ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getgroup&gid=3";
+	ajaxCommon(searchnameUrl, searchgroup, "json");
+}
+function searchgroup(data){
+	var ghtml = "<option value=0>全部</option>";
+	if(data!=null){
+		$.each(data.children, function(i, item){
+			ghtml += "<option value="+item.groupid+">"+item.label+"</option>";
+		});
+		$("#groupid").empty().append(ghtml);
+		$("#groupid").attr("value",$('#groupid').val());
+	}
+}
+function bindresource(groupid){ 
+	var searchnameUrl = config.modelUrl+"resource_model.php?type=getresourcebyproduct&pid="+pid+"&groupid="+groupid+"&scopetype="+tenanttype;
+	ajaxCommon(searchnameUrl, searchresource, "json");
+}
+function searchresource(data){
+	if(data!=null){
+		$("#resourceid").empty();
+		if(data.children!=null&&data.children.length>0){
+			$.each(data.children, function(i,item){
+				alluseableresource.push(item);
+				$("<option value="+item.resourceid+"-"+item.score+">"+item.label+"</option>").appendTo("#resourceid");
+			});
+			bindjson($("#resourceid").val());
+			var tmpres = ($("#resourceid").val()).split("-");
+			$("#currentresscore").html(tmpres[1]);
+			currescore = tmpres[1];
+		}
+		else{
+			$("<option value=-1>暂无可分配资源</option>").appendTo("#resourceid");	
+		}
+	}
+	else{
+		$("#resourceid").empty();
+		$("<option value=-1>暂无可分配资源</option>").appendTo("#resourceid");
+	}
+}
+function sentresource(){
+	if($("#resourceid").val()==-1){
+		alert("暂无可分配资源");
+		return;
+	}
+	if(curruseableresource == null){
+		alert('请选择资源');
+		return false;
+	}
+	usedscore = parseInt($("#useagescore").html());
+	curresscore = parseInt($("#currentresscore").html());
+
+	if(usedscore<curresscore){
+		alert("当前租户剩余积分小于当前资源积分,无法进行分配!");
+		return;
+	}
+	var rid = ($("#resourceid").val()).split("-");
+	var initUrl = config.modelUrl+"resource_model.php?type=checkresexist&gid="+rid[0]+"&userid="+tid;
+
+	$.ajax({
+		type: "get",
+		contentType: "application/json",
+		dataType: "json",
+		url: initUrl,
+		success:function(data){
+			if(data.result==1){
+				alert("资源已存在请重新设置!");
+				return;
+			}
+			else{
+				if(datajson == null || datajson == false){
+					alert("请设置计费");
+					return false;
+				}
+				var URL=config.modelUrl+"resource_model.php";
+				$.ajax({
+					type: "POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: URL,
+					data: JSON.stringify({type:"addtenantresource",resourceid:rid[0],tenantid:tid,ruledata:datajson}), 
+					success:function(msg){
+						if(msg.result){
+							if(confirm(msg.msg)){
+								window.location.href="addtenantresrel.shtml?tid="+tid+"&pid="+pid;
+							}
+							else{
+								window.location.href="childtenantlist.shtml";
+							}
+						}
+						else{
+							alert(msg.msg);
+							return false;
+						}
+					}//end sucess
+				});//end ajax
+			}
+		},
+		error:function(msg){
+	   }
+	}); 
+}
+function setresource(fromid,toid){
+	$("#"+fromid+" option:selected").each(function() {
+		arrscore= $(this).val().split("-");
+		if(fromid=="resourceid"){
+			tscore = parseInt($("#payscore").html())+parseInt(arrscore[1]);
+			usedscore = parseInt($("#useagescore").html())-parseInt(arrscore[1]);
+			$("#useagescore").html(usedscore);
+			$("#payscore").html(tscore);					
+		}
+		if(fromid=="addresource"){
+			tscore = parseInt($("#payscore").html())-parseInt(arrscore[1]);
+			usedscore = parseInt($("#useagescore").html())+parseInt(arrscore[1]);
+			$("#useagescore").html(usedscore);
+			$("#payscore").html(tscore);	
+		}
+		//将源list中的option添加到目标list,当目标list中已有该option时不做任何操作.  
+		$(this).appendTo($("#"+toid+":not(:has(option[value="+$(this).val()+"]))"));  
+		//目标list中已经存在的option并没有移动,仍旧在源list中,将其清空.  
+		if($("#"+fromid+" option[value="+$(this).val()+"]").length > 0) {  
+			$("#"+fromid).get(0).removeChild($("#"+fromid+" option[value="+$(this).val()+"]").get(0));  
+		}  
+	});  
+}
+function getresource(groupid){
+	//bindresource($("#groupid").val());
+	bindresource(groupid);
+}
+
+function gettenantinfo(tenantid)
+{
+	var initUrl = config.modelUrl+"tenant_user_model.php?type=gettenantbyid&tid="+tenantid;
+	$.ajax({
+		url: initUrl,
+		dataType: "json",
+		cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+		async:false,  //同步请求
+		success:function(data)
+		{
+			// var stdata=jQuery.parseJSON(data)
+			if(data!=null)
+			{
+				if(data.children!=null&&data.children.length>0)
+				{
+					$("#tenantname").html(data.children[0].tenantname);
+					$("#productname").html(data.children[0].productname);
+					$("#score").html(data.children[0].prepayment);
+					tenanttype=data.children[0].localtype;
+				}
+				else
+				{
+					alert("当前租户不存在，请与管理员联系!");
+					return;
+				}
+			}
+			else
+			{
+				alert("当前租户不存在，请与管理员联系!");
+				return;
+			}
+		} 
+	});
+}
+
+function bindaddresource(tenantid)
+{
+	var initUrl = config.modelUrl+"resource_model.php?type=gettenantres&gid="+tenantid;
+	$.ajax({
+		url: initUrl,
+		dataType: "json",
+		cache: false, //默认为true， false时不会从浏览器缓存中加载请求信息
+		async:false,  //同步请求
+		success:function(data)
+		{
+			if(data!=null)
+			{
+				
+				if(data.totalscore==0)
+				{
+					tscore = parseInt($("#score").html());
+					$("#payscore").html(data.totalscore);  
+			 		$("#useagescore").html(tscore-data.totalscore);
+				}
+				else
+				{
+				$("#payscore").html(data.totalscore); 
+			 tscore = parseInt($("#score").html());
+			 usedscore = parseInt($("#payscore").html());
+			 
+			 $("#useagescore").html(tscore-usedscore);
+				}
+			}
+		} 
+	});
+}
+
+
+//检查删除的资源
+function checkresource(rid)
+{
+	if(oldres.length>0)
+	{
+		for(var i=0;i<oldres.length;i++)
+		{
+			if(oldres[i]==rid)
+			{
+				//oldres.remove(i);
+				oldres.splice(i,1); 
+			}
+		}
+	}
+}
+
+function bindjson(rsid)
+{
+    curruseableresource = null;
+	if(rsid != undefined && rsid != "" && rsid != "-1"){
+		var resid = rsid.split("-");
+		  $(alluseableresource).each(function(i,item){
+			  if(item.resourceid == resid[0]){
+	              curruseableresource = item; 
+	              return false;
+			  }
+		  });   
+	}
+}
+/**
+ * 设置计费规则
+ */
+function setAccounting(){
+	if(curruseableresource != null){
+		fcpac = createAccountConfigObject(curruseableresource.ruledata,"#divaccount");
+		if(fcpac != null){
+	        $("#divaccount").dialog("open");
+    		  fcpac.render();
+		}
+	}
+	else{
+	    alert('请选择资源');
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt;<span style="color: gray">给租户分配资源</span> 
+    <a href="childtenantlist.shtml" style="float: right">给租户分配资源</a>
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <td width="30%" align="right" valign="middle" scope="col"><div align="right"></div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;</th>
+        </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="tenantname" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+       <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">购买产品：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="productname" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+       <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">分值：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="score" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+        <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">已使用积分：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="payscore" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+       <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">剩余积分：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="useagescore" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+       <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">当前所选资源分值：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <label>
+	         <div id="currentresscore" align="left"></div>
+	       </label>
+	       </td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">资 源 组：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+         &nbsp;&nbsp;<select name="groupid" id="groupid" onchange="getresource(this.value)">
+         </select>
+	     </label></td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">可分配资源：</div></td>
+	     <td align="left" valign="middle" scope="col">&nbsp;&nbsp;<select name="resourceid" id="resourceid" onchange="bindjson(this.value)">
+	       </select></td>
+       </tr>
+       	 <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">设置计费：</div></td>
+	     <td align="left" valign="middle" scope="col"><label>
+	       <div align="left">
+            &nbsp;&nbsp;<input type="button" value="设置计费" onclick="setAccounting()"></input></div>
+	     </label></td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addrole" />
+	       <input type="submit" name="btnok" id="btnok" value="保存" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="reset" name="btncancel" id="btncancel" onclick="history.back()" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+<div id="divaccount"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

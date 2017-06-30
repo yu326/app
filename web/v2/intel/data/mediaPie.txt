@@ -1,0 +1,1 @@
+[{"categoryname":"City Tier","categoryvalue":"","referencedata":false,"secondaryyaxis":false,"referencedataratio":"","xcombined":false,"columnstacking":false,"xzreverse":false,"showid":"smallpiechart","totalcount":5,"datalist":[{"text":"Mass","frq":42},{"text":"Partner","frq":27},{"text":"Media","frq":22},{"text":"Owned","frq":9}]}]

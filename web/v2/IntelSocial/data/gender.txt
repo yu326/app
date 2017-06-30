@@ -1,0 +1,1 @@
+[{"categoryname":"Gender","categoryvalue":"","referencedata":false,"secondaryyaxis":false,"referencedataratio":"","xcombined":false,"columnstacking":false,"xzreverse":false,"showid":"smallpiechart","totalcount":3,"datalist":[{"text":"\u7537","frq":56},{"text":"\u5973","frq":44}]}]

@@ -1,0 +1,693 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+	label {
+		vertical-align: middle
+	}
+	input[type=checkbox] {
+		vertical-align: middle;
+	}
+	.formtable .tdtip {
+		color:red;
+	}
+	.selwordsbox {
+		border: 1px solid #CCC;
+		padding: 1.5px 0 1.5px 1.5px;
+		margin: 3px 0 0 2px;
+		display: inline-block;
+	}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript" src="js/parts/popAddDictionary.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	//var pageCount;//存储总页数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	var areaCountry = [];
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	$(function () {
+		changeTabTitle();
+		if ($("#addareadiv").length == 1) {
+			$("#addareadiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 540,
+				height: 430,
+				close: function () {
+					$("input[name=addarea_type_radio][value=country]").attr("checked", true);
+					$("#addarea_country_select").val("");
+					$("#addarea_province_select").val("");
+					$("#addarea_city_select").val("");
+					$("#addarea_district").val("");
+					$("#addarea_name_text").val("");
+					$("#addarea_another_name_text").val("");
+					$("#addarea_short_name_text").val("");
+					$("#addarea_code_text").val("");
+
+					$("#ro_name_tip").text("");
+					$("#ro_another_name_tip").text("");
+					$("#ro_short_name_tip").text("");
+					$("#ro_area_code_tip").text("");
+				}
+			});
+		}
+		//清空警告
+		$.each(["name", "another_name", "short_name", "area_code"], function (k, item) {
+			$("#addarea_" + item + "_text").bind("change", function () {
+				if ($(this).val().length > 0) {
+					$("#ro_" + item + "_tip").text("");
+				}
+			});
+		});
+
+		//级联选择
+		$("#addarea_country_select").bind("change", function () {
+			$("#ro_country_tip").text("");
+			var ptype = $("#addarea_country_select").val();
+			getAreaProvince("addarea_province_select", ptype);
+			$("#addarea_city_select").empty().append("<option value='-1' >未选择</option>");
+		});
+		$("#area_country").bind("change", function () {
+			var pclass = $("#area_country").val();
+			getAreaProvince("area_province", pclass);
+			$("#area_city").empty().append("<option value='-1' >未选择</option>");
+		});
+		$("#addarea_province_select").bind("change", function () {
+			$("#ro_province_tip").text("");
+			var countrycode = $("#addarea_country_select").val();
+			var provincecode = $("#addarea_province_select").val();
+			getAreaCity("addarea_city_select", countrycode, provincecode);
+		});
+		$("#area_province").bind("change", function () {
+			var countrycode = $("#area_country").val();
+			var provincecode = $("#area_province").val();
+			getAreaCity("area_city", countrycode, provincecode);
+		});
+		$("#addarea_city_select").bind("change", function(){
+			$("#ro_city_tip").text("");
+		});
+
+		//新增地区
+		$("#addarea").bind("click", function () {
+			addDictionaryWordHtml();
+		});
+		//根据地区类型显示不同的下拉菜单, 添加子级时必须选择父级
+		$("#addarea_type_td input[name=addarea_type_radio]").bind("click", function(){
+			var chkval = $(this).val();
+			switch(chkval){
+				case "province":
+					$("#addarea_country_tr").css("display", "");
+					$("#addarea_province_tr").css("display", "none");
+					$("#addarea_city_tr").css("display", "none");
+					break;
+				case "city":
+					$("#addarea_country_tr").css("display", "");
+					$("#addarea_province_tr").css("display", "");
+					$("#addarea_city_tr").css("display", "none");
+					break;
+				case "district":
+					$("#addarea_country_tr").css("display", "");
+					$("#addarea_province_tr").css("display", "");
+					$("#addarea_city_tr").css("display", "");
+					break;
+				default:
+					$("#addarea_country_tr").css("display", "none");
+					$("#addarea_province_tr").css("display", "none");
+					$("#addarea_city_tr").css("display", "none");
+					break;
+			}
+		});
+		//获取国家下拉菜单
+		getAreaCountry();
+		//查询,根据条件搜索
+		$("#area_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#areainfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+//获取国家数据
+	function getAreaCountry(){
+		if(areaCountry.length == 0){
+			$.ajax({
+				url:config.dataUrl+"?type=selectcountry",
+				type:"GET",
+				dataType:"json",
+				async:false,
+				beforeSend : function() {
+					$("#waitimg").parents("tr").first().remove();
+					$("#areainfo").append("<tr><td colspan='9'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				},
+				complete:function(XMLHttpRequest, textStatus) {
+					$("#waitimg").parents("tr").first().remove();
+				},
+				success:function(res){
+					if(res[0].datalist.length> 0) {
+						areaCountry = res[0].datalist;
+					}
+					addAreaCountry("area_country");
+				}
+			});
+			return areaCountry;
+		}
+		else{
+			return areaCountry;
+		}
+	}	
+//获取省下拉菜单
+	function getAreaProvince(targetid, countrycode) {
+		if(countrycode!= -1){
+			var searchUrl = config.dataUrl+"?type=selectprovince&countrycode="+countrycode;
+			ajaxRequest(searchUrl, function (data) {
+				$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+				if(data[0].datalist != null && data[0].datalist.length > 0) {
+					var classopthtml = "";
+					$.each(data[0].datalist, function (di, ditem) {
+						classopthtml += "<option value='"+ditem.code+"' >" + ditem.name + "</option>"
+					});
+					$("#" + targetid + "").append(classopthtml);
+				}
+			}, "json");
+		}
+		else{
+			$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+		}
+	}
+//获取市下拉菜单
+	function getAreaCity(targetid, countrycode, provincecode) {
+		if(countrycode != -1){
+			var searchUrl;
+			if(provincecode=='110000' || provincecode=='120000'|| provincecode=='310000' || provincecode=='500000'){
+				citycode = provincecode.substr(0,3)+"100,"+provincecode.substr(0,3)+"200";
+				searchUrl = config.dataUrl+"?type=selectdistrict&countrycode="+countrycode+"&provincecode="+provincecode+"&citycode="+citycode;
+			}
+			else{
+				searchUrl = config.dataUrl+"?type=selectcity&countrycode="+countrycode+"&provincecode="+provincecode;
+			}
+
+			ajaxRequest(searchUrl, function (data) {
+				if (data.errorcode != undefined) {
+					alert(data.errormsg);
+					return false;
+				}
+				$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+				if (data[0].datalist != null && data[0].datalist.length > 0) {
+					var classopthtml = "";
+					$.each(data[0].datalist, function (di, ditem) {
+						classopthtml += "<option value='"+ditem.code+"' >" + ditem.name + "</option>"
+					});
+					$("#" + targetid + "").append(classopthtml);
+				}
+			}, "json");
+		}
+		else{
+			$("#"+targetid+"").empty().append("<option value='-1' >未选择</option>");
+		}
+	}
+//发送请求数据
+	function searchRequest(pagesize, curpage) {
+		$("#areainfo tr:not(:first)").remove();
+		var fpc = $("#area_country").val();
+		var param = "";
+		if (fpc != -1) {
+			param += "&area_country=" + fpc + "";
+		}
+		var fc = $("#area_province").val();
+		if (fc != -1) {
+			param += "&area_province=" + fc + "";
+		}
+		var dpos = $("#area_city").val();
+		if (dpos != -1) {
+			param += "&area_city=" + dpos + "";
+		}
+
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "area_model.php?type=selectareainfo&page=" + curpage2 + "&pagesize=" + pagesize + param; //searchfeatureclass
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#areainfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				var dprovince = ditem.province == null ? "" : ditem.province;
+				var dcity = ditem.city == null ? "" : ditem.city;
+				var ddistrict = ditem.district == null ? "" : ditem.district;
+				var dname = ditem.name == null ? "" : ditem.name;
+				var danother_name = ditem.another_name == null ? "" : ditem.another_name;
+				var dshort_name = ditem.short_name == null ? "" : ditem.short_name;
+				fhtml = "<tr><td><input type='checkbox' name='checklist' id='checkfeture" + ditem.area_code+ "' value='" + ditem.area_code+ "'></input></td><td>" + ditem.area_code+ "</td><td>" + ditem.country+ "</td><td>" + dprovince+ "</td><td>" + dcity + "</td><td>" + ddistrict + "</td><td>" + dname + "</td><td>" + danother_name + "</td><td>" + dshort_name + "</td></tr>";
+				$("#areainfo").append(fhtml);
+				/*
+				$("#dic"+di+"").bind("click", function () {
+					addDictionaryWordHtml(ditem);
+				});
+				*/
+			});
+			fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selectAll' id='selectAll' onclick='selectall()' value='全选'>&nbsp;&nbsp;<input type='button' name='unselectAll' id='unselectAll' onclick='unselectall()' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#areainfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#areainfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall() {
+		$(":checkbox").each(function () {
+			$(this).attr("checked", !this.checked);
+		});
+	}
+
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.area_code){
+					delid.push(citem)
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if (confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletetenant(delid);
+			}
+		}
+	}
+
+	function deletetenant(tid) {
+		var dataobj = {
+			type: "deletevalueword",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "area_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						areaCountry = []; //新增国家时, 需要清空, 重新赋值
+						getAreaCountry();
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//地区类型下拉选择
+	function addAreaCountry(targetid){
+		if(areaCountry != undefined && areaCountry.length > 0) {
+			var pcopt = "<option value='-1' >未选择</option>";
+			$.each(areaCountry, function (pi, pitem) {
+				pcopt += "<option value='"+pitem.code+"' >" +pitem.name+ "</option>";
+			});
+			if(targetid == undefined){
+				targetid =  "addarea_country_select";
+			}
+			$("#"+targetid+"").empty().append(pcopt);
+		}
+	}
+	//新增地区html初始化
+	function addDictionaryWordHtml() {
+		$("input[name=addarea_type_radio][value=country]").attr("checked", true);
+		$("#addarea_country_tr").css("display", "none");
+		$("#addarea_province_tr").css("display", "none");
+		$("#addarea_city_tr").css("display", "none");
+
+		$("#addareadiv").attr("addopttype", "add");
+		//父级选择
+		addAreaCountry();
+		addDicWord();
+	}
+
+	function checkTextValidate(name, prefix){
+		name = commonFun.trim(name);
+		if(name.length > 50) {
+			$("#ro_"+prefix+"_tip").text("最多50个字符!")
+			return false;
+		} else {
+			var reg = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？]");
+			if (reg.test(name)) {
+				$("#ro_"+prefix+"_tip").text("不能含有特殊字符!");
+				return false;
+			}
+		}
+	}
+	function submitDic(){
+		var fudanWords=[];
+	
+		var ty = $("#addareadiv").attr("addopttype");
+		var addarea_name = $("#addarea_name_text").val();
+		fudanWords.push(addarea_name);
+		if(addarea_name == ""){
+			$("#ro_name_tip").text("地区名称不能为空!");
+			return false;
+		}
+		else{
+			checkTextValidate(addarea_name, "name");
+		}
+		var addarea_another_name = $("#addarea_another_name_text").val();
+		if(addarea_another_name != ""){
+			checkTextValidate(addarea_another_name , "another_name");
+			fudanWords.push(addarea_another_name);
+		}
+		var addarea_short_name = $("#addarea_short_name_text").val();
+		if(addarea_short_name != ""){
+			checkTextValidate(addarea_short_name , "short_name");
+			fudanWords.push(addarea_short_name);
+		}
+		var addarea_code = $("#addarea_code_text").val();
+		if(addarea_code == ""){
+			$("#ro_area_code_tip").text("行政区代码不能为空!");
+			return false;
+		}
+		else{
+			checkTextValidate(addarea_code, "area_code");
+		}
+		//填写子级时需要选择父级
+		var atype = $("#addarea_type_td input[name=addarea_type_radio]:checked").val();
+		switch(atype){
+			case "country":
+				var addarea_country = addarea_code;
+				break;
+			case "province":
+				var addarea_country = $("#addarea_country_select").val();
+				if (addarea_country == -1) {
+					$("#ro_country_tip").text("请选择国家!");
+					return false;
+				}
+				var addarea_province = addarea_code;
+				break;
+			case "city":
+				var addarea_country = $("#addarea_country_select").val();
+				if (addarea_country == -1) {
+					$("#ro_country_tip").text("请选择国家!");
+					return false;
+				}
+				var addarea_province = $("#addarea_province_select").val();
+				if (addarea_province == -1) {
+					$("#ro_province_tip").text("请选择省!");
+					return false;
+				}
+				var addarea_city = addarea_code;
+				break;
+			case "district":
+				var addarea_country = $("#addarea_country_select").val();
+				if (addarea_country == -1) {
+					$("#ro_country_tip").text("请选择国家!");
+					return false;
+				}
+				var addarea_province = $("#addarea_province_select").val();
+				if (addarea_province == -1) {
+					$("#ro_province_tip").text("请选择省!");
+					return false;
+				}
+				var addarea_city = $("#addarea_city_select").val();
+				if (addarea_city == -1) {
+					$("#ro_city_tip").text("请选择市!");
+					return false;
+				}
+				var addarea_district = addarea_code;
+			default:
+				break;
+		}
+		//需要提交的数据
+		var senddataobj = {
+		   area_code: addarea_code,
+		   area_country: addarea_country,
+		   area_province: addarea_province,
+		   area_city: addarea_city,
+		   area_district: addarea_district,
+		   area_name: addarea_name,
+		   area_another_name: addarea_another_name,
+		   area_short_name: addarea_short_name,
+		   type: "checkvalueexist"
+		}
+	
+		var searchnameUrl = config.modelUrl + "area_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#addareadiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#addareadiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if (data.flag == 1) {
+						var existArr = [];
+						$.each(data.datalist, function(ddi, dditem){
+							var pk = dditem.name;
+							existArr.push(pk); 
+						});
+						$("#ro_area_code_tip").text(existArr.join(", ")+" 已存在, 请更改!");
+						return false;
+					} else {
+						senddataobj.type = "addarea"; 
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "area_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#addareadiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#addareadiv");
+							},
+							success: function (msg) {
+								if(msg.flag == 1) {
+								
+									if(msg.msg != undefined && msg.msg !=""){
+										alert(msg.msg);
+									}
+									//弹出分词窗体
+									if(confirm("地区添加成功，是否需要将地区添加到分词字典？")){
+										$("#dict_area1").val(fudanWords.join("\n"));
+										addDicWord2();
+									}
+									$("#addareadiv").dialog("close");
+									areaCountry = []; //新增国家时, 需要清空, 重新赋值
+									getAreaCountry();
+									searchRequest(pagesize);
+								} 
+							}
+						});
+					}
+				}
+			}
+		});
+
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+	function addDicWord() {
+		$("#addareadiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#addareadiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+			var area_id = $("#addareadiv").attr("area_id");
+		}
+		$("#addareadiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#addareadiv");
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+	<!--#include file="top.shtml"-->
+	<div id="content">
+		<!--#include file="3a_left.shtml"-->
+		<div id="right">当前位置：
+        <a href="index.shtml">首页</a>&gt; <span style="color: gray">地区管理</span> 
+			<a href="javascript:void(0)" id="addarea" style="float: right">新增词</a>
+			<div>
+				国家：
+				<select id="area_country">
+					<option value="-1">未选择</option>
+				</select>
+				省：
+				<select id="area_province">
+					<option value="-1">未选择</option>
+				</select>
+				市：
+				<select id="area_city">
+					<option value="-1">未选择</option>
+				</select>
+				<input type="button" name="area_search" value="查询" id="area_search" />
+			</div>
+			<table id="areainfo" name="areainfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+				<tr>
+					<th width="4%" scope="col">选择</th>
+					<th width="13%" scope="col">行政区代码</th>
+					<th width="11%" scope="col">国家</th>
+					<th width="7%" scope="col">省</th>
+					<th width="21%" scope="col">市</th>
+					<th width="10%" scope="col">县</th>
+					<th width="10%" scope="col">名称</th>
+					<th width="10%" scope="col">别名</th>
+					<th width="10%" scope="col">简称</th>
+					<!--
+					<th width="10%" scope="col">操作</th>
+					-->
+				</tr>
+			</table>
+			<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+		</div>
+	</div>
+	<div id="addareadiv" style="display:none;" addopttype="add" area_id="" >
+		<table class="formtable">
+			<tr>
+				<td class="tdleft">地区类型：</td>
+				<td id="addarea_type_td">
+					<span><input type="radio" name="addarea_type_radio" id="addarea_type_country" value="country" checked="checked" /><label for="addarea_type_country">国家</label></span>
+					<span><input type="radio" name="addarea_type_radio" id="addarea_type_province" value="province" /><label for="addarea_type_province">省</label></span>
+					<span><input type="radio" name="addarea_type_radio" id="addarea_type_city" value="city" /><label for="addarea_type_city">市</label></span>
+					<span><input type="radio" name="addarea_type_radio" id="addarea_type_district" value="district" /><label for="addarea_type_district">县</label></span>
+				</td>
+				<td></td>
+				<td class="tdtip" id="ro_type_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">名称：</td>
+				<td>
+					<input type="text" name="addarea_name_text" id="addarea_name_text"/>
+				</td>
+				<td></td>
+				<td class="tdtip" id="ro_name_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">别名：</td>
+				<td>
+					<input type="text" name="addarea_another_name_text" id="addarea_another_name_text"/>
+				</td>
+				<td></td>
+				<td class="tdtip" id="ro_another_name_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">简称：</td>
+				<td>
+					<input type="text" name="addarea_short_name_text" id="addarea_short_name_text"/>
+				</td>
+				<td></td>
+				<td class="tdtip" id="ro_short_name_tip"></td>
+			</tr>
+			<tr id="addarea_country_tr" style="display:none;">
+				<td class="tdleft">国家：</td>
+				<td colspan = '2'>
+					<select id="addarea_country_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td class="tdtip" id="ro_country_tip"></td>
+			</tr>
+			<tr id="addarea_province_tr" style="display:none;">
+				<td class="tdleft">省：</td>
+				<td colspan = '2'>
+					<select id="addarea_province_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td class="tdtip" id="ro_province_tip"></td>
+			</tr>
+			<tr id="addarea_city_tr" style="display:none;">
+				<td class="tdleft">市：</td>
+				<td colspan = '2'>
+					<select id="addarea_city_select">
+						<option value='-1'>未选择</option>
+					</select>
+				</td>
+				<td class="tdtip" id="ro_city_tip"></td>
+			</tr>
+			<tr>
+				<td class="tdleft">行政区代码：</td>
+				<td id="addarea_code_td" colspan = '2'>
+					<input type="text" name="addarea_code_text" id="addarea_code_text" />
+				</td>
+				<td class="tdtip" id="ro_area_code_tip"></td>
+			</tr>
+		</table>
+	</div>
+	<!--#include file="popAddDictionary.shtml"-->
+	<!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>
+

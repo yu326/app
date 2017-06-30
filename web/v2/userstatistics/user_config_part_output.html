@@ -1,0 +1,94 @@
+<div name="accordiondiv">
+	<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">输出选项</a></h3>
+	<div>
+		<div id="type_facet">
+        <div id="fieldstofacet" style="border:0 none;padding-left: 0px; padding-right: 0px;">
+            <ul style="background:#ffffff;border:0;border-bottom:1px solid #A6C9E2;border-radius:0;margin:0 1px;">
+                <li><a href="#group_user" facetfieldp="screen_name" facetfieldc="screen_name">用户</a></li>
+                <li><a href="#group_sourceid" facetfieldp="sourceid" facetfieldc="sourceid">数据来源</a></li>
+            </ul>
+            <div id="user_config_facet_group_div" style="border-width:0 1px 1px;border-style:solid;border-color: #A6C9E2;border-bottom-left-radius:5px;border-bottom-right-radius:5px;margin:0 1px;">
+                <div id="group_user" style="margin-right:0"></div>
+                <div id="group_sourceid" style="margin-right:0"></div>
+				<div id="user_config_facet_field" style="width:100%">
+                    <div id="user_config_facet_feature_div"></div>
+					<div class="search"><span class="rightalign">包含：</span><span id="user_config_filter_include_span">
+							<input type="text" id="user_config_filter_include" name="user_config_filter_include" />
+							<input type="button" id="user_config_filter_include_add" name="user_config_filterword_add" value="添加" />
+                            <input type="button" id="user_config_filter_include_batchadd" name="user_config_filter_include_batchadd" value="批量添加" />
+					</span></div>
+					<div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedincludeword"></span></div>
+					<div class="search"><span class="rightalign">去除：</span><span id="user_config_filter_exclude_span">
+							<input type="text" id="user_config_filter_exclude" name="user_config_filter_exclude" />
+							<input type="button" id="user_config_filter_exclude_add" name="user_config_filter_exclude_add" value="添加" />
+                            <input type="button" id="user_config_filter_exclude_batchadd" name="user_config_filter_exclude_batchadd" value="批量添加" />
+					</span></div>
+					<div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedexcludeword"></span></div>
+				</div>
+				<div id="user_config_facet_range" style="display:none">
+					<div class="search"><span class="rightalign"></span><input type="checkbox" id="user_config_facet_range_custom" />自定义区间</div>
+					<div class="search"><span class="rightalign">区间推荐：</span><span><input type="button" name="user_config_facet_range_recommend" id="user_config_facet_range_recommend" value="推荐" /><span id="user_config_facet_range_txt" style="display:none;">最小值:<span id="user_config_facet_range_min"></span>&nbsp;最大值:<span id="user_config_facet_range_max"></span> </span></span></div>
+					<div class="search">
+						<span class="rightalign">区间：</span><span id="user_config_facet_range_html" checkedtimetype="createdtime" ><input type="text" name="user_config_facet_range" id="user_config_facet_range_start"/> 至 <input type="text" name="user_config_facet_range" id="user_config_facet_range_end"/></span>
+						<select id="user_config_facet_range_unit" style="display:none;">
+							<option value="year">年</option>
+							<option value="month" selected="selected">月</option>
+							<option value="day">天</option>
+						</select>
+					</div>
+					<div class="search" id="user_config_facet_range_not_custom_type"><span class="rightalign">区间类型：</span><span><input type="radio" name="user_config_facet_gap_type" value="gap" /> 区间长度 <input type="radio" name="user_config_facet_gap_type" value="gapCount" />区间个数</span></div>
+					<div class="search" id="user_config_facet_range_not_custom_num"><span class="rightalign">数值：</span>
+						<span>
+							<input type="text" id="user_config_facet_gap_text" name="user_config_facet_gap_text" />                 
+							<select id="user_config_facet_gap_measure" style="display:none;">
+								<option value="hour">小时</option>
+								<option value="day">天</option>
+								<option value="month" selected="selected">月</option>
+							</select>
+						</span>
+					</div>
+					<div class="search" id="user_config_facet_range_is_custom_name"><span class="rightalign">区间名称：</span><input type="text" name="user_config_facet_range_name" id="user_config_facet_range_name"/><input type="button" value="添加" name="user_config_facet_range_name_add" id="user_config_facet_range_name_add"></div>
+					<div class="search" id="user_config_facet_range_is_custom_tag"><span class="rightalign"></span><span id="user_config_facet_range_tag"></span></div>
+					<div class="search" id="user_config_facet_range_label_axis"><span class="rightalign">添加标签：</span><span><input type="button" name="user_config_facet_range_label_axis_x" id="user_config_facet_range_label_axis_x" value="X轴" /> &nbsp;&nbsp; <input type="button" name="user_config_facet_range_label_axis_y" id="user_config_facet_range_label_axis_y" value="Y轴" /></span></div>
+					<div class="search" id="user_config_facet_range_exp_div_x"><span class="rightalign">X轴标签：</span><span id="user_config_facet_range_label_exp_x"></span></div>
+					<div class="search" id="user_config_facet_range_exp_div_y"><span class="rightalign">Y轴标签：</span><span id="user_config_facet_range_label_exp_y"></span></div>
+					<div class="search" id="user_config_facet_range_sides_div"><span class="rightalign">返回设置：</span><span><input type="checkbox" name="user_config_facet_range_sides" value="leftside" id="user_config_facet_range_sides_left"  /><label for="user_config_facet_range_sides_left">左边其他 </label><input type="checkbox" name="user_config_facet_range_sides" id="user_config_facet_range_sides_right" value="rightside" /><label for="user_config_facet_range_sides_right">右边其他</label></span></div>
+				</div>
+                <div class="divhr"></div>
+                <h3 class="childgrouptitle">排序</h3>
+                <div class="childgroupdiv" >
+					<div class="search" id="user_config_facet_counttype">
+						<span style="float:right;"><label for="user_config_counttype_modifiy">实时过滤</label><input type="checkbox" value="true" name="user_config_counttype_modifiy" id="user_config_counttype_modifiy" class="outborder"/></span>
+						<span class="rightalign">类型：</span>
+						<span id="user_config_counttype_span">
+							<input type="checkbox" name="user_config_counttype" value="101" class="outborder" /> 用户数
+							<input type="checkbox" name="user_config_counttype" value="301" class="outborder" /> 粉丝数
+							<input type="checkbox" name="user_config_counttype" value="302" class="outborder"/> 关注数
+							<input type="checkbox" name="user_config_counttype" value="303" class="outborder"/> 文章数 
+							<input type="checkbox" name="user_config_counttype" value="304" class="outborder"/> 收藏数 
+							<input type="checkbox" name="user_config_counttype" value="305" class="outborder"/> 互粉数 
+							<input type="checkbox" name="user_config_facet_average" id="user_config_facet_average" class="outborder" /> 平均值
+						</span>
+					</div>
+					<div class="search" id="user_config_facet_allusercount"><span class="rightalign">显示全部：</span><span id="user_config_allusercount_span">
+							<input type="radio" name="user_config_allusercount" value="true" class="outborder" />
+							是
+							<input type="radio" name="user_config_allusercount" value="false" class="outborder" checked="checked" />
+							否</span> (是否显示所有类型)</div>
+				</div>
+                <div class="divhr"></div>
+                <h3 class="childgrouptitle" >数据过滤<span style="float:right;"> <label for="user_config_datalimit_modifiy">实时过滤</label> <input type="checkbox" value="true" name="user_config_datalimit_modifiy" id="user_config_datalimit_modifiy" class="outborder"/></span></h3>
+                <div class="childgroupdiv" style="border:0px solid #A6C9E2; border-top:0;" id="user_config_output_datafilter" checkedoutputdata="start_end">
+					<div class="search" id="pageable"><span class="rightalign"></span>从第<span id="user_config_output_start_num_span"><input type="text" id="user_config_output_start_num" name="user_config_output_start_num" class="shortinput" /></span>条开始,每页显示<span id="user_config_output_perpage_num_span"><input type="text" id="user_config_output_perpage_num" name="user_config_output_perpage_num" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+					<div class="search" id="unpageable"><span class="rightalign"></span>
+						第<span id="user_config_limit_span"><input type="text" id="user_config_limit" name="user_config_limit" class="shortinput" /></span>条到第<span id="user_config_orderword_span"> <input type="text" id="user_config_orderword" name="user_config_orderword" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+                </div>
+			</div>
+		</div>
+		<!--
+				<div class="search" id="user_config_facetareauser_div"> <span class="rightalign">用户地区：</span> <span id="user_config_facetareauser_span">
+				</span></div>
+				-->
+		</div>
+	</div>
+</div>

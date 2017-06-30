@@ -1,0 +1,496 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.o../xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+checkuserusage();
+$(function(){
+		changeTabTitle();
+	bindproduct();
+	/*$("#frmuser").validate(		   
+	{
+		submitHandler:function(form)
+	               {
+					   senttenant();
+	               },
+		rules:{
+	   		tenantname:{required:true},
+	   		productid:{required:true},
+	   		prepayment:{required: true,digits:true},
+	   		timelimit:{required:true},
+	    	weburl:{required:true},
+	   		email: {email:true, required:true}
+		},
+	    messages:{
+			tenantname:"请输入用户名",
+			productid:"请选择产品",
+			prepayment:"请输入预付款(整数)",
+			timelimit:"请输入到期时间",
+			email:"请输入正确的email地址",
+			weburl:"请输入二级域名"
+		}
+	});*/
+
+	$('#timelimit').bind("click", function() {
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+	});
+	var dateobj = new Date();
+	var s = dateobj.dateAdd('y', 1);
+	$("#timelimit").val(formatTime('yyyy-MM-dd hh:mm:ss', Date.parse(s)/1000));
+
+	$("#btnok").bind("click", senttenant);
+	$("input[name=allowaccessdata]").bind("click",function(){
+		var chkv = $("input[name=allowaccessdata]:checked").val();
+		if(parseInt(chkv,10)){
+			$("#accessdatalimit").removeAttr("disabled");
+		}
+		else{
+			$("#accessdatalimit").attr("disabled","disabled");
+		}
+	});
+});	
+
+
+function senttenant()
+{
+	var tname = $("#tenantname").val();
+	if(tname == undefined || tname == "" || commonFun.trim(tname) == ""){
+		$("#tenantname_error").text("请输入租户名称");
+		$("#tenantname").focus();
+		return false;
+	}
+	var pid = $("#productid").val();
+	if(pid == undefined || pid == "" ){
+		$("#productid_error").text("请选择产品");
+		$("#productid").focus();
+		return false;
+	}
+	var prepayment = $("#prepayment").val();
+	var re = /^\d+$/;
+	if(prepayment == undefined || prepayment == "" || commonFun.trim(prepayment) == "" || !re.test(prepayment)){
+		$("#prepayment_error").text("请输入预付款(整数)");
+		$("#prepayment").focus();
+		return false;
+	}
+	var timelimit = $("#timelimit").val();
+	if(timelimit == undefined || timelimit == "" || commonFun.trim(timelimit) == ""){
+		$("#timelimit_error").text("请输入到期时间");
+		$("#timelimit").focus();
+		return false;
+	}
+	var email = $("#email").val();
+	var emailre = /^[a-zA-Z0-9_+.-]+\@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]{1,4}$/;
+	if(email == undefined || email == "" || commonFun.trim(email) == "" || !emailre.test(email)){
+		$("#email_error").text("请输入正确的email地址");
+		$("#email").focus();
+		return false;
+	}
+	var weburl = $("#weburl").val();
+	var weburlre = /^[a-zA-Z0-9_-]+$/;
+	/*if(weburl == undefined || weburl == "" || commonFun.trim(weburl) == ""){
+		$("#weburl_error").text("请输入二级域名");
+		$("#weburl").focus();
+		return false;
+	}*/
+	weburl = commonFun.trim(weburl);
+	if(!weburlre.test(weburl)){
+		$("#weburl_error").text("二级域名只能包含数字、字母、下划线或横线");
+		$("#weburl").focus();
+		return false;
+	}
+	var accessdatalimit = $("#accessdatalimit").val();
+	if($("#accessdatalimit:enabled").length > 0){
+		var re_adl = /^[1-9][0-9]*$/;
+		if(accessdatalimit == undefined || !re_adl.test(accessdatalimit)){
+			$("#accessdatalimit_error").text("请输入正整数");
+			$("#accessdatalimit").focus();
+			return false;
+		}
+	}
+	var des = $("#description").val();
+	if(des != undefined && des != ""){
+		des = commonFun.trim(des);
+		if(des.length > 125){
+			$("#description_error").text("您最多可以输入125个字");
+			$("#description").focus();
+			return false;
+		}
+	}
+	$("span[id$=_error]").text("");
+	checkuser();
+}
+
+function checkuser()
+{
+	var tname = $("#tenantname").val();
+	tname = commonFun.trim(tname);
+	var webinfo = $("#weburl").val();
+	webinfo = commonFun.trim(webinfo);
+	var searchnameUrl = config.modelUrl+"tenant_user_model.php?type=gettenantbyname&tenantname="+tname+"&weburl="+webinfo+"&tid=0";
+	ajaxCommon(searchnameUrl, checkExits, "json");
+}
+
+function checkExits(data)
+{
+	if(data!=null)
+	{
+		if(data.flag==1)
+		{
+			$("#tenantname_error").text("租户名称已存在,请更改");
+			$("#tenantname").focus();
+		}
+		else
+		{
+			if(data.flag==2)
+			{
+				$("#weburl_error").text("二级域名已存在,请更改");
+				$("#weburl").focus();
+			}
+			else
+			{
+				var tname=$("#tenantname").val();
+	var tel = $("#tel").val();
+	var email = $("#email").val();
+	var address = $("#address").val();
+	var contact = $("#contact").val();
+	//var logourl =$("#logourl").val();
+	var weburl =$("#weburl").val();
+	var desc =$("#description").val();
+	var pay =$("#prepayment").val();
+	var timelimit = getTimeSec($("#timelimit").val());
+	var pid=$("#productid").val();
+	var webname = $("#webname").val();
+	var localtype = $("#localtype").val();
+	var allowdrilldown = $("input[name=allowdrilldown]:checked").val();
+	var allowlinkage= $("input[name=allowlinkage]:checked").val();
+	var allowoverlay= $("input[name=allowoverlay]:checked").val();
+	var allowdownload= $("input[name=allowdownload]:checked").val();
+	var allowupdatesnapshot= $("input[name=allowupdatesnapshot]:checked").val();
+	var alloweventalert= $("input[name=alloweventalert]:checked").val();
+	var allowwidget = $("input[name=allowwidget]:checked").val();
+	var allowaccessdata = $("input[name=allowaccessdata]:checked").val();
+	var accessdatalimit = $("#accessdatalimit").val();
+	var selfstyle = $("input[name=selfstyle]:checked").val();
+	var allowvirtualdata = $("input[name=allowvirtualdata]:checked").val();
+	
+    $.post(config.modelUrl+"tenant_user_model.php", 
+    	    {tenantname:tname,tel:tel,email:email,address:address,contact:contact,weburl:weburl,type:"addtenant",description:desc,
+	         productid:pid,prepayment:pay,timelimit:timelimit,allowdrilldown:allowdrilldown,allowlinkage:allowlinkage,allowoverlay:allowoverlay,selfstyle:selfstyle,allowvirtualdata:allowvirtualdata,
+	         allowwidget:allowwidget, allowaccessdata:allowaccessdata, accessdatalimit:accessdatalimit,
+	         allowdownload:allowdownload,allowupdatesnapshot:allowupdatesnapshot,alloweventalert:alloweventalert,
+			 webname:webname,localtype:localtype,usertype:1},     
+    function(msg){
+        var stdata=jQuery.parseJSON(msg);    
+		if(!stdata.result)
+		{
+			alert(stdata.msg);
+			window.history.back();
+		}
+		else
+		{
+			if(stdata.flag==1)
+			{
+			if(confirm("添加成功，是否继续添加!"))
+			{
+				$("#tenantname").attr("value","");
+				$("#email").attr("value","");
+				$("#address").attr("value","");
+				$("#contact").attr("value","");
+				$("#weburl").attr("value","");
+				$("#tel").attr("value","");
+				$("#description").attr("value","");
+				$("#prepayment").attr("value","");
+				$("#webname").attr("value","");
+				$("span[id$=_error]").text("");
+			}
+			else
+			{
+				window.location.href="tenantlist.shtml";
+			}
+			}
+			else
+			{
+				alert("添加失败!");
+			}
+			
+		}
+    });
+			}
+			
+		}
+	}
+}
+
+//加载产品信息
+function bindproduct()
+{
+	var tname = $("#tenantname").val();
+	var searchnameUrl = config.modelUrl+"productcontroller.php?type=getproduct";
+	ajaxCommon(searchnameUrl, getproduct, "json");
+}
+
+function getproduct(data)
+{
+	$("<option value=''>请选择</option>").appendTo("#productid");
+	if(data!=null)
+	{
+		$.each(data.children, function(i){
+		//$('#productid').append( new Option(data.children[i].label,data.children[i].productid) );
+		$("<option value="+data.children[i].productid+">"+data.children[i].label+"</option>").appendTo("#productid");							   
+	});
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span
+	style="color: gray">租户管理</span> <a href="addtenant.shtml" style="float: right">新增租户</a>
+    <a href="tenantlist.shtml" style="float: right">租户列表</a>&nbsp;&nbsp;
+    <p />
+  <form id="frmuser" name="frmuser" method="post" action="">
+	 <table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="30%" align="right" valign="middle" scope="col"><div align="right"></div></th>
+	     <th align="left" valign="middle" scope="col">&nbsp;</th>
+    </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">租户名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	         <div align="left">
+	           &nbsp;&nbsp;<input type="text" name="tenantname" id="tenantname"  maxlength="50"  />
+	         &nbsp;<span style="color:red" id="tenantname_error"></span>
+	         </div>
+	       </td>
+       </tr>
+        <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">购买产品：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<select name="productid" id="productid">
+              </select>
+            &nbsp;<span style="color:red" id="productid_error"></span>
+            </div>
+	    </td>
+       </tr>
+       <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">租户类型：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<select name="localtype" id="localtype">
+                         <option value="1">数据平台租户</option>
+              <option value="2">普通租户</option>
+              </select>
+            </div>
+	    </td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">预付款：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="prepayment" id="prepayment"  maxlength="11" />
+            &nbsp;<span style="color:red" id="prepayment_error"></span>
+            </div>
+	     </td>
+       </tr>
+         <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">到期时间：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="timelimit" id="timelimit" />
+            &nbsp;<span style="color:red" id="timelimit_error"></span>
+            </div>
+	     </td>
+       </tr>
+        <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">系统名称：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="webname" id="webname" maxlength="125" />
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td height="150" align="right" valign="middle" scope="col"><div align="right">联系电话：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="tel" id="tel" maxlength="25" />
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">联系地址：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">&nbsp;&nbsp;<input type="text" name="address" id="address" maxlength="125" />
+	       </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">联系人：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="contact" id="contact" maxlength="25" />
+	       </div>
+	     </td>
+       </tr>
+          <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">电子邮件：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="email" id="email" maxlength="125" />
+            &nbsp;<span style="color:red" id="email_error"></span>
+            </div>
+	     </td>
+       </tr>
+       	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">二级域名：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="weburl" id="weburl" maxlength="255" />
+            &nbsp;<span style="color:red" id="weburl_error"></span>
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许钻取：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowdrilldown" id="allowdrilldown0" value="0" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许联动：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowlinkage" id="allowlinkage0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许叠加：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay1" value="1" checked="checked"/>是
+	         &nbsp;&nbsp;<input type="radio" name="allowoverlay" id="allowoverlay0"  value="0"/>否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许下载：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowdownload" id="allowdownload0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">定时更新快照：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowallowupdatesnapshot1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowupdatesnapshot" id="allowupdatesnapshot0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">事件预警：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="alloweventalert" id="alloweventalert0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许嵌入站点：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowwidget" id="allowwidget0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许使用自有样式：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="selfstyle" id="selfstyle1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="selfstyle" id="selfstyle0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许使用虚拟数据源：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowvirtualdata" id="allowvirtualdata0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">允许访问数据接口：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata1" value="1" />是
+	         &nbsp;&nbsp;<input type="radio" name="allowaccessdata" id="allowaccessdata0"  value="0" checked="checked" />否
+            </div>
+	     </td>
+       </tr>
+	   <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">接口数据量限制：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;<input type="text" name="accessdatalimit" id="accessdatalimit" value="0" disabled maxlength="11" />
+	         &nbsp;<span style="color:red" id="accessdatalimit_error"></span>
+            </div>
+	     </td>
+       </tr>
+        <tr>
+	     <td align="right" valign="middle" scope="col"><div align="right">说明信息：</div></td>
+	     <td align="left" valign="middle" scope="col">
+	       <div align="left">
+	         &nbsp;&nbsp;
+	         <textarea name="description" cols="50" rows="5" id="description"></textarea>
+	         &nbsp;<span style="color:red" id="description_error"></span>
+            </div>
+	     </td>
+       </tr>
+          <tr>
+	     <td colspan="2" align="center" valign="middle" scope="col"><input type="hidden" name="txttype" id="txttype" value="addtenant" />
+	       <input type="button" name="btnok" id="btnok" value="提交" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	       <input type="button" name="btncancel" id="btncancel" onclick="window.location.href='tenantlist.shtml';return false" value="取消" />
+	     </td>
+       </tr>
+       
+</table>
+</form>
+<div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

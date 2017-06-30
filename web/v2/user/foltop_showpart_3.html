@@ -1,0 +1,32 @@
+<fieldset id="conditionfield">
+    <legend>条件选择</legend>
+    <div class="search"><span class="rightalign">性别：</span>
+        <span id="isshow_sex">
+            <input type="checkbox" name="show_sex" id="show_sexm" value="m" class="outborder"/><label for="show_sexm">男</label>
+            <input type="checkbox" name="show_sex" id="show_sexf" value="f" class="outborder"/><label for="show_sexf">女</label>
+            <input type="checkbox" name="show_sex" id="show_sexall" value="0" class="outborder"/><label for="show_sexall">总计</label> 
+        </span>
+        <input type="checkbox" name="show_sex" id="show_sexunlimit" value="unlimit" class="outborder"/><label for="show_sexunlimit">不限</label>
+    </div>
+    <div class="search"><span class="rightalign">认证：</span>
+        <span id="isshow_verified">
+            <input type="checkbox" name="show_verified" id="show_verified1" value=1 class="outborder" /><label for="show_verified1">是</label> 
+            <input type="checkbox" name="show_verified" id="show_verified0" value=0 class="outborder" /><label for="show_verified0">否</label> 
+            <input type="checkbox" name="show_verified" id="show_verifiedall" value=-1 class="outborder"/><label for="show_verifiedall">总计</label> 
+        </span>
+        <input type="checkbox" name="show_verified" id="show_verifiedunlimit" value="unlimit" class="outborder"/><label for="show_verifiedunlimit">不限</label>
+    </div>
+    <div class="search"><span class="rightalign">来源：</span>
+        <span id="isshow_source">
+            <input type="checkbox" name="show_source" id="show_source1" value="1" class="outborder"/><label>新浪</label>
+            <input type="checkbox" name="show_source" id="show_source2" value="2" class="outborder"/><label>腾讯</label>
+        </span>
+        <input type="checkbox" name="show_source" id="show_sourceunlimit" value="0" class="outborder"/><label for="show_sourceunlimit">不限</label>
+    </div>
+    <div class="search"><span class="rightalign">地区：</span>
+        <span id="isshow_area">
+            <input id="show_area" name="show_area" value="选择地区"  type="button"><span id="show_selectedarea"></span>
+            <input type="hidden" value="" class="txtsel" id="show_areacode">
+        </span>
+    </div>
+</fieldset>

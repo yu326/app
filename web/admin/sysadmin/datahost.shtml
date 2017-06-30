@@ -1,0 +1,479 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--数据主机管理</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css" type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+input[type=checkbox] {
+	vertical-align: middle;
+}
+.formtable .tdtip {
+	color:red;
+}
+.selwordsbox {
+	border: 1px solid #CCC;
+	padding: 1.5px 0 1.5px 1.5px;
+	margin: 3px 0 0 2px;
+	display: inline-block;
+}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript" src="js/md5.js"></script>
+<script type="text/javascript" src="js/json2.js"></script>
+<script type="text/javascript" src="js/parts/util.js"></script>
+<script type="text/javascript">
+	var page; //第几页
+	var pagesize = 10; //每页显示条数
+	var totalCount; //总记录数
+	var curpage2; //当前页码
+	var pagenum = 10; //显示的页码数
+	var startpage = 0;
+	var endpage = 0;
+	//显示域名的列表
+	var hostpagesize = 5; //每页显示条数
+	var hostcurpage2; //当前页码
+	var hostpagenum = 10; //显示的页码数
+	var currPageData = []; //存储datalist数据用于删除时根据ID获取整条信息
+	$(function () {
+		changeTabTitle();
+		if($("#adddatahostdiv").length == 1) {
+			$("#adddatahostdiv").dialog({
+				autoOpen: false,
+				modal: true,
+				width: 596,
+				height: 289,
+				close: function () {
+					$("#addhost_alias_text").val("");
+					$("#addhost_dbserver_text").val("");
+					$("#addhost_dbname_text").val("");
+					$("#addhost_username_text").val("");
+					$("#addhost_password_text").val("");
+					$("#addhost_solrstore_text").val("");
+
+					$("#ro_alias_tip").text("");
+					$("#ro_dbserver_tip").text("");
+					$("#ro_dbname_tip").text("");
+					$("#ro_username_tip").text("");
+					$("#ro_password_tip").text("");
+					$("#ro_solrstore_tip").text("");
+				}
+			});
+		}
+		$.each(["alias", "dbserver", "username", "password", "solrstore","dbname"], function(i, item){
+			$("#addhost_"+item+"_text").bind("focus", function(){
+				$("#ro_"+item+"_tip").text("");
+			});
+		});
+		$("#adddatahost").bind("click", function () {
+			addDatahostWordHtml();
+		});
+		$("#host_search").bind("click", function () {
+			searchRequest(pagesize);
+		});
+		$("#datahostinfo tr:not(:first)").remove();
+		searchRequest(pagesize);
+	});
+	function searchRequest(pagesize, curpage) {
+		$("#datahostinfo tr:not(:first)").remove();
+		var param = "";
+		var fpc = $("#host_alias").val();
+		if(fpc){
+			param += "&host_alias=" + fpc + "";
+		}
+		curpage2 = curpage == undefined ? 1 : curpage;
+		var searchnameUrl = config.modelUrl + "datahost_model.php?type=selectdatahostinfo&page=" + curpage2 + "&pagesize=" + pagesize + param; 
+		ajaxRequest(searchnameUrl, searchname, "json", function(){}, 
+				function(){
+					$("#waitimg").parents("tr").first().remove();
+					$("#datahostinfo").append("<tr><td colspan='7'><img src='"+config.imagePath+"wait.gif'  style='padding:10px;' id='waitimg'/></td></tr>");
+				}, function(){
+					$("#waitimg").parents("tr").first().remove();
+				});
+	}
+
+	function searchname(data) {
+		//显示分页
+		if (data.errorcode != undefined) {
+			alert(data.errormsg);
+			return false;
+		}
+		totalCount = data.totalcount;
+		if (totalCount > 0) {
+			var fhtml = "";
+			currPageData = data.datalist; 
+			$.each(data.datalist, function (di, ditem) {
+				//add by zuoqian:2016-6-16
+				fhtml = "<tr><td><input type='checkbox' name='checklist' id='checksource" + ditem.id+ "' value='" + ditem.id+ "'></input></td><td>" +ditem.alias+ "</td><td>" +ditem.dbserver+ "</td><td>"+ditem.dbname+"</td><td>" +ditem.username+ "</td><td>" +ditem.solrstore+ "</td><td><a href='javascript:void(0);' id='host_"+di+"'>修改</a></td></tr>";
+				$("#datahostinfo").append(fhtml);
+				$("#host_"+di+"").bind("click", function (){
+					addDatahostWordHtml(ditem);
+				});
+			});
+			fhtml = "<tr><td></td><td colspan='8' align='left'>&nbsp;&nbsp;<input type='button' name='selecthostAll' id='selecthostAll' onclick='selectall(this)' value='全选'>&nbsp;&nbsp;<input type='button' name='unselecthostAll' id='unselecthostAll' onclick='unselectall(this)' value='反选'>&nbsp;&nbsp;<input type='button' name='delall' id='delall' onclick='delselect()' value='删除'></td></tr>";
+			$("#datahostinfo").append(fhtml);
+		} else {
+			var str = $("<tr><td colspan='9'>暂无记录!</td></tr>");
+			$("#datahostinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if (totalCount > pagesize) {
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize, curpage2);
+		}
+	}
+
+	function selectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", "true");
+		});
+	}
+
+	function unselectall(ele) {
+		var id = $(ele).attr("id");
+		$("#"+id+"").parents("table").find(":checkbox").each(function(){
+			$(this).attr("checked", !this.checked);
+		});
+	}
+	function delselect() {
+		var delid = [];
+		var arrChk = $("input[name='checklist']:checked");
+		$(arrChk).each(function () {
+			var val = $(this).val();
+			$.each(currPageData, function(ci, citem){
+				if(val == citem.id){
+					delid.push(citem);
+				}
+			});
+		});
+		if (delid.length == 0) {
+			alert("请选择要数据的记录!");
+		} else {
+			if(confirm("您确认要删除选中数据么，删除后相关信息将无法恢复!")) {
+				deletesource(delid);
+			}
+		}
+	}
+
+	function deletesource(tid) {
+		var dataobj = {
+			type: "deletedatahost",
+			deldata: tid
+		};
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: config.modelUrl + "datahost_model.php",
+			data: JSON.stringify(dataobj),
+			success: function (data) {
+				if (data != null) {
+					if(data.flag) {
+						if(data.msg != undefined && data.msg != ""){
+							alert(data.msg);
+						}
+						searchRequest(pagesize);
+					} else {
+						alert(data.msg);
+					}
+				}
+			}
+		});
+	}
+	//新增特征词html初始化
+	function addDatahostWordHtml(ditem) {
+		if (ditem != undefined) {
+			$("#adddatahostdiv").attr("addopttype", "update");
+			$("#adddatahostdiv").attr("host_id", ditem.id)
+		} else {
+			$("#adddatahostdiv").attr("addopttype", "add");
+		}
+		//主机别名
+		if(ditem != undefined) {
+			$("#addhost_alias_text").val(ditem.alias);
+		}
+		//数据库地址
+		if(ditem != undefined && ditem.dbserver != undefined){
+			$("#addhost_dbserver_text").val(ditem.dbserver);
+		}
+		//数据库名称add by zq:2016-6-16
+		if(ditem != undefined && ditem.dbname != undefined){
+			$("#addhost_dbname_text").val(ditem.dbname);
+		}
+		//数据库用户名
+		if(ditem != undefined && ditem.username != undefined) {
+			var pk = ditem.username;
+			$("#addhost_username_text").val(pk);
+		}
+		//数据库密码
+		if(ditem != undefined && ditem.password != undefined) {
+			var pk = ditem.password;
+			$("#addhost_password_text").val(pk);
+		}
+		//SOLR地址
+		if(ditem != undefined && ditem.solrstore != undefined) {
+			var pk = ditem.solrstore;
+			$("#addhost_solrstore_text").val(pk);
+		}
+
+		//弹开新增窗口
+		addDicWord();
+	}
+	function addDicWord() {
+		$("#adddatahostdiv").dialog("open");
+		var dialogtitle = "";
+		var ty = $("#adddatahostdiv").attr("addopttype");
+		if (ty == "add") {
+			dialogtitle = "新增";
+		} else {
+			dialogtitle = "修改";
+		}
+		$("#adddatahostdiv").dialog({
+			title: dialogtitle
+		});
+		submitbtnDisplay("#adddatahostdiv");
+	}
+
+	function submitDic(){
+		var ty = $("#adddatahostdiv").attr("addopttype");
+		if (ty != "add") {
+			var host_id = $("#adddatahostdiv").attr("host_id");
+		}
+		//主机别名
+		var addhost_alias = $("#addhost_alias_text").val();
+		addhost_alias = addhost_alias == undefined ? "" : commonFun.trim(addhost_alias);
+		if(addhost_alias == ""){
+			$("#ro_alias_tip").text("请输入主机别名!");
+			return false;
+		}
+
+		//数据库地址
+		var addhost_dbserver = $("#addhost_dbserver_text").val();
+		addhost_dbserver = addhost_dbserver == undefined ? "" : commonFun.trim(addhost_dbserver);
+		if(addhost_dbserver == ""){
+			$("#ro_dbserver_tip").text("请输入数据库地址!");
+			return false;
+		}
+		//数据库名称
+		var addhost_dbname = $("#addhost_dbname_text").val();
+		addhost_dbname = addhost_dbname == undefined ? "" : commonFun.trim(addhost_dbname);
+		if(addhost_dbname == ""){
+			$("#ro_dbname_tip").text("请输入数据库名称!");
+			return false;
+		}
+		//数据库用户名
+		var addhost_username = $("#addhost_username_text").val();
+		addhost_username = addhost_username == undefined ? "" : commonFun.trim(addhost_username);
+		if(addhost_username == ""){
+			$("#ro_username_tip").text("请输入数据库用户名!");
+			return false;
+		}
+		//数据库密码
+		var addhost_password = $("#addhost_password_text").val();
+		addhost_password = addhost_password == undefined ? "" : commonFun.trim(addhost_password);
+
+		//solr地址
+		var addhost_solrstore = $("#addhost_solrstore_text").val();
+		addhost_solrstore = addhost_solrstore == undefined ? "" : commonFun.trim(addhost_solrstore);
+		if(addhost_solrstore == ""){
+			$("#ro_solrstore_tip").text("请输入SOLR地址!");
+			return false;
+		}
+
+		var senddataobj = {
+			host_id:host_id,
+			host_alias: addhost_alias,
+			host_dbserver: addhost_dbserver,
+			host_dbname: addhost_dbname,
+			host_username: addhost_username,
+			host_password: addhost_password,
+			host_solrstore: addhost_solrstore,
+			type: "checkvalueexist"
+		}
+
+		var searchnameUrl = config.modelUrl + "datahost_model.php";
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: searchnameUrl,
+			data: JSON.stringify(senddataobj),
+			beforeSend:function(){
+				btnWaitDisplay("#adddatahostdiv");
+			},
+			complete:function(){
+				submitbtnDisplay("#adddatahostdiv");
+			},
+			success: function (data) {
+				if (data != null) {
+					if(data.flag == 1) {
+						var tip = "";
+						var tipdefault="";
+						if(data.defaulthost){
+							tip = " 与默认主机冲突,请更改!";
+						}
+						else{
+							tip = " 已存在, 请更改!";
+						}
+						if(data.defaulthostservername){
+							tipdefault = " 与默认主机冲突,请更改!(数据库的地址和名称不能同时与默认主机一致)";
+						}
+
+						if(data.datalist.alias != undefined){
+							var existArr = [];
+							$.each(data.datalist.alias, function(ddi, dditem){
+								var pk = dditem.alias;
+								existArr.push(pk); 
+							});
+							$("#ro_alias_tip").text(existArr.join(", ")+tip);
+						}
+						if(data.datalist.dbserver != undefined){
+							var existArr = [];
+							$.each(data.datalist.dbserver, function(ddi, dditem){
+								var pk = dditem.dbserver;
+								existArr.push(pk);
+							});
+							tipdefault!=""?$("#ro_dbserver_tip").text(existArr.join(", ")+tipdefault):$("#ro_dbname_tip").text($("#addhost_dbname_text").val()+" 已存在"+existArr.join(", ")+"中,请更改!");
+						}
+						if(data.datalist.solrstore != undefined){
+							var existArr = [];
+							$.each(data.datalist.solrstore, function(ddi, dditem){
+								var pk = dditem.solrstore;
+								existArr.push(pk); 
+							});
+							$("#ro_solrstore_tip").text(existArr.join(", ")+tip);
+						}
+						return false;
+					} else {
+						senddataobj.type = "adddatahost";
+						if (ty == "update") {
+							senddataobj.type = "updatedatahost";
+						}
+						$.ajax({
+							type: "POST",
+							contentType: "application/json",
+							dataType: "json",
+							url: config.modelUrl + "datahost_model.php",
+							data: JSON.stringify(senddataobj),
+							beforeSend:function(){
+								btnWaitDisplay("#adddatahostdiv");
+							},
+							complete:function(){
+								submitbtnDisplay("#adddatahostdiv");
+							},
+							success: function (msg) {
+								if (msg.flag == 1) {
+									if (ty == "update") {
+										searchRequest(pagesize);
+										$("#adddatahostdiv").dialog("close");
+									} else {
+										if(msg.msg != undefined && msg.msg !=""){
+											alert(msg.msg);
+										}
+										searchRequest(pagesize);
+										$("#adddatahostdiv").dialog("close");
+									}
+								} else {
+									if (host_id != undefined) {
+										alert("修改失败,请重试!");
+									} else {
+										alert(msg.msg);
+									}
+								}
+							}
+						});
+					}
+				}
+			}
+		});
+	}
+	function btnWaitDisplay(targetor){
+		$(targetor).dialog("option", "buttons",[{text:"loading...", click:function(){}}, {text:"取消", click:function(){ $(this).dialog("close");}}]);
+	}
+	function submitbtnDisplay(targetor){
+		$(targetor).dialog("option", "buttons", {
+			"确定": function () {
+				submitDic();
+			},
+			"取消": function () {
+				$(this).dialog("close");
+			}
+		});
+
+	}
+</script>
+</head>
+<body>
+<div id="mybody">
+    <!--#include file="top.shtml"-->
+    <div id="content">
+        <!--#include file="3a_left.shtml"-->
+        <div id="right">当前位置： <a href="index.shtml">首页</a>&gt; <span style="color: gray">数据主机管理</span> <a href="javascript:void(0)" id="adddatahost" style="float: right">新增数据主机</a>
+            <div> 主机别名：
+				<input id="host_alias" type="text" />
+                <input type="button" name="host_search" value="查询" id="host_search" />
+            </div>
+            <table id="datahostinfo" name="datahostinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+                <tr>
+                    <th width="4%" scope="col">选择</th>
+                    <th width="10%" scope="col">主机别名</th>
+                    <th width="11%" scope="col">数据库地址</th>
+					<th width="11%" scope="col">数据库名称</th><!--add  by zq:2016-6-16-->
+                    <th width="11%" scope="col">数据库用户名</th>
+                    <th width="31%" scope="col">SOLR地址</th>
+                    <th width="10%" scope="col">操作</th>
+                </tr>
+            </table>
+            <div id="pagestyle" style="margin:5px; cursor:hand;" align="center"></div>
+        </div>
+    </div>
+    <div id="adddatahostdiv" style="display:none;" addopttype="add" host_id="" >
+        <table class="formtable">
+            <tr>
+                <td class="tdleft">主机别名：</td>
+                <td ><input id="addhost_alias_text" name="addhost_alias_text" type="text" /></td>
+                <td class="tdtip" id="ro_alias_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">数据库地址：</td>
+                <td ><input id="addhost_dbserver_text" name="addhost_dbserver_text" type="text" style="width:250px;" /></td>
+                <td class="tdtip" id="ro_dbserver_tip"></td>
+            </tr>
+			<!--add by zuoqian:2016-6-16-->
+			<tr>
+				<td class="tdleft">数据库名称：</td>
+				<td ><input id="addhost_dbname_text" name="addhost_dbname_text" type="text" /></td>
+				<td class="tdtip" id="ro_dbname_tip"></td>
+			</tr>
+			<!--end by zuoqian:2016-6-16-->
+            <tr>
+                <td class="tdleft">数据库用户名：</td>
+                <td ><input type="text" id="addhost_username_text" name="addhost_username_text" /></td>
+                <td class="tdtip" id="ro_username_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">数据库密码：</td>
+                <td ><input type="password" id="addhost_password_text" name="addhost_password_text" /></td>
+                <td class="tdtip" id="ro_password_tip"></td>
+            </tr>
+            <tr>
+                <td class="tdleft">SOLR地址：</td>
+                <td ><input type="text" id="addhost_solrstore_text" name="addhost_solrstore_text" style="width:250px;" /></td>
+                <td class="tdtip" id="ro_solrstore_tip"></td>
+            </tr>
+        </table>
+    </div>
+    <!--#include file="foot.shtml"-->
+</div>
+</body>
+</html>

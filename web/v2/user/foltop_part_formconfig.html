@@ -1,0 +1,914 @@
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">数据来源</a></h3>
+<div>
+<table border="0" cellspacing="0" cellpadding="0" class="tab2">
+	<!--来源-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">来源：</span></td>
+		<td class="tdwidth2" >
+			<span id="foltop_config_users_source_host">
+            <input type="button" value="请选择来源" id="foltop_config_users_source_host_btn">
+			<span><input type="checkbox" name="foltop_config_users_source_host_all" id="foltop_config_users_source_host_all" value="-1" target="users_source_host" checked="checked" class="outborder"/> 全部</span>
+        </span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"><input class="outborder" type="checkbox" id="allclassify_query_users_source_host" contrastvalue="users_source_host" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_users_source_host">全分类查询</label></td>
+		<td class="tdwidth5"><input class="outborder" type="checkbox" id="classify_contrast_users_source_host" contrastvalue="users_source_host" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_users_source_host">分类对比</label></td>
+		<!--
+		<td class="tdwidth6"><input class="outborder" type="checkbox" id="allclassify_contrast_users_source_host" contrastvalue="users_source_host" name="contrast" contrasttype="allclassifycontrast" /><label for="allclassify_contrast_users_source_host">全分类对比</label></td>
+		-->
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+	</tr>	
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusers_source_host" ></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--页面地址-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">页面地址：</span></td>
+		<td class="tdwidth2" id="foltop_config_users_page_url_default">
+			<span id="foltop_config_users_page_url"> 
+				<input type="text" id="foltop_config_users_page_url_text" name="foltop_config_users_page_url_text"/>
+				<input type="button" id="foltop_config_users_page_url_recommend" name="foltop_config_users_page_url_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_users_page_url_add" name="foltop_config_users_page_url_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_users_page_url_limit" style="display:none">
+			<span>
+				<input type="button" id="users_page_url_limit_btn" name="choosedlimit" filtername="users_page_url" value="选择页面地址" />
+				<span><input class="outborder" type="checkbox" name="foltop_config_users_page_url_all" id="foltop_config_users_page_url_all" target="users_page_url" checked="checked" /><label for="foltop_config_users_page_url_all">全部</label></span>
+			</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<td class="tdwidth5">
+			<span><input class="outborder" type="checkbox" id="classify_contrast_users_page_url" contrastvalue="users_page_url" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_users_page_url">分类对比</label></span>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+		<!--
+		<td class="tdwidth7"><span id="foltop_config_users_page_url_check" featurecheckname="users_page_url" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_users_page_url_arrowcheck" ></span></span></td>
+		-->
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusers_page_url"></span></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_users_page_url_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_users_page_url_feature_recommend" value="选择分类" featurename="users_page_url" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_users_page_url" contrastvalue="users_page_url" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_users_page_url">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_users_page_url_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+</div>
+</div>
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">用户信息</a></h3>
+<div>
+<table border="0" cellspacing="0" cellpadding="0" class="tab2">
+<!--添加用户-->
+<!--
+	<tr id="foltop_config_username">
+		<td class="tdwidth1"><span class="rightalign">添加用户：</span></td>
+		<td colspan="6" >
+			<input type="text" name="foltop_config_username" id="foltop_config_username" />
+			<span class="search"> <input id="searchName" type="button" value="推荐"/>
+				<span><input type="checkbox" id="usernameanalyse" name="analyse" class="outborder"/>查作者昵称</span>
+				<span><input type="checkbox" id="usersfolloweranalyse" name="analyse" class="outborder"/>查粉丝</span>
+				<span><input type="checkbox" id="usersfriendanalyse" name="analyse" class="outborder"/>查关注</span>
+				<input type="button" id="addMoreUser"  value="添加" /><span class="remark"> 使用*进行模糊查询,如:李*</span>
+			</span>
+		</td>
+	</tr>
+	-->
+	<!--查作者昵称-->
+	<!--
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">作者昵称：</span></td>
+		<td class="tdwidth2">
+			<span id="username"></span> endusers 改为 username 统一成 filtername 2013-03-25
+			<span><input class="outborder" type="checkbox" name="endusers_all" target="username" checked="checked" />全部</span>
+			<input type="button" id="btnusernamelimit" filtername="username" name="analyselimit" value="选择用户" />
+			<span class="remark"> 对用户进行分析</span>
+		</td>
+		<td class="tdwidth3"><input class="outborder" type="checkbox" id="classify_query_username" contrastvalue="username" name="contrast" contrasttype="classifyquery" /><label for="classify_query_username">分类查询</label></td>
+		<td class="tdwidth4"></td>
+		<td class="tdwidth5"><input class="outborder" type="checkbox" id="classify_contrast_username" contrastvalue="username" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_username">分类对比</label>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+	</tr>
+	-->
+	<!--昵称-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">作者昵称：</span></td>
+		<td class="tdwidth2" id="foltop_config_username_default">
+			<span id="foltop_config_username"> 
+				<input type="text" id="foltop_config_username_text" name="foltop_config_username_text"/>
+				<input type="button" id="foltop_config_username_recommend" name="foltop_config_username_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_username_add" name="foltop_config_username_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_username_limit" style="display:none;">
+			<input type="button" id="username_limit_btn" name="choosedlimit" filtername="username" value="选择用户" />
+			<span><input class="outborder" type="checkbox" name="foltop_config_username_all" id="foltop_config_username_all" target="username" checked="checked" /><label for="foltop_config_username_all">全部</label></span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_username" contrastvalue="username" name="contrast" contrasttype="classifyquery" /><label for="classify_query_username">分类查询</label>
+		</td>
+		<td class="tdwidth4">&nbsp;</td>
+		-->
+		<td class="tdwidth5" style="width:86px;">
+			<input class="outborder" type="checkbox" id="classify_contrast_username" contrastvalue="username" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_username">分类对比</label>
+		</td>
+		<td class="tdwidth6" style="width:99px;">&nbsp;</td>
+		<td class="tdwidth7" style="width:89px;"><span id="foltop_config_username_check" featurecheckname="username" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_username_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusername"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_username_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_username_feature_recommend" value="选择分类" featurename="username" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_username" contrastvalue="username" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_username">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_username_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--查粉丝-->
+	<!--
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">查粉丝：</span></td>
+		<td class="tdwidth2">
+			<span id="usersfollower"></span>
+			<span><input class="outborder" type="checkbox" name="usersfollower_all" target="usersfollower" checked="checked"/>全部</span>
+			<input type="button" id="btnusersfollowerlimit" filtername="usersfollower" name="analyselimit" value="选择用户" />
+			<span class="remark"> 对用户的粉丝进行分析</span>
+		</td>
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_usersfollower" contrastvalue="usersfollower" name="contrast" contrasttype="classifyquery" /><label for="classify_query_usersfollower">分类查询</label>
+		</td>
+		<td class="tdwidth4"></td>
+		<td class="tdwidth5">
+			<input class="outborder" type="checkbox" id="classify_contrast_usersfollower" contrastvalue="usersfollower" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_usersfollower">分类对比</label>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+	</tr>
+	-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">查粉丝：</span></td>
+		<td class="tdwidth2" id="foltop_config_usersfollower_default">
+			<span id="foltop_config_usersfollower"> 
+				<input type="text" id="foltop_config_usersfollower_text" name="foltop_config_usersfollower_text"/>
+				<input type="button" id="foltop_config_usersfollower_recommend" name="foltop_config_usersfollower_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_usersfollower_add" name="foltop_config_usersfollower_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_usersfollower_limit" style="display:none;">
+			<input type="button" id="usersfollower_limit_btn" name="choosedlimit" filtername="usersfollower" value="选择用户" />
+			<span><input class="outborder" type="checkbox" name="foltop_config_usersfollower_all" id="foltop_config_usersfollower_all" target="usersfollower" checked="checked" /><label for="foltop_config_usersfollower_all">全部</label></span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_usersfollower" contrastvalue="usersfollower" name="contrast" contrasttype="classifyquery" /><label for="classify_query_usersfollower">分类查询</label>
+		</td>
+		<td class="tdwidth4">&nbsp;</td>
+		-->
+		<td class="tdwidth5" style="width:86px;">
+			<input class="outborder" type="checkbox" id="classify_contrast_usersfollower" contrastvalue="usersfollower" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_usersfollower">分类对比</label>
+		</td>
+		<td class="tdwidth6" style="width:99px;">&nbsp;</td>
+		<td class="tdwidth7" style="width:89px;"><span id="foltop_config_usersfollower_check" featurecheckname="usersfollower" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_usersfollower_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusersfollower"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_usersfollower_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_usersfollower_feature_recommend" value="选择分类" featurename="usersfollower" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_usersfollower" contrastvalue="usersfollower" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_usersfollower">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_usersfollower_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+	<!--查关注-->
+	<!--
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">查关注：</span></td>
+		<td class="tdwidth2" >
+			<span id="usersfriend"></span>
+			<span><input class="outborder" type="checkbox" name="usersfriend_all"  target="usersfriend" checked="checked" />全部</span>
+			<input type="button" id="btnusersfriendlimit" filtername="usersfriend" name="analyselimit" value="选择用户" />
+			<span class="remark"> 对用户的关注进行分析</span>
+		</td>
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_usersfriend" contrastvalue="usersfriend" name="contrast" contrasttype="classifyquery" /><label for="classify_query_usersfriend">分类查询</label>
+		</td>
+		<td class="tdwidth4"></td>
+		<td class="tdwidth5">
+<input class="outborder" type="checkbox" id="classify_contrast_usersfriend" contrastvalue="usersfriend" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_usersfriend">分类对比</label>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+	</tr>
+	-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">查关注：</span></td>
+		<td class="tdwidth2" id="foltop_config_usersfriend_default">
+			<span id="foltop_config_usersfriend"> 
+				<input type="text" id="foltop_config_usersfriend_text" name="foltop_config_usersfriend_text"/>
+				<input type="button" id="foltop_config_usersfriend_recommend" name="foltop_config_usersfriend_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_usersfriend_add" name="foltop_config_usersfriend_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_usersfriend_limit" style="display:none;">
+			<input type="button" id="usersfriend_limit_btn" name="choosedlimit" filtername="usersfriend" value="选择用户" />
+			<span><input class="outborder" type="checkbox" name="foltop_config_usersfriend_all" id="foltop_config_usersfriend_all" target="usersfriend" checked="checked" /><label for="foltop_config_usersfriend_all">全部</label></span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_usersfriend" contrastvalue="usersfriend" name="contrast" contrasttype="classifyquery" /><label for="classify_query_usersfriend">分类查询</label>
+		</td>
+		<td class="tdwidth4">&nbsp;</td>
+		-->
+		<td class="tdwidth5" style="width:86px;">
+			<input class="outborder" type="checkbox" id="classify_contrast_usersfriend" contrastvalue="usersfriend" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_usersfriend">分类对比</label>
+		</td>
+		<td class="tdwidth6" style="width:99px;">&nbsp;</td>
+		<td class="tdwidth7" style="width:89px;"><span id="foltop_config_usersfriend_check" featurecheckname="usersfriend" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_usersfriend_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusersfriend"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_usersfriend_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_usersfriend_feature_recommend" value="选择分类" featurename="usersfriend" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_usersfriend" contrastvalue="usersfriend" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_usersfriend">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_usersfriend_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--认证原因-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">认证原因：</span></td>
+		<td class="tdwidth2" id="foltop_config_verifiedreason_default">
+			<span id="foltop_config_verifiedreason"> 
+				<input type="text" id="foltop_config_verifiedreason_text" name="foltop_config_verifiedreason_text"/>
+				<input type="button" id="foltop_config_verifiedreason_recommend" name="foltop_config_verifiedreason_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_verifiedreason_add" name="foltop_config_verifiedreason_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_verifiedreason_limit" style="display:none">
+			<span>
+				<input type="button" id="verifiedreason_limit_btn" name="choosedlimit" filtername="verifiedreason" value="选择认证原因" />
+				<span><input class="outborder" type="checkbox" name="foltop_config_verifiedreason_all" id="foltop_config_verifiedreason_all" target="verifiedreason" checked="checked" /><label for="foltop_config_verifiedreason_all">全部</label></span>
+			</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_verifiedreason" contrastvalue="verifiedreason" name="contrast" contrasttype="classifyquery" /><label for="classify_query_verifiedreason">分类查询</label>
+		</td>
+		<td class="tdwidth4"></td>
+		-->
+		<td class="tdwidth5">
+			<span style="display:none"><input class="outborder" type="checkbox" id="classify_contrast_verifiedreason" contrastvalue="verifiedreason" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_verifiedreason">分类对比</label></span>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"><span id="foltop_config_verifiedreason_check" featurecheckname="verifiedreason" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_verifiedreason_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedverifiedreason"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_verifiedreason_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_verifiedreason_feature_recommend" value="选择分类" featurename="verifiedreason" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_verifiedreason_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--简介-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">简介：</span></td>
+		<td class="tdwidth2" id="foltop_config_description_default">
+			<span id="foltop_config_description"> 
+				<input type="text" id="foltop_config_description_text" name="foltop_config_description_text"/>
+				<input type="button" id="foltop_config_description_recommend" name="foltop_config_description_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_description_add" name="foltop_config_description_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_description_limit" style="display:none">
+			<span>
+				<input type="button" id="description_limit_btn" name="choosedlimit" filtername="description" value="选择简介" />
+				<span><input class="outborder" type="checkbox" name="foltop_config_description_all" id="foltop_config_description_all" target="description" checked="checked" /><label for="foltop_config_description_all">全部</label></span>
+			</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_description" contrastvalue="description" name="contrast" contrasttype="classifyquery" /><label for="classify_query_description">分类查询</label>
+		</td>
+		<td class="tdwidth4"></td>
+		-->
+		<td class="tdwidth5">
+			<span style="display:none"><input class="outborder" type="checkbox" id="classify_contrast_description" contrastvalue="description" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_description">分类对比</label></span>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"><span id="foltop_config_description_check" featurecheckname="description" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_description_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selecteddescription"></span></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_description_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_description_feature_recommend" value="选择分类" featurename="description" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_description_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--博客地址-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">博客地址：</span></td>
+		<td class="tdwidth2" id="foltop_config_users_url_default">
+			<span id="foltop_config_users_url"> 
+				<input type="text" id="foltop_config_users_url_text" name="foltop_config_users_url_text"/>
+				<input type="button" id="foltop_config_users_url_recommend" name="foltop_config_users_url_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_users_url_add" name="foltop_config_users_url_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_users_url_limit" style="display:none">
+			<span>
+				<input type="button" id="users_url_limit_btn" name="choosedlimit" filtername="users_url" value="选择博客地址" />
+				<span><input class="outborder" type="checkbox" name="foltop_config_users_url_all" id="foltop_config_users_url_all" target="users_url" checked="checked" /><label for="foltop_config_users_url_all">全部</label></span>
+			</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<td class="tdwidth5">
+			<span><input class="outborder" type="checkbox" id="classify_contrast_users_url" contrastvalue="users_url" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_users_url">分类对比</label></span>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+		<!--
+		<td class="tdwidth7"><span id="foltop_config_users_url_check" featurecheckname="users_url" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_users_url_arrowcheck" ></span></span></td>
+		-->
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusers_url"></span></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_users_url_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_users_url_feature_recommend" value="选择分类" featurename="users_url" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_users_url" contrastvalue="users_url" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_users_url">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_users_url_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--个性域名-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">个性域名：</span></td>
+		<td class="tdwidth2" id="foltop_config_users_domain_default">
+			<span id="foltop_config_users_domain"> 
+				<input type="text" id="foltop_config_users_domain_text" name="foltop_config_users_domain_text"/>
+				<input type="button" id="foltop_config_users_domain_recommend" name="foltop_config_users_domain_recommend"  value="推荐"/>
+				<input type="button" id="foltop_config_users_domain_add" name="foltop_config_users_domain_add"  value="添加" />
+			</span>
+		</td>
+		<td class="tdwidth2" id="foltop_config_users_domain_limit" style="display:none">
+			<span>
+				<input type="button" id="users_domain_limit_btn" name="choosedlimit" filtername="users_domain" value="选择个性域名" />
+				<span><input class="outborder" type="checkbox" name="foltop_config_users_domain_all" id="foltop_config_users_domain_all" target="users_domain" checked="checked" /><label for="foltop_config_users_domain_all">全部</label></span>
+			</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<input class="outborder" type="checkbox" id="classify_query_users_domain" contrastvalue="users_domain" name="contrast" contrasttype="classifyquery" /><label for="classify_query_users_domain">分类查询</label>
+		</td>
+		<td class="tdwidth4"></td>
+		-->
+		<td class="tdwidth5">
+			<span><input class="outborder" type="checkbox" id="classify_contrast_users_domain" contrastvalue="users_domain" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_users_domain">分类对比</label></span>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"></td>
+		<!--
+		<td class="tdwidth7"><span id="foltop_config_users_domain_check" featurecheckname="users_domain" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_users_domain_arrowcheck" ></span></span></td>
+		-->
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedusers_domain"></span></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_users_domain_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_users_domain_feature_recommend" value="选择分类" featurename="users_domain" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_users_domain" contrastvalue="users_domain" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_users_domain">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_users_domain_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+
+	<!--粉丝数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">粉丝数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_followerrank">
+            <input type="text" class="shortinput" name="foltop_config_followerrank_start" filtervalue="followerrank" /> 到
+            <input type="text" class="shortinput" name="foltop_config_followerrank_end" filtervalue="followerrank"/>
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_followerrank_all" id="foltop_config_followerrank_all" target="followerrank" checked="checked" />全部<label id="followerrank_range_text"></label></span>
+		</td>
+	</tr>
+	<!--关注数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">关注数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_friendrank">
+            <input type="text" name="foltop_config_friendrank_start" class="shortinput" filtervalue="friendrank" /> 到
+            <input type="text" name="foltop_config_friendrank_end" class="shortinput" filtervalue="friendrank"/>
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_friendrank_all" id="foltop_config_friendrank_all" target="friendrank" checked="checked" />全部<label id="friendrank_range_text"></label></span>
+		</td>
+	</tr>
+	<!--文章数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">文章数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_statusesrank">
+            <input type="text" name="foltop_config_statusesrank_start" class="shortinput" filtervalue="statusesrank" /> 到
+            <input type="text" name="foltop_config_statusesrank_end" class="shortinput" filtervalue="statusesrank" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_statusesrank_all" id="foltop_config_statusesrank_all" target="statusesrank" checked="checked"/>全部<label id="statusesrank_range_text"></label></span>
+		</td>
+	</tr>
+	<!--回复数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">回复数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_users_replys_count">
+            <input type="text" name="foltop_config_users_replys_count_start" class="shortinput" filtervalue="users_replys_count" /> 到
+            <input type="text" name="foltop_config_users_replys_count_end" class="shortinput" filtervalue="users_replys_count" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_users_replys_count_all" id="foltop_config_users_replys_count_all" target="users_replys_count" checked="checked"/>全部<label id="users_replys_count_range_text"></label></span>
+		</td>
+	</tr>
+	<!--精华帖数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">精华帖数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_users_recommended_count">
+            <input type="text" name="foltop_config_users_recommended_count_start" class="shortinput" filtervalue="users_recommended_count" /> 到
+            <input type="text" name="foltop_config_users_recommended_count_end" class="shortinput" filtervalue="users_recommended_count" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_users_recommended_count_all" id="foltop_config_users_recommended_count_all" target="users_recommended_count" checked="checked"/>全部<label id="users_recommended_count_range_text"></label></span>
+		</td>
+	</tr>
+	<!--收藏数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">收藏数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_users_favourites_count">
+            <input type="text" name="foltop_config_users_favourites_count_start" class="shortinput" filtervalue="users_favourites_count" /> 到
+            <input type="text" name="foltop_config_users_favourites_count_end" class="shortinput" filtervalue="users_favourites_count" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_users_favourites_count_all" id="foltop_config_users_favourites_count_all" target="users_favourites_count" checked="checked"/>全部<label id="users_favourites_count_range_text"></label></span>
+		</td>
+	</tr>
+	<!--互粉数-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">互粉数：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_users_bi_followers_count">
+            <input type="text" name="foltop_config_users_bi_followers_count_start" class="shortinput" filtervalue="users_bi_followers_count" /> 到
+            <input type="text" name="foltop_config_users_bi_followers_count_end" class="shortinput" filtervalue="users_bi_followers_count" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_users_bi_followers_count_all" id="foltop_config_users_bi_followers_count_all" target="users_bi_followers_count" checked="checked"/>全部<label id="users_bi_followers_count_range_text"></label></span>
+		</td>
+	</tr>
+	<!--博龄-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">博龄：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_registertime">
+            <input type="text" name="foltop_config_registertime_start" class="shortinput" filtervalue="registertime" /> 到
+            <input type="text" name="foltop_config_registertime_end" class="shortinput" filtervalue="registertime" /><select id='foltop_config_registertime_gap'> <option value='year'>年</option>  <option value='month'>月</option> <option value='day' selected='selected'>天</option> </select>
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_registertime_all" id="foltop_config_registertime_all" target="registertime" checked="checked" />全部<label id="registertime_range_text"></label></span>
+		</td>
+	</tr>
+	<!--性别-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">作者性别：</span></td>
+		<td class="tdwidth2" >
+			<span id="foltop_config_sex">
+            <input type="checkbox" name="foltop_config_sex" id="foltop_config_sexm" value="m" filtervalue="sex" class="outborder"/><label for="foltop_config_sexm">男</label>
+            <input type="checkbox" name="foltop_config_sex" id="foltop_config_sexf" value="f" filtervalue="sex" class="outborder"/><label for="foltop_config_sexf">女</label>
+			</span>
+			<span><input type="checkbox" name="foltop_config_sex_all" id="foltop_config_sex_all" value="0" target="sex" checked="checked" class="outborder" /> 全部</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"><input class="outborder" type="checkbox" id="allclassify_query_sex" contrastvalue="sex" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_sex">全分类查询</label></td>
+		<td class="tdwidth5"></td>
+		<td class="tdwidth6"><input class="outborder" type="checkbox" id="allclassify_contrast_sex" contrastvalue="sex" name="contrast" contrasttype="allclassifycontrast" /><label for="allclassify_contrast_sex">全分类对比</label></td>
+		<td class="tdwidth7">实时过滤<input type="checkbox" value="true" name="foltop_config_sex_modifiy" class="outborder"/></td>
+	</tr>
+	<!--是否允许所有人给我发私信-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">允许私信：</span></td>
+		<td class="tdwidth2" >
+			<span id="foltop_config_users_allow_all_act_msg">
+            <input type="checkbox" name="foltop_config_users_allow_all_act_msg" id="foltop_config_users_allow_all_act_msg1" value="1" filtervalue="users_allow_all_act_msg" class="outborder"/><label for="foltop_config_users_allow_all_act_msg1">是</label>
+            <input type="checkbox" name="foltop_config_users_allow_all_act_msg" id="foltop_config_users_allow_all_act_msg0" value="0" filtervalue="users_allow_all_act_msg" class="outborder"/><label for="foltop_config_users_allow_all_act_msg0">否</label>
+			</span>
+			<span><input type="checkbox" name="foltop_config_users_allow_all_act_msg_all" id="foltop_config_users_allow_all_act_msg_all" value="-1" target="users_allow_all_act_msg" checked="checked" class="outborder" /> 全部</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"><input class="outborder" type="checkbox" id="allclassify_query_users_allow_all_act_msg" contrastvalue="users_allow_all_act_msg" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_users_allow_all_act_msg">全分类查询</label></td>
+		<td class="tdwidth5"></td>
+		<td class="tdwidth6"><input class="outborder" type="checkbox" id="allclassify_contrast_users_allow_all_act_msg" contrastvalue="users_allow_all_act_msg" name="contrast" contrasttype="allclassifycontrast" /><label for="allclassify_contrast_users_allow_all_act_msg">全分类对比</label></td>
+		<td class="tdwidth7">实时过滤<input type="checkbox" value="true" name="foltop_config_users_allow_all_act_msg_modifiy" class="outborder"/></td>
+	</tr>
+	<!--是否允许所有人对我的微博进行评论-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">允许评论：</span></td>
+		<td class="tdwidth2" >
+			<span id="foltop_config_users_allow_all_comment">
+            <input type="checkbox" name="foltop_config_users_allow_all_comment" id="foltop_config_users_allow_all_comment1" value="1" filtervalue="users_allow_all_comment" class="outborder"/><label for="foltop_config_users_allow_all_comment1">是</label>
+            <input type="checkbox" name="foltop_config_users_allow_all_comment" id="foltop_config_users_allow_all_comment0" value="0" filtervalue="users_allow_all_comment" class="outborder"/><label for="foltop_config_users_allow_all_comment0">否</label>
+			</span>
+			<span><input type="checkbox" name="foltop_config_users_allow_all_comment_all" id="foltop_config_users_allow_all_comment_all" value="-1" target="users_allow_all_comment" checked="checked" class="outborder" /> 全部</span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"><input class="outborder" type="checkbox" id="allclassify_query_users_allow_all_comment" contrastvalue="users_allow_all_comment" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_users_allow_all_comment">全分类查询</label></td>
+		<td class="tdwidth5"></td>
+		<td class="tdwidth6"><input class="outborder" type="checkbox" id="allclassify_contrast_users_allow_all_comment" contrastvalue="users_allow_all_comment" name="contrast" contrasttype="allclassifycontrast" /><label for="allclassify_contrast_users_allow_all_comment">全分类对比</label></td>
+		<td class="tdwidth7">实时过滤<input type="checkbox" value="true" name="foltop_config_users_allow_all_comment_modifiy" class="outborder"/></td>
+	</tr>
+	<!--用户级别-->
+	<tr formcontrol="1">
+		<td><span class="rightalign">用户级别：</span></td>
+		<td colspan="6">
+			<span id="foltop_config_users_level">
+            <input type="text" name="foltop_config_users_level_start" class="shortinput" filtervalue="users_level" /> 到
+            <input type="text" name="foltop_config_users_level_end" class="shortinput" filtervalue="users_level"/>
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_users_level_all" id="foltop_config_users_level_all" target="users_level" checked="checked" />全部<label id="users_level_range_text"></label></span>
+		</td>
+	</tr>
+	<!--认证-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">认证：</span></td>
+		<td class="tdwidth2" >
+			<span id="foltop_config_verified">
+            <input type="button" value="请选择认证" id="foltop_config_verified_btn">
+			<span><input type="checkbox" name="foltop_config_verified_all" id="foltop_config_verified_all" value="-1" target="verified" checked="checked" class="outborder"/> 全部</span>
+        </span>
+		</td>
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"><input class="outborder" type="checkbox" id="allclassify_query_verified" contrastvalue="verified" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_verified">全分类查询</label></td>
+		<td class="tdwidth5"><input class="outborder" type="checkbox" id="classify_contrast_verified" contrastvalue="verified" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_verified">分类对比</label></td>
+		<!--
+		<td class="tdwidth6"><input class="outborder" type="checkbox" id="allclassify_contrast_verified" contrastvalue="verified" name="contrast" contrasttype="allclassifycontrast" /><label for="allclassify_contrast_verified">全分类对比</label></td>
+		-->
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7">实时过滤<input type="checkbox" value="true" name="foltop_config_verified_modifiy" class="outborder"/></td>
+	</tr>	
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedverified" ></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<!--用户名-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">用户名：</span></td>
+		<td class="tdwidth2" id="foltop_config_userid_default">
+			<span id="foltop_config_userid"> 
+				<input type="hidden" value=""  id="foltop_config_useridcode" name="foltop_config_useridcode">
+				<input type="button" id="foltop_config_userid_select" name="foltop_config_userid_select"  value="选择用户名" />
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_userid_all" id="foltop_config_userid_all" target="userid" checked="checked" />全部</span>
+		</td>
+		<!--
+		<td class="tdwidth2" id="foltop_config_userid_limit" style="display: none;">
+			<input type="button" id="userid_limit_btn" name="choosedlimit" filtername="userid" value="选择用户名" />
+			<span><input class="outborder" type="checkbox" name="foltop_config_userid_all" id="foltop_config_userid_all" target="userid" checked="checked" /><label for="foltop_config_userid_all">全部</label></span>
+		</td>
+		-->
+		<td class="tdwidth3"></td>
+		<td class="tdwidth4"></td>
+		<!--
+		<td class="tdwidth3">
+			<span><input class="outborder" type="checkbox" id="classify_query_userid" contrastvalue="userid" name="contrast" contrasttype="classifyquery" /><label for="classify_query_userid">分类查询</label></span>
+		</td>
+		<td class="tdwidth4"></td>
+		-->
+		<td class="tdwidth5">
+			<input class="outborder" type="checkbox" id="classify_contrast_userid" contrastvalue="userid" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_userid">分类对比</label>
+		</td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7"><span id="foltop_config_userid_check" featurecheckname="userid" featurechecktype="folded" ><a href='javascript:void(0);'>分类</a><span class="checkarrowdown" id="foltop_config_userid_arrowcheck" ></span></span></td>
+	</tr>
+	<tr style="display:none;">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selecteduserid"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr formcontrol="1" id="foltop_config_userid_feature" style="display:none">
+		<td><span class="rightalign">分类：</span></td>
+		<td>
+			<span>
+				<input type="button" id="foltop_config_userid_feature_recommend" value="选择分类" featurename="userid" />
+			</span>
+		</td>
+		<td></td>
+		<td></td>
+		<td>
+			<span><input class="outborder" type="checkbox" id="classify_contrast_feature_userid" contrastvalue="userid" name="contrast" contrasttype="featureclassifycontrast" /><label for="classify_contrast_feature_userid">分类对比</label></span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_userid_feature_selected"></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+	<!--地区-->
+	<tr formcontrol="1">
+		<td class="tdwidth1"><span class="rightalign">地区：</span></td>
+		<td class="tdwidth2">
+			<span id="foltop_config_area">
+            <input type="button" value="请选择地区" id="foltop_config_area_btn">
+            <input type="hidden" value=""  id="foltop_config_areacode" name="foltop_config_areacode">
+			</span>
+			<span><input class="outborder" type="checkbox" name="foltop_config_area_all" id="foltop_config_area_all" target="area" checked="checked" />全部</span>
+		</td>
+		<td class="tdwidth3"><input class="outborder" type="checkbox" id="classify_query_area" contrastvalue="area" name="contrast" contrasttype="classifyquery" /><label for="classify_query_area">分类查询</label></td>
+		<td class="tdwidth4"><span style="display:none"><input class="outborder" type="checkbox" id="allclassify_query_area" contrastvalue="area" name="contrast" contrasttype="allclassifyquery" /><label for="allclassify_query_area">全分类查询</label></td>
+		<td class="tdwidth5"><input class="outborder" type="checkbox" id="classify_contrast_area" contrastvalue="area" name="contrast" contrasttype="classifycontrast" /><label for="classify_contrast_area">分类对比</label></td>
+		<td class="tdwidth6"></td>
+		<td class="tdwidth7">实时过滤<input type="checkbox" value="true" name="foltop_config_area_modifiy" class="outborder"/></td>
+	</tr>
+	<tr style="display:none">
+		<td><span class="rightalign"></span></td>
+		<td><span id="foltop_config_selectedarea" ></span></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+</div>
+</div>
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">条件组合</a></h3>
+<div>
+<table border="0" cellspacing="0" cellpadding="0" class="tab2">
+	<!--条件组合-->
+	<tr>
+		<td class="tdwidth1"><span class="rightalign"></span></td>
+		<td colspan=6><input type="button" id="foltop_config_fieldlogic_btn" value="条件组合"/><input type="button" style="margin-left:6px;" id="foltop_config_fieldlogic_recommend_btn" value="推荐"/><span id="foltop_config_conbinationfield"></span>
+		<div id="setrelationbox"></div></td>
+	</tr>
+</table>
+</div>
+</div>
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">输出选项</a></h3>
+<div>
+	<h3 class="childgrouptitle">排序</h3>
+	<div class="childgroupdiv">
+		<table border="0" cellspacing="0" cellpadding="0" class="tab2">
+			<!--排序-->
+			<tr>
+				<td class="tdwidth1"><span class="rightalign">排序：</span></td>
+				<td colspan="3" style="width:500px;">
+					<span id="foltop_config_orderby">
+						<input type="radio" name="foltop_config_orderby" value="users_followers_count" class="outborder"/> 粉丝数
+						<input type="radio" name="foltop_config_orderby" value="users_friends_count" class="outborder"/> 关注数
+						<input type="radio" name="foltop_config_orderby" value="users_statuses_count" class="outborder"/> 文章数
+						<input type="radio" name="foltop_config_orderby" value="users_favourites_count" class="outborder"/> 收藏数 
+						<input type="radio" name="foltop_config_orderby" value="users_bi_followers_count" class="outborder"/> 互粉数
+						<input type="radio" name="foltop_config_orderby" value="users_replys_count" class="outborder"/> 回复数
+						<input type="radio" name="foltop_config_orderby" value="users_recommended_count" class="outborder"/> 精华帖数
+					</span>
+				</td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<!--排序类型-->
+			<tr>
+				<td class="tdwidth1"><span class="rightalign">排序类型：</span></td>
+				<td class="tdwidth2">
+					<span id="foltop_config_ordertype">
+						<input type="radio" name="foltop_config_ordertype" value="asc" class="outborder"/> 升序
+						<input type="radio" name="foltop_config_ordertype" value="desc" class="outborder"/> 降序
+					</span>
+				</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+	</div>
+	<div class="divhr"></div>
+	<h3 class="childgrouptitle">数据过滤<span style="float:right;"> <label for="foltop_config_datalimit_modifiy">实时过滤</label> <input type="checkbox" value="true" name="foltop_config_datalimit_modifiy" id="foltop_config_datalimit_modifiy" class="outborder"/></span></h3>
+	<div class="childgroupdiv" id="foltop_config_output_datafilter" checkedoutputdata="start_end">
+		<div class="search" id="pageable"><span class="rightalign"></span>从第<span id="foltop_config_output_start_num_span"><input type="text" id="foltop_config_output_start_num" name="foltop_config_output_start_num" class="shortinput" /></span>条开始,每页显示<span id="foltop_config_output_perpage_num_span"><input type="text" id="foltop_config_output_perpage_num" name="foltop_config_output_perpage_num" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+
+		<div class="search"><span class="rightalign"></span>第<span id="foltop_config_limit_span"><input type="text" id="foltop_config_limit" name="foltop_config_limit" class="shortinput" /></span>条到第<span id="foltop_config_orderword_span"><input type="text" id="foltop_config_orderword" name="foltop_config_orderword" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+	</div>
+</div>
+</div>

@@ -1,0 +1,139 @@
+<fieldset>
+    <legend>条件选择</legend>
+    <div class="search"> <span class="rightalign">来源：</span>
+        <span id="topic_config_sourceid">
+            <input type="checkbox" name="topic_config_sourceid" value=1 class="outborder" filtervalue="sourceid" /> 新浪 
+            <input type="checkbox" name="topic_config_sourceid" value=2 class="outborder" filtervalue="sourceid" /> 腾讯 
+        </span>
+		<span><input class="outborder" type="checkbox" name="topic_config_sourceid_all" target="sourceid" checked="checked"/>全部</span>
+        <span style="float:right">实时过滤<input type="checkbox" value="true" name="topic_config_sourceid_modifiy" class="outborder"/></span> 
+    </div>
+    <div id="conditionsearch">
+        <div class="search" id="topic_config_searchword_all"><span class="rightalign">搜索：</span>
+            <span id="topic_config_searchword"> 
+                <input type="text" id="topic_config_searchword_text" name="topic_config_searchword_text"/>
+                <input type="button" id="topic_config_searchword_recommend" name="topic_config_searchword_recommend"  value="推荐"/>
+                <input type="button" id="topic_config_searchword_add" name="topic_config_searchword_add"  value="添加" />
+            </span>
+        </div>
+        <div class="search" id="topic_config_searchword_limit"><span class="rightalign">搜索：</span><span id="endusers"></span>
+            <span><input class="outborder" type="checkbox" name="searchword_all" target="searchword" checked="checked" />全部</span>
+            <input type="button" id="searchword_limit_btn" name="choosedlimit" filtername="searchword" value="选择搜索词" />
+        </div>
+        <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedsearchword"></span></div>
+        <div class="search"><span class="rightalign">行业：</span>
+            <span id="topic_config_business">
+                <input type="button" value="请选择行业"  id="topic_config_business_btn" name="topic_config_business_btn">
+                <input type="hidden" value=""  id="topic_config_businesscode" name="topic_config_businesscode">
+            </span>
+            <span id="selectedbusiness"></span>
+		    <span><input class="outborder" type="checkbox" name="topic_config_business_all" target="business" checked="checked"/>全部</span>
+            <span style="float:right;">实时过滤<input type="checkbox" value="true" id="topic_config_business_modifiy" name="topic_config_business_modifiy" class="outborder"/> </span>
+        </div>
+        <div class="search"> <span class="rightalign">转发数：</span>
+            <span id="topic_config_repostsnum">
+                <input type="text" class="shortinput" name="topic_config_repostsnum_start" id="topic_config_repostsnum_start" filtervalue="repostsnum" /> 到
+                <input type="text" class="shortinput" name="topic_config_repostsnum_end" id="topic_config_repostsnum_end" filtervalue="repostsnum" />
+            </span>
+		    <span><input class="outborder" type="checkbox" name="topic_config_repostsnum_all" target="repostsnum" checked="checked"/>全部</span>
+        </div>
+        <div class="search"> <span class="rightalign">评论数：</span>
+            <span id="topic_config_commentsnum">
+                <input type="text" class="shortinput" name="topic_config_commentsnum_start" id="topic_config_commentsnum_start" filtervalue="commentsnum" /> 到
+                <input type="text" class="shortinput" name="topic_config_commentsnum_end" id="topic_config_commentsnum_end" filtervalue="commentsnum" />
+            </span>
+		    <span><input class="outborder" type="checkbox" name="topic_config_commentsnum_all" target="commentsnum" checked="checked" />全部</span>
+        </div>
+        <div class="search" id="topic_config_username_all"><span class="rightalign">昵称：</span>
+            <span id="topic_config_username"> 
+                <input type="text" id="topic_config_username_text" name="topic_config_username_text"/>
+                <input type="button" id="topic_config_username_recommend" name="topic_config_username_recommend"  value="推荐"/>
+                <input type="button" id="topic_config_username_add" name="topic_config_username_add"  value="添加" />
+            </span>
+        </div>
+        <div class="search" id="topic_config_username_limit"><span class="rightalign">昵称：</span><span id="endusers"></span>
+            <span><input class="outborder" type="checkbox" name="username_all" target="username" checked="checked" />全部</span>
+            <input type="button" id="username_limit_btn" name="choosedlimit" filtername="username" value="选择用户" />
+        </div>
+        <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedusername"></span></div>
+        <div class="search"> <span class="rightalign">博龄：</span>
+            <span id="topic_config_registertime">
+                <input type="text" class="shortinput" name="topic_config_registertime_start" id="topic_config_registertime_start" filtervalue="registertime" />天 到
+                <input type="text" class="shortinput" name="topic_config_registertime_end" id="topic_config_registertime_end" filtervalue="registertime" />天
+            </span>
+            <span><input class="outborder" type="checkbox" name="topic_config_registertime_all" target="registertime" checked="checked" />全部</span>
+        </div>
+        <div class="search"> <span class="rightalign">作者性别：</span>
+            <span id="topic_config_sex">
+                <input type="checkbox" name="topic_config_sex" id="topic_config_sexm" value="m" filtervalue="sex" /> 男
+                <input type="checkbox" name="topic_config_sex" id="topic_config_sexf" value="f" filtervalue="sex" /> 女
+            </span>
+            <input type="checkbox" name="topic_config_sex" id="topic_config_sex0" value="0" target="sex" checked="checked"/> 全部
+            <span style="float:right;">实时过滤<input type="checkbox" value="" name="topic_config_sex_modifiy" value="true" class="outborder"/></span> 
+        </div>
+        <div class="search"> <span class="rightalign">认证：</span>
+            <span id="topic_config_verified">
+                <input type="checkbox" name="topic_config_verified" id="topic_config_verifiedyes" value=1 filtervalue="verified" /> 是
+                <input type="checkbox" name="topic_config_verified" id="topic_config_verifiedno" value=0 filtervalue="verified" /> 否
+            </span>
+            <input type="checkbox" name="topic_config_verified" id="topic_config_verifiedall" value="-1" target="verified" checked="checked" /> 全部
+            <span style="float:right;">实时过滤<input type="checkbox" value="true" name="topic_config_verified_modifiy" class="outborder"/></span>
+        </div>
+        <div class="search"><span class="rightalign">地区类型：</span>
+            <span id="topic_config_areatype">
+                <input type="checkbox" class="outborder" name="topic_config_areatype" id="topic_config_areatype_user" value=0 filtervalue="areatype" />用户地区
+                <input type="checkbox" class="outborder" name="topic_config_areatype" id="topic_config_areatype_mention" value=1 filtervalue="areatype" />提及地区
+            </span>
+            <input type="checkbox" name="topic_config_areatype" id="topic_config_areatypeall" value="-1" target="areatype" checked="checked" /> 全部
+        </div>
+        <div class="search"><span class="rightalign">地区：</span>
+            <span id="topic_config_area">
+                <input type="button" value="请选择地区" id="topic_config_area_btn"><span id="topic_config_selectedarea" style="*vertical-align: middle;"></span>
+                <input type="hidden" value=""  id="topic_config_areacode" name="topic_config_areacode">
+                <span id="selectedarea"></span>
+                <span><input class="outborder" type="checkbox" name="topic_config_area_all" target="area" checked="checked" />全部</span>
+            </span>
+            <span style="float:right">实时过滤<input type="checkbox" value="true" name="topic_config_area_modifiy" class="outborder"/></span>
+        </div>
+        <div class="search"> <span class="rightalign">时间：</span>
+            <span id="topic_config_createdtime">
+                <input type="text" value=""  id="topic_config_createdtime_start" name="topic_config_createdtime_start" filtervalue="createdtime" >至
+                <input type="text" value=""  id="topic_config_createdtime_end" name="topic_config_createdtime_end" filtervalue="createdtime">
+                <span><input class="outborder" type="checkbox" name="topic_config_createdtime_all" target="createdtime" checked="checked"/>全部</span>
+                <span style="float:right">实时过滤<input type="checkbox" value="true" name="topic_config_createdtime_modifiy" class="outborder"/> </span>
+            </span>
+        </div>
+        <div class="search"><span class="rightalign">情感：</span>
+            <span id="topic_config_emotion">
+                <input type="checkbox" name="topic_config_emotion" value="1" class="outborder" filtervalue="emotion" />反对
+                <input type="checkbox" name="topic_config_emotion" value="2" class="outborder" filtervalue="emotion" />负面
+                <input type="checkbox" name="topic_config_emotion" value="3" class="outborder" filtervalue="emotion" />中性
+                <input type="checkbox" name="topic_config_emotion" value="4" class="outborder" filtervalue="emotion" />正面
+                <input type="checkbox" name="topic_config_emotion" value="5" class="outborder" filtervalue="emotion" />赞赏
+            </span>
+            <span><input class="outborder" type="checkbox" name="topic_config_emotion_all" target="emotion" checked="checked"/>全部</span>
+        </div>
+        <div class="search"><span class="rightalign">类型：</span>
+            <span id="topic_config_weibotype">
+                <input type="radio" name="topic_config_weibotype" value=103 class="outborder" checked="checked" />总体
+                <input type="radio" name="topic_config_weibotype" value=100 class="outborder"/>原创
+                <input type="radio" name="topic_config_weibotype" value=101 class="outborder"/>转发
+                <input type="radio" name="topic_config_weibotype" value=102 class="outborder"/>评论
+            </span>
+        </div>
+    <div id="manualinput" style="display:none;">
+        <div class="search">请输入<span id="manualdo">关键词</span>：<input type="text" id="manualword" />
+            <div id="addbiz" style="display:none">
+                <input type="text" value="请选择行业"  id="manualbiz">
+                <input type="hidden" value=""  id="manualbizcode">
+            </div>
+            <div id="addarea" style="display:none">
+                <input type="text" value="请选择地区"  id="manualarea">
+                <input type="hidden" value=""  id="manualareacode">
+            </div>
+        </div>
+        <div class="search">
+            <input id="addword" name="Submit" type="submit" class="buttono" value="确定" />
+        </div>
+    </div>
+</fieldset>

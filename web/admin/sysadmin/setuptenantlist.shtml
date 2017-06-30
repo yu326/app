@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统管理--设置角色权限</title>
+<link rel="stylesheet" href="css/jquery-ui-1.8.16.custom.css"
+	type="text/css" />
+<link rel="stylesheet" href="css/pstyle.css" type="text/css" />
+<style>
+label {
+	vertical-align: middle
+}
+
+input[type=checkbox] {
+	vertical-align: middle;
+}
+#pagestyle a{ cursor:pointer;}
+</style>
+<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/base_common.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/check.js"></script>
+<script type="text/javascript">
+ checkuserusage();
+var page; //第几页
+var pagesize=10; //每页显示条数
+var totalCount;//总记录数
+//var pageCount;//存储总页数
+var curpage2;//当前页码
+var pagenum =10;//显示的页码数
+var startpage=0;
+var endpage=0;
+
+$(function(){
+		changeTabTitle();
+	bindrole();
+	$("#userinfo tr:not(:first)").remove();
+	searchRequest(pagesize); //支持分页后，替换上两行
+	$("#readonly_search").bind("click", function () {
+		searchRequest(pagesize);
+	});
+});
+function bindrole() {
+    var searchnameUrl = config.modelUrl + "role_model.php?type=getrolebytype&tid=3";
+    ajaxCommon(searchnameUrl, searchrole, "json");
+}
+
+function searchrole(data) {
+    if(data != null && data.children){
+		var rolehtml = "<option value='0'>请选择</option>";
+        $.each(data.children, function(i, item){
+			rolehtml += "<option value=" + item.roleid + ">" + item.label + "</option>";
+        });
+		$("#search_roleid").empty().append(rolehtml);
+    }
+}
+function searchRequest(pagesize, curpage)
+{ 
+	var param = "";
+	//租户名称
+	var rstenantname = $("#search_tenantname").val();
+	if(rstenantname){
+		param += "&tenantname=" + commonFun.trim(rstenantname) + "";
+	}
+	//角色名称
+	var roleid = $("#search_roleid").val();
+	if(roleid){
+		param += "&roleid="+roleid+"";
+	}
+
+	$("#userinfo tr:not(:first)").remove();
+	curpage2 = curpage == undefined ? 1 : curpage;
+	var searchnameUrl =  config.modelUrl+"tenant_role_model.php?type=gettenantrolelist"+"&currpage="+curpage2+"&pagesize="+pagesize+param;
+	ajaxCommon(searchnameUrl, searchname, "json");
+}
+
+
+function searchname(data){
+	if(!data.result){
+		alert(data.msg);
+		window.history.back();
+	}
+	else{
+		//显示分页
+		totalCount = data.totalcount;
+		if(totalCount>0){
+			var str = "";
+			$.each(data.children, function(i, item){
+					str +="<tr><td>"+item.tenantname+"</td><td>"+item.label+"</td><td>"+item.updatetime+"</td><td><a href='addtenantres.shtml?tenantid="+item.tenantid+"&roleid="+item.roleid+"'>设置通用权限</a> <a href='tenantresourcelist.shtml?tid="+item.tenantid+"&roleid="+item.roleid+"'>设置资源权限</a></td></tr>"; 
+					});
+			$("#userinfo").append(str);
+		}
+		else{
+			var str=$("<tr><td colspan='9'>暂无记录!</td></tr>"); 
+			$("#userinfo").append(str);
+		}
+		$("#pagestyle").empty();
+		if(totalCount>pagesize){
+			pageDisplay(totalCount, searchRequest, "pagestyle", pagesize,curpage2);
+		}
+	}
+}
+</script>
+</head>
+<body>
+<div id="mybody"><!--#include file="top.shtml"-->
+<div id="content"><!--#include file="3a_left.shtml"-->
+<div id="right">当前位置：<a href="index.shtml">首页</a> &gt; <span style="color: gray">设置角色权限</span>
+<div id="search_div" >
+	<label for="search_tenantname">租户名称：</label><input type="text" id="search_tenantname" class="shortinput" />
+	<label for="search_roleid">角色名称：</label><select name="search_roleid" id="search_roleid"></select> 
+	  <input type="button" name="readonly_search" value="查询" id="readonly_search" />
+	  <span>使用*进行模糊查询</span>
+</div>
+<table id="userinfo" name="userinfo" width="98%" border="0" cellspacing="0" cellpadding="0" class="list">
+	   <tr>
+	     <th width="13%" scope="col">租户名称</th>
+	     <th width="13%" scope="col">角色名称</th>
+         <th width="13%" scope="col">创建时间</th>
+	     <th width="15%" scope="col">操作</th>
+       </tr>
+</table>
+<div id="pagestyle" style="margin:5px;" align="center"></div>
+</div>
+</div>
+<!--#include file="foot.shtml"--></div>
+</body>
+</html>

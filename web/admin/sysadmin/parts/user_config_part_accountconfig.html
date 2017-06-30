@@ -1,0 +1,307 @@
+<!--作者昵称-->
+<div class="search"><span class="rightalign">作者昵称限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusername" name="username" />
+    <input name="commendName" target="username" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusername" name="btnaddlimit" target="username" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_username" class="shortestinput" />
+    <input type="checkbox" id="username_nolimit" name="username_nolimit" class="outborder"/><label for="username_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_username" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_username" name="nolimitcontrol_username" class="outborder"/><label for="nolimitcontrol_username">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_username">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusername"></span></div>
+<!--查粉丝-->
+<div class="search"><span class="rightalign">查粉丝限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusersfollower" name="usersfollower" />
+    <input name="commendName" target="usersfollower" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusersfollower" name="btnaddlimit" target="usersfollower" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_usersfollower" class="shortestinput" />
+    <input type="checkbox" id="usersfollower_nolimit" name="usersfollower_nolimit" class="outborder"/><label for="usersfollower_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_usersfollower" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_usersfollower" name="nolimitcontrol_usersfollower" class="outborder"/><label for="nolimitcontrol_usersfollower">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_usersfollower">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusersfollower"></span></div>
+<!--查关注-->
+<div class="search"><span class="rightalign">查关注限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusersfriend" name="usersfriend" />
+    <input name="commendName" target="usersfriend" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusersfriend" name="btnaddlimit" target="usersfriend" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_usersfriend" class="shortestinput" />
+    <input type="checkbox" id="usersfriend_nolimit" name="usersfriend_nolimit" class="outborder"/><label for="usersfriend_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_usersfriend" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_usersfriend" name="nolimitcontrol_usersfriend" class="outborder"/><label for="nolimitcontrol_usersfriend">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_usersfriend">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusersfriend"></span></div>
+<!--粉丝数-->
+<div class="search"> <span class="rightalign">粉丝数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="followerrank_minvalue" id="followerrank_minvalue" value="" class="shortestinput" />
+	&nbsp;&nbsp;最大值：<input type="text" name="followerrank_maxvalue" id="followerrank_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_followerrank" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_followerrank" name="nolimitcontrol_followerrank" class="outborder"/><label for="nolimitcontrol_followerrank">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_followerrank">值：</label>
+</div>
+<div class="search" > <span class="rightalign">关注数：</span> 
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="friendrank_minvalue" id="friendrank_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput" name="friendrank_maxvalue" id="friendrank_maxvalue" value="" />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_friendrank" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_friendrank" name="nolimitcontrol_friendrank" class="outborder"/><label for="nolimitcontrol_friendrank">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_friendrank">值：</label>
+</div>
+<!--文章数-->
+<div class="search" > <span class="rightalign">文章数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="statusesrank_minvalue" id="statusesrank_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="statusesrank_maxvalue" id="statusesrank_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_statusesrank" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_statusesrank" name="nolimitcontrol_statusesrank" class="outborder"/><label for="nolimitcontrol_statusesrank">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_statusesrank">值：</label>
+</div>
+<!--回复数-->
+<div class="search" > <span class="rightalign">回复数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="users_replys_count_minvalue" id="users_replys_count_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="users_replys_count_maxvalue" id="users_replys_count_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_replys_count" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_replys_count" name="nolimitcontrol_users_replys_count" class="outborder"/><label for="nolimitcontrol_users_replys_count">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_replys_count">值：</label>
+</div>
+<!--精华帖数-->
+<div class="search" > <span class="rightalign">精华帖数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="users_recommended_count_minvalue" id="users_recommended_count_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="users_recommended_count_maxvalue" id="users_recommended_count_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_recommended_count" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_recommended_count" name="nolimitcontrol_users_recommended_count" class="outborder"/><label for="nolimitcontrol_users_recommended_count">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_recommended_count">值：</label>
+</div>
+<!--收藏数-->
+<div class="search" > <span class="rightalign">收藏数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="users_favourites_count_minvalue" id="users_favourites_count_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="users_favourites_count_maxvalue" id="users_favourites_count_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_favourites_count" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_favourites_count" name="nolimitcontrol_users_favourites_count" class="outborder"/><label for="nolimitcontrol_users_favourites_count">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_favourites_count">值：</label>
+</div>
+<!--互粉数-->
+<div class="search" > <span class="rightalign">互粉数：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="users_bi_followers_count_minvalue" id="users_bi_followers_count_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="users_bi_followers_count_maxvalue" id="users_bi_followers_count_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_bi_followers_count" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_bi_followers_count" name="nolimitcontrol_users_bi_followers_count" class="outborder"/><label for="nolimitcontrol_users_bi_followers_count">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_bi_followers_count">值：</label>
+</div>
+<!--博龄-->
+<div class="search" > <span class="rightalign">博龄：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="registertime_minvalue" id="registertime_minvalue" value="" />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="registertime_maxvalue" id="registertime_maxvalue" value="" />
+	<select id="registertime_gap"> 
+		<option value="year">年</option>  
+		<option value="month">月</option> 
+		<option value="day" selected="selected">天</option> 
+	</select>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_registertime" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_registertime" name="nolimitcontrol_registertime" class="outborder"/><label for="nolimitcontrol_registertime">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_registertime">值：</label>
+</div>
+<!--性别-->
+<div class="search" > <span class="rightalign">性别限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_sex" id="islimit_sexm" value="m" /><label for="islimit_sexm">男</label>
+	<input type="checkbox" name="islimit_sex" id="islimit_sexf" value="f" /><label for="islimit_sexf">女</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_sex" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_sex" name="nolimitcontrol_sex" class="outborder"/><label for="nolimitcontrol_sex">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_sex">值：</label>
+</div>
+<!--允许私信-->
+<div class="search" > <span class="rightalign">允许私信限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_users_allow_all_act_msg" id="islimit_users_allow_all_act_msg1" value="1" /><label for="islimit_users_allow_all_act_msg1">是</label>
+	<input type="checkbox" name="islimit_users_allow_all_act_msg" id="islimit_users_allow_all_act_msg0" value="0" /><label for="islimit_users_allow_all_act_msg0">否</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_allow_all_act_msg" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_allow_all_act_msg" name="nolimitcontrol_users_allow_all_act_msg" class="outborder"/><label for="nolimitcontrol_users_allow_all_act_msg">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_allow_all_act_msg">值：</label>
+</div>
+<!--允许评论-->
+<div class="search" > <span class="rightalign">允许评论限制：</span>
+	&nbsp;&nbsp;<input type="checkbox" name="islimit_users_allow_all_comment" id="islimit_users_allow_all_comment1" value="1" /><label for="islimit_users_allow_all_comment1">是</label>
+	<input type="checkbox" name="islimit_users_allow_all_comment" id="islimit_users_allow_all_comment0" value="0" /><label for="islimit_users_allow_all_comment0">否</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_allow_all_comment" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_allow_all_comment" name="nolimitcontrol_users_allow_all_comment" class="outborder"/><label for="nolimitcontrol_users_allow_all_comment">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_allow_all_comment">值：</label>
+</div>
+<!--认证原因-->
+<div class="search"><span class="rightalign">认证原因限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtverifiedreason" name="verifiedreason" />
+    <input name="commendWord" target="verifiedreason" type="button" value="推荐"/> 
+    <input type="button" id="btnaddverifiedreason" name="btnaddlimit" target="verifiedreason" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_verifiedreason" class="shortestinput" />
+    <input type="checkbox" id="verifiedreason_nolimit" name="verifiedreason_nolimit" class="outborder"/><label for="verifiedreason_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_verifiedreason" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_verifiedreason" name="nolimitcontrol_verifiedreason" class="outborder"/><label for="nolimitcontrol_verifiedreason">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_verifiedreason">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endverifiedreason"></span></div>
+<!--简介-->
+<div class="search"><span class="rightalign">简介限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtdescription" name="description" />
+    <input name="commendWord" target="description" type="button" value="推荐"/> 
+    <input type="button" id="btnadddescription" name="btnaddlimit" target="description" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_description" class="shortestinput" />
+    <input type="checkbox" id="description_nolimit" name="description_nolimit" class="outborder"/><label for="description_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_description" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_description" name="nolimitcontrol_description" class="outborder"/><label for="nolimitcontrol_description">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_description">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="enddescription"></span></div>
+<!--博客地址-->
+<div class="search"><span class="rightalign">博客地址限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusers_url" name="users_url" />
+    <input name="commendWord" target="users_url" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusers_url" name="btnaddlimit" target="users_url" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_users_url" class="shortestinput" />
+    <input type="checkbox" id="users_url_nolimit" name="users_url_nolimit" class="outborder"/><label for="users_url_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_url" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_users_url" name="nolimitcontrol_users_url" class="outborder"/><label for="nolimitcontrol_users_url">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_users_url">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusers_url"></span></div>
+<!--个性域名-->
+<div class="search"><span class="rightalign">个性域名限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusers_domain" name="users_domain" />
+    <input name="commendWord" target="users_domain" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusers_domain" name="btnaddlimit" target="users_domain" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_users_domain" class="shortestinput" />
+    <input type="checkbox" id="users_domain_nolimit" name="users_domain_nolimit" class="outborder"/><label for="users_domain_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_domain" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_users_domain" name="nolimitcontrol_users_domain" class="outborder"/><label for="nolimitcontrol_users_domain">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_users_domain">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusers_domain"></span></div>
+<!--来源-->
+<div class="search"><span class="rightalign">来源限制：</span>
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_users_source_host" class="shortestinput" />
+    <input type="checkbox" id="users_source_host_nolimit" name="users_source_host_nolimit" class="outborder"/><label for="users_source_host_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_source_host" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_source_host" name="nolimitcontrol_users_source_host" class="outborder"/><label for="nolimitcontrol_users_source_host">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_source_host">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setusers_source_host" name="setusers_source_host" value="设置来源限制"  type="button">&nbsp;&nbsp;
+    <span id="selectedusers_source_host" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_users_source_hostcode">
+</div>
+<!--页面地址-->
+<div class="search"><span class="rightalign">页面地址限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtusers_page_url" name="users_page_url" />
+    <input name="commendWord" target="users_page_url" type="button" value="推荐"/> 
+    <input type="button" id="btnaddusers_page_url" name="btnaddlimit" target="users_page_url" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_users_page_url" class="shortestinput" />
+    <input type="checkbox" id="users_page_url_nolimit" name="users_page_url_nolimit" class="outborder"/><label for="users_page_url_nolimit">不限</label>
+	&nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_page_url" class="shortestinput" />
+	<input type="checkbox" id="nolimitcontrol_users_page_url" name="nolimitcontrol_users_page_url" class="outborder"/><label for="nolimitcontrol_users_page_url">不限</label>
+	&nbsp;&nbsp;<label for="allowcontrol_users_page_url">值：</label> 
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endusers_page_url"></span></div>
+<!--用户级别-->
+<div class="search" > <span class="rightalign">用户级别：</span>
+    &nbsp;&nbsp;最小值：<input type="text" class="shortestinput"  name="users_level_minvalue" id="users_level_minvalue" value=""  />
+	&nbsp;&nbsp;最大值：<input type="text" class="shortestinput"  name="users_level_maxvalue" id="users_level_maxvalue" value=""  />
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_users_level" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_users_level" name="nolimitcontrol_users_level" class="outborder"/><label for="nolimitcontrol_users_level">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_users_level">值：</label>
+</div>
+<!--认证和认证类型-->
+<div class="search"><span class="rightalign">认证限制：</span>
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_verified" class="shortestinput" />
+    <input type="checkbox" id="verified_nolimit" name="verified_nolimit" class="outborder"/><label for="verified_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_verified" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_verified" name="nolimitcontrol_verified" class="outborder"/><label for="nolimitcontrol_verified">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_verified">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setverified" name="setverified" value="设置认证限制"  type="button">&nbsp;&nbsp;
+    <span id="selectedverified" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_verifiedcode">
+</div>
+<!--用户名-->
+<div class="search"><span class="rightalign">用户名限制：</span>
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_userid" class="shortestinput" />
+    <input type="checkbox" id="userid_nolimit" name="userid_nolimit" class="outborder"/><label for="userid_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_userid" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_userid" name="nolimitcontrol_userid" class="outborder"/><label for="nolimitcontrol_userid">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_userid">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setuserid" name="setuserid" value="设置用户名限制"  type="button">&nbsp;&nbsp;
+    <span id="selecteduserid" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_useridcode">
+</div>
+<!--地区-->
+<div class="search"><span class="rightalign">地区限制：</span>
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_areauser" class="shortestinput" />
+    <input type="checkbox" id="areauser_nolimit" name="areauser_nolimit" class="outborder"/><label for="areauser_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_areauser" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_areauser" name="nolimitcontrol_areauser" class="outborder"/><label for="nolimitcontrol_areauser">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_areauser">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setareauser" name="setareauser" value="设置地区限制"  type="button">&nbsp;&nbsp;
+    <span id="selectedareauser" style="*vertical-align: middle;"></span>
+	<input type="hidden" value="" class="txtsel" id="islimit_areausercode">
+</div>
+<!--输出过滤限制-->
+<div class="search"><span class="rightalign">输出过滤限制：</span>
+    &nbsp;&nbsp;<input class="shortinput" type="text" id="txtfacetfilterlimit" name="facetfilterlimit" />
+    <input name="commendSearchword" target="facetfilterlimit" type="button" value="推荐"/> 
+    <input type="button" id="btnaddfacetfilterlimit" name="addsearchword" target="facetfilterlimit" value="添加限制" />
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_facetfilterlimit" class="shortestinput" />
+    <input type="checkbox" id="facetfilterlimit_nolimit" name="facetfilterlimit_nolimit" class="outborder"/><label for="facetfilterlimit_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_facetfilterlimit" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_facetfilterlimit" name="nolimitcontrol_facetfilterlimit" class="outborder"/><label for="nolimitcontrol_facetfilterlimit">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_facetfilterlimit">值：</label>
+</div>
+<div class="search"><span class="rightalign"></span>&nbsp;&nbsp;<span id="endfacetfilterlimit"></span></div>
+<!--统计字段限制-->
+<div class="search"><span class="rightalign">统计字段限制：</span>
+    &nbsp;&nbsp;值个数：<input type="text" id="maxlimitlength_facetlimit" class="shortestinput" />
+    <input type="checkbox" id="facetlimit_nolimit" name="facetlimit_nolimit" class="outborder"/><label for="facetlimit_nolimit">不限</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_facetlimit" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_facetlimit" name="nolimitcontrol_facetlimit" class="outborder"/><label for="nolimitcontrol_facetlimit">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_facetlimit">值：</label>
+    &nbsp;&nbsp;<input type="button" name="clearfacetlimit" id="clearfacetlimit" value="清空" />
+</div>
+<div class="search"><span class="rightalign"></span>
+    <input id="setfacetlimit" name="setfacetlimit" value="设置统计字段限制"  type="button">&nbsp;&nbsp;<br/>
+    <span id="selectedfacetlimit" style="*vertical-align: middle;"></span>
+    <input type="hidden" value="" class="txtsel" id="islimit_facetlimit">
+</div>
+
+<!--数据量-->
+<div class="search"> <span class="rightalign">数据量限制：</span>
+    &nbsp;&nbsp;最小值：<input type="text" name="outputcount_minvalue" id="outputcount_minvalue" value="" class="shortestinput" />
+    &nbsp;&nbsp;最大值：<input type="text" name="outputcount_maxvalue" id="outputcount_maxvalue" value="" class="shortestinput"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_outputcount" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_outputcount" name="nolimitcontrol_outputcount" class="outborder"/><label for="nolimitcontrol_outputcount">不限</label>
+    &nbsp;&nbsp;<label for="allowcontrol_outputcount">值：</label>
+</div>
+<div class="search" id="div_download_allow"><span class="rightalign">下载限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="download_allow" value="1" id="download_allow1" /><label for="download_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="download_allow" value="0" id="download_allow0" checked /><label for="download_allow0">禁止</label>
+</div>
+<div class="search" style="display:none" name="download_div"> <span class="rightalign">下载数据量：</span>
+    &nbsp;&nbsp;最大值：<input type="text" name="download_datalimit" id="download_datalimit" value="" class="shortestinput"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_downloaddatalimit" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_downloaddatalimit" name="nolimitcontrol_downloaddatalimit" class="outborder"/><label for="nolimitcontrol_downloaddatalimit">不限</label>
+</div>
+<div class="search" style="display:none" name="download_div"><span class="rightalign">下载字段限制：</span>
+    &nbsp;&nbsp;修改次数：<input type="text" id="limitcontrol_downloadfieldlimit" class="shortestinput" />
+    <input type="checkbox" id="nolimitcontrol_downloadfieldlimit" name="nolimitcontrol_downloadfieldlimit" class="outborder"/><label for="nolimitcontrol_downloadfieldlimit">不限</label>
+</div>
+<div class="search" style="display:none" name="download_div"><span class="rightalign">选择下载字段：</span>
+    <span id="selecteddownloadfieldlimit" style="*vertical-align: middle;"></span>
+</div>
+<div class="search" id="div_updatesnapshot_allow"><span class="rightalign">定时更新快照限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="updatesnapshot_allow" value="1" id="updatesnapshot_allow1" /><label for="updatesnapshot_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="updatesnapshot_allow" value="0" id="updatesnapshot_allow0" /><label for="updatesnapshot_allow0">禁止</label>
+</div>
+<div class="search" id="div_eventalert_allow"><span class="rightalign">事件预警限制：</span>
+	&nbsp;&nbsp;<input type="radio" name="eventalert_allow" value="1" id="eventalert_allow1" /><label for="eventalert_allow1">允许</label>
+	&nbsp;&nbsp;<input type="radio" name="eventalert_allow" value="0" id="eventalert_allow0" /><label for="eventalert_allow0">禁止</label>
+</div>

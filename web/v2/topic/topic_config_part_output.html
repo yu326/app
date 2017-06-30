@@ -1,0 +1,174 @@
+<div name="accordiondiv">
+<h3 style="background-color:#F5F5F5;"><a href="javascript:void(0);">输出选项</a></h3>
+<div>
+    <div class="search" style="display:none"><span class="rightalign">输出类型：</span><span id="topic_config_ouputtype_query_span">
+        <input type="radio" id="topic_config_ouputtype_query" name="topic_config_ouputtype" class="outborder" checked="checked" value=1 />
+        查询</span><span id="topic_config_ouputtype_facet_span">
+        <input type="radio" id="topic_config_ouputtype_facet" name="topic_config_ouputtype" class="outborder" value=2 />
+        分组统计</span></div>
+    <div id="type_query" style="display:none">
+        <fieldset>
+            <legend>查询</legend>
+            <div><span class="leftalign">排序字段：</span><span id="topic_config_orderby"><span id="fieldstoorderby"></span></span></div>
+            <div><span class="leftalign">排序方式：</span><span id="topic_config_order">
+                <input type="radio" id="topic_config_order_asc" name="topic_config_order" value="asc" class="outborder"  />
+                升序
+                <input type="radio" id="topic_config_order_desc" name="topic_config_order" class="outborder" value="desc" checked="checked"/>
+                降序</span></div>
+        </fieldset>
+    </div>
+    <div id="type_facet">
+        <div id="fieldstofacet" style="border:0 none;padding-left: 0px; padding-right: 0px;">
+            <ul style="background:#ffffff;border:0;border-bottom:1px solid #A6C9E2;border-radius:0;margin:0 1px;">
+                <li><a href="#group_user" facetfieldp="screen_name" facetfieldc="screen_name">用户</a></li>
+                <li><a href="#group_product" facetfieldp="productType" facetfieldc="productType">产品型号</a></li>
+                <li><a href="#group_content" facetfieldp="text" facetfieldc="text">内容</a></li>
+                <li><a href="#group_ancestor_content" facetfieldp="ancestor_text" facetfieldc="ancestor_text">上层转发内容</a></li>
+                <li><a href="#group_wbtopic" facetfieldp="wb_topic" facetfieldc="wb_topic">微博话题</a></li>
+                <li><a href="#group_posttitle" facetfieldp="post_title" facetfieldc="post_title">标题栏目</a></li>
+                <li><a href="#group_ancestor_wbtopic" facetfieldp="ancestor_wb_topic" facetfieldc="ancestor_wb_topic">上层转发微博话题</a></li>
+                <li><a href="#group_comment" facetfieldp="comments_count" facetfieldc="comments_count">评论</a></li>
+                <li><a href="#group_repost" facetfieldp="reposts_count" facetfieldc="reposts_count">转发</a></li>
+                <li><a href="#group_reach" facetfieldp="followers_count" facetfieldc="followers_count">到达</a></li>
+                <li><a href="#group_time" facetfieldp="created_at" facetfieldc="created_at">时间</a></li>
+                <li><a href="#group_contenttype" facetfieldp="content_type" facetfieldc="content_type">类型</a></li>
+                <li><a href="#group_emotion" facetfieldp="emotion" facetfieldc="emotion">情感</a></li>
+                <li><a href="#group_oristatus" facetfieldp="retweeted_status" facetfieldc="retweeted_status">唯一标识</a></li>
+                <li><a href="#group_ancestor_emotion" facetfieldp="ancestor_emotion" facetfieldc="ancestor_emotion">上层转发情感</a></li>
+                <li><a href="#group_praise" facetfieldp="praises_count" facetfieldc="praises_count">赞</a></li>
+                <li><a href="#group_readcount" facetfieldp="read_count" facetfieldc="read_count">阅读数</a></li>
+                <li><a href="#group_paragraphid" facetfieldp="paragraphid" facetfieldc="paragraphid">段落数</a></li>
+                <li><a href="#group_qaid" facetfieldp="question_id" facetfieldc="question_id">问答</a></li>
+                <li><a href="#group_floor" facetfieldp="floor" facetfieldc="floor">楼</a></li>
+                <li><a href="#group_source_host" facetfieldp="source_host" facetfieldc="source_host">数据来源</a></li>
+            </ul>
+            <div id="topic_config_facet_group_div" style="border-width:0 1px 1px;border-style:solid;border-color: #A6C9E2;border-bottom-left-radius:5px;border-bottom-right-radius:5px;margin:0 1px;">
+                <div id="group_user" style="margin-right:0"></div>
+                <div id="group_product" style="margin-right:0;"></div>
+                <div id="group_content" style="margin-right:0;"></div>
+                <div id="group_ancestor_content" style="margin-right:0;"></div>
+                <div id="group_wbtopic" style="margin-right:0;"></div>
+                <div id="group_posttitle" style="margin-right:0;"></div>
+                <div id="group_ancestor_wbtopic" style="margin-right:0;"></div>
+                <div id="group_comment" style="margin-right:0;"></div>
+                <div id="group_repost" style="margin-right:0;"></div>
+                <div id="group_reach" style="margin-right:0;"></div>
+                <div id="group_time" style="margin-right:0;"></div>
+                <div id="group_emotion" style="margin-right:0;"></div>
+                <div id="group_ancestor_emotion" style="margin-right:0;"></div>
+                <div id="group_praise" style="margin-right:0;"></div>
+                <div id="group_readcount" style="margin-right:0;"></div>
+                <div id="group_paragraphid" style="margin-right:0;"></div>
+                <div id="group_qaid" style="margin-right:0;"></div>
+                <div id="group_floor" style="margin-right:0;"></div>
+                <div id="group_source_host" style="margin-right:0;"></div>
+                <div id="group_contenttype" style="margin-right:0;"></div>
+                <div id="group_oristatus" style="margin-right:0;"></div>
+                <div id="topic_config_facet_field" style="width:100%">
+                    <div id="topic_config_facet_feature_div"></div>
+                    <div class="search"><span class="rightalign">包含：</span><span id="topic_config_filter_include_span">
+                        <input type="text" id="topic_config_filter_include" name="topic_config_filter_include" />
+                        <input type="button" id="topic_config_filter_include_add" name="topic_config_filterword_add" value="添加" />
+                        <input type="button" id="topic_config_filter_include_batchadd" name="topic_config_filter_include_batchadd" value="批量添加" />
+                        </span></div>
+                    <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedincludeword"></span></div>
+                    <div class="search"><span class="rightalign">去除：</span><span id="topic_config_filter_exclude_span">
+                        <input type="text" id="topic_config_filter_exclude" name="topic_config_filter_exclude" />
+                        <input type="button" id="topic_config_filter_exclude_add" name="topic_config_filter_exclude_add" value="添加" />
+                        <input type="button" id="topic_config_filter_exclude_batchadd" name="topic_config_filter_exclude_batchadd" value="批量添加" />
+                        </span></div>
+                    <div class="search" style="display:none"><span class="rightalign">已添加：</span><span id="selectedexcludeword"></span></div>
+                </div>
+                <div id="topic_config_facet_range" style="display:none">
+                    <div class="search"><span class="rightalign"></span>
+                        <input type="checkbox" id="topic_config_facet_range_custom" />
+                        自定义区间</div>
+                    <div class="search"><span class="rightalign">区间推荐：</span><span>
+                        <input type="button" name="topic_config_facet_range_recommend" id="topic_config_facet_range_recommend" value="推荐" />
+                        <span id="topic_config_facet_range_txt" style="display:none;">最小值:<span id="topic_config_facet_range_min"></span>&nbsp;最大值:<span id="topic_config_facet_range_max"></span> </span></span></div>
+                    <div class="search"> <span class="rightalign">区间：</span><span id="topic_config_facet_range_html" checkedtimetype="createdtime" >
+                        <input type="text" name="topic_config_facet_range" id="topic_config_facet_range_start"/>
+                        至
+                        <input type="text" name="topic_config_facet_range" id="topic_config_facet_range_end" />
+                        </span>
+                        <select id="topic_config_facet_range_unit" style="display:none;">
+                            <option value="year">年</option>
+                            <option value="month" selected="selected">月</option>
+                            <option value="day">天</option>
+                        </select>
+                    </div>
+                    <div class="search" id="topic_config_facet_range_not_custom_type"><span class="rightalign">区间类型：</span><span>
+                        <input type="radio" name="topic_config_facet_gap_type" value="gap" />
+                        区间长度
+                        <input type="radio" name="topic_config_facet_gap_type" value="gapCount" />
+                        区间个数</span></div>
+                    <div class="search" id="topic_config_facet_range_not_custom_num"><span class="rightalign">数值：</span> <span>
+                        <input type="text" id="topic_config_facet_gap_text" name="topic_config_facet_gap_text" />
+                        <select id="topic_config_facet_gap_measure" style="display:none;">
+                            <option value="hour">小时</option>
+                            <option value="day">天</option>
+                            <option value="month" selected="selected">月</option>
+                        </select>
+                        </span> </div>
+                    <div class="search" id="topic_config_facet_range_is_custom_name"><span class="rightalign">区间名称：</span>
+                        <input type="text" name="topic_config_facet_range_name" id="topic_config_facet_range_name"/>
+                        <input type="button" value="添加" name="topic_config_facet_range_name_add" id="topic_config_facet_range_name_add">
+                    </div>
+                    <div class="search" id="topic_config_facet_range_is_custom_tag"><span class="rightalign"></span><span id="topic_config_facet_range_tag"></span></div>
+                    <div class="search" id="topic_config_facet_range_label_axis"><span class="rightalign">添加标签：</span><span>
+                        <input type="button" name="topic_config_facet_range_label_axis_x" id="topic_config_facet_range_label_axis_x" value="X轴" />
+                        &nbsp;&nbsp;
+                        <input type="button" name="topic_config_facet_range_label_axis_y" id="topic_config_facet_range_label_axis_y" value="Y轴" />
+                        </span></div>
+                    <div class="search" id="topic_config_facet_range_exp_div_x"><span class="rightalign">X轴标签：</span><span id="topic_config_facet_range_label_exp_x"></span></div>
+                    <div class="search" id="topic_config_facet_range_exp_div_y"><span class="rightalign">Y轴标签：</span><span id="topic_config_facet_range_label_exp_y"></span></div>
+                    <div class="search" id="topic_config_facet_range_sides_div"><span class="rightalign">返回设置：</span><span> <input type="checkbox" name="topic_config_facet_range_sides" value="leftside" id="topic_config_facet_range_sides_left"  /> <label for="topic_config_facet_range_sides_left">左边其他 </label> <input type="checkbox" name="topic_config_facet_range_sides" id="topic_config_facet_range_sides_right" value="rightside" /> <label for="topic_config_facet_range_sides_right">右边其他</label></span></div>
+                </div>
+
+				<div id="topic_config_facet_statistics_fields_div"><!-- style="display:none;" 额外增加的div,为控制整个统计字段的显示和隐藏-->
+                <div class="divhr"></div>
+                <h3 class="childgrouptitle">输出字段</h3>
+                <div class="childgroupdiv" >
+					<div class="search"><span class="rightalign"></span><span><input type="button" id="topic_config_facet_statistics_btn" value="选择输出字段" /></span></div>
+					<div class="search"><span class="rightalign">输出字段：</span><span id="topic_config_facet_statistics_fields"></span>
+					</div>
+				</div>
+			</div>
+				<div class="divhr"></div>
+                <h3 class="childgrouptitle">排序</h3>
+                <div class="childgroupdiv" >
+					<div class="search" id="topic_config_facet_counttype">
+					<div class="search"><span class="rightalign"></span><span><input type="button" id="topic_config_sort_btn" value="选择排序字段" /></span></div>
+					<div class="search" >
+						<span class="rightalign">排序字段：</span>
+						<span id="topic_config_sort_fields">
+						</span>
+					</div>
+				</div>
+                <div class="divhr"></div>
+                <h3 class="childgrouptitle" >数据过滤<span style="float:right;"> <label for="topic_config_datalimit_modifiy">实时过滤</label> <input type="checkbox" value="true" name="topic_config_datalimit_modifiy" id="topic_config_datalimit_modifiy" class="outborder"/></span></h3>
+                <div class="childgroupdiv" style="border:0px solid #A6C9E2; border-top:0;" id="topic_config_output_datafilter" checkedoutputdata="start_end">
+					<div class="search" id="pageable"><span class="rightalign"></span>从第<span id="topic_config_output_start_num_span"><input type="text" id="topic_config_output_start_num" name="topic_config_output_start_num" class="shortinput" /></span>条开始,每页显示<span id="topic_config_output_perpage_num_span"><input type="text" id="topic_config_output_perpage_num" name="topic_config_output_perpage_num" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+					<div class="search" id="unpageable"><span class="rightalign"></span>
+						第<span id="topic_config_limit_span"><input type="text" id="topic_config_limit" name="topic_config_limit" class="shortinput" /></span>条到第<span id="topic_config_orderword_span"> <input type="text" id="topic_config_orderword" name="topic_config_orderword" class="shortinput" /></span>条<span style="color:#565553">(起始从1开始)</span></div>
+					<!--
+                    <div class="search"><span class="rightalign">起始条数：</span><span id="topic_config_limit_span">
+                        <input type="text" id="topic_config_limit" name="topic_config_limit" />
+						</span>
+					</div>
+                    <div class="search"><span class="rightalign">返回个数：</span><span id="topic_config_orderword_span">
+                        <input type="text" id="topic_config_orderword" name="topic_config_orderword" />
+						</span> 
+					</div>
+						-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--
+            <div class="search" id="topic_config_facetareauser_div"> <span class="rightalign">用户地区：</span> <span id="topic_config_facetareauser_span"> </span></div>
+            <div class="search" id="topic_config_facetareamentioned_div"> <span class="rightalign">提及地区：</span> <span id="topic_config_facetareamentioned_span"></span></div>
+            <div class="search" id="topic_config_facetemotion_div"> <span class="rightalign">情感：</span> <span id="topic_config_facetemotion_span"> </span></div>
+			-->
+</div>
+</div>
